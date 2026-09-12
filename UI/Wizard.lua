@@ -271,8 +271,32 @@ function Wizard:CreateFrame()
     seamTitle:SetPoint("TOPLEFT", 14, -48)
     seamTitle:SetText(L["WIZARD_LABEL_SEAM"])
 
+    local seamEditBox = CreateFrame("EditBox", nil, card3, "BackdropTemplate")
+    seamEditBox:SetSize(60, 20)
+    seamEditBox:SetPoint("LEFT", seamTitle, "RIGHT", 10, 0)
+    seamEditBox:SetAutoFocus(false)
+    if seamEditBox.SetFontObject then seamEditBox:SetFontObject("GameFontHighlightSmall") end
+    if seamEditBox.SetJustifyH then seamEditBox:SetJustifyH("CENTER") end
+    if seamEditBox.SetBackdrop then
+        seamEditBox:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 },
+        })
+        seamEditBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
+        seamEditBox:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
+    end
+    seamEditBox:SetText(string.format("%.1f%%", ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
+    f.seamEditBox = seamEditBox
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(seamEditBox, "Manual Seam Width Entry", "Type a percentage (e.g. 36%) or ratio (e.g. 0.36) and press Enter.")
+    end
+
     local seamValText = card3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    seamValText:SetPoint("TOPLEFT", 180, -48)
+    seamValText:SetPoint("LEFT", seamEditBox, "RIGHT", 8, 0)
+    seamValText:SetText(string.format("Seam: %.1f%%", ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
+    f.seamValText = seamValText
 
     -- Seam Slider
     local seamSlider = CreateFrame("Slider", nil, card3, "BackdropTemplate")
@@ -304,6 +328,33 @@ function Wizard:CreateFrame()
     seamSlider:SetThumbTexture(thumb)
     seamSlider.thumb = thumb
 
+    local function CommitSeamEditBox()
+        local txt = seamEditBox:GetText()
+        local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.15, 0.80, 0.005, "%.1f%%")
+        if parsed then
+            seamSlider:SetValue(parsed)
+        else
+            local cur = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+            seamEditBox:SetText(string.format("%.1f%%", cur * 100))
+        end
+        if seamEditBox.ClearFocus then seamEditBox:ClearFocus() end
+    end
+
+    seamEditBox:SetScript("OnEnterPressed", function() CommitSeamEditBox() end)
+    seamEditBox:SetScript("OnEscapePressed", function(s)
+        local cur = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+        s:SetText(string.format("%.1f%%", cur * 100))
+        if s.ClearFocus then s:ClearFocus() end
+    end)
+    seamEditBox:SetScript("OnEditFocusLost", function(s)
+        CommitSeamEditBox()
+        if s.SetBackdropBorderColor then s:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9) end
+    end)
+    seamEditBox:SetScript("OnEditFocusGained", function(s)
+        if s.HighlightText then s:HighlightText() end
+        if s.SetBackdropBorderColor then s:SetBackdropBorderColor(1.0, 0.82, 0.0, 1.0) end
+    end)
+
     local btnMinus = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnMinus:SetSize(46, 22)
     btnMinus:SetPoint("LEFT", seamSlider, "RIGHT", 12, 0)
@@ -322,14 +373,44 @@ function Wizard:CreateFrame()
     btnLaser:SetText(L["BTN_LASER_TOGGLE"])
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnLaser, L["BTN_LASER_TOGGLE_TIP_TITLE"], L["BTN_LASER_TOGGLE_TIP_DESC"]) end
 
+    seamSlider:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" then self.isDragging = true end
+    end)
+
+    seamSlider:SetScript("OnMouseUp", function(self, button)
+        if self.isDragging then
+            self.isDragging = false
+            self._debounceTimer = nil
+            Akimbo:ApplyFullLayout()
+        end
+    end)
+
     seamSlider:SetScript("OnValueChanged", function(self, val)
         val = math.floor((val / 0.005) + 0.5) * 0.005
         Akimbo.db.deckWidthRatio = val
         seamValText:SetText(string.format("Seam: %.1f%%", val * 100))
+        if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
+            seamEditBox:SetText(string.format("%.1f%%", val * 100))
+        end
         if Akimbo.Options and Akimbo.Options.ShowSeamGuide then
             Akimbo.Options:ShowSeamGuide(val)
         end
-        Akimbo:ApplyFullLayout()
+        if self.isDragging then
+            if not self._debounceTimer then
+                self._debounceTimer = true
+                if C_Timer and C_Timer.After then
+                    C_Timer.After(0.15, function()
+                        self._debounceTimer = nil
+                        Akimbo:ApplyFullLayout()
+                    end)
+                else
+                    self._debounceTimer = nil
+                    Akimbo:ApplyFullLayout()
+                end
+            end
+        else
+            Akimbo:ApplyFullLayout()
+        end
         f:UpdateLaserButton()
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(seamSlider, L["SLIDER_SEAM_WIDTH_TIP_TITLE"], L["SLIDER_SEAM_WIDTH_TIP_DESC"]) end
@@ -392,8 +473,32 @@ function Wizard:CreateFrame()
     scaleTitle:SetPoint("TOPLEFT", 14, -48)
     scaleTitle:SetText(L["WIZARD_LABEL_UI_SCALE"])
 
+    local scaleEditBox = CreateFrame("EditBox", nil, card4, "BackdropTemplate")
+    scaleEditBox:SetSize(60, 20)
+    scaleEditBox:SetPoint("LEFT", scaleTitle, "RIGHT", 10, 0)
+    scaleEditBox:SetAutoFocus(false)
+    if scaleEditBox.SetFontObject then scaleEditBox:SetFontObject("GameFontHighlightSmall") end
+    if scaleEditBox.SetJustifyH then scaleEditBox:SetJustifyH("CENTER") end
+    if scaleEditBox.SetBackdrop then
+        scaleEditBox:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 },
+        })
+        scaleEditBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
+        scaleEditBox:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
+    end
+    scaleEditBox:SetText(string.format("%.0f%%", ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
+    f.scaleEditBox = scaleEditBox
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(scaleEditBox, "Manual UI Scale Entry", "Type a percentage (e.g. 70%) or number (e.g. 0.70) and press Enter.")
+    end
+
     local scaleValText = card4:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    scaleValText:SetPoint("TOPLEFT", 180, -48)
+    scaleValText:SetPoint("LEFT", scaleEditBox, "RIGHT", 8, 0)
+    scaleValText:SetText(string.format("Scale: %.0f%%", ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
+    f.scaleValText = scaleValText
 
     -- Continuous UI Scale Slider
     local scaleSlider = CreateFrame("Slider", nil, card4, "BackdropTemplate")
@@ -415,6 +520,7 @@ function Wizard:CreateFrame()
 
     local scaleThumb = scaleSlider:CreateTexture(nil, "OVERLAY")
     if scaleThumb and scaleThumb.SetTexture then
+        thumb = scaleThumb
         scaleThumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
     elseif scaleThumb and scaleThumb.SetColorTexture then
         scaleThumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
@@ -424,6 +530,33 @@ function Wizard:CreateFrame()
     end
     scaleSlider:SetThumbTexture(scaleThumb)
     scaleSlider.thumb = scaleThumb
+
+    local function CommitScaleEditBox()
+        local txt = scaleEditBox:GetText()
+        local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.25, 1.25, 0.01, "%.0f%%")
+        if parsed then
+            scaleSlider:SetValue(parsed)
+        else
+            local cur = (Akimbo.db and Akimbo.db.hudScale) or 0.70
+            scaleEditBox:SetText(string.format("%.0f%%", cur * 100))
+        end
+        if scaleEditBox.ClearFocus then scaleEditBox:ClearFocus() end
+    end
+
+    scaleEditBox:SetScript("OnEnterPressed", function() CommitScaleEditBox() end)
+    scaleEditBox:SetScript("OnEscapePressed", function(s)
+        local cur = (Akimbo.db and Akimbo.db.hudScale) or 0.70
+        s:SetText(string.format("%.0f%%", cur * 100))
+        if s.ClearFocus then s:ClearFocus() end
+    end)
+    scaleEditBox:SetScript("OnEditFocusLost", function(s)
+        CommitScaleEditBox()
+        if s.SetBackdropBorderColor then s:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9) end
+    end)
+    scaleEditBox:SetScript("OnEditFocusGained", function(s)
+        if s.HighlightText then s:HighlightText() end
+        if s.SetBackdropBorderColor then s:SetBackdropBorderColor(1.0, 0.82, 0.0, 1.0) end
+    end)
 
     local btnScaleMinus = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnScaleMinus:SetSize(46, 22)
@@ -446,11 +579,41 @@ function Wizard:CreateFrame()
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, "Reset UI Scale", "Resets the Global UI Scale to the recommended standard default of 70%.") end
 
+    scaleSlider:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" then self.isDragging = true end
+    end)
+
+    scaleSlider:SetScript("OnMouseUp", function(self, button)
+        if self.isDragging then
+            self.isDragging = false
+            self._debounceTimer = nil
+            Akimbo:ApplyFullLayout()
+        end
+    end)
+
     scaleSlider:SetScript("OnValueChanged", function(self, val)
         val = math.floor((val / 0.01) + 0.5) * 0.01
         Akimbo.db.hudScale = val
         scaleValText:SetText(string.format("Scale: %.0f%%", val * 100))
-        Akimbo:ApplyFullLayout()
+        if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
+            scaleEditBox:SetText(string.format("%.0f%%", val * 100))
+        end
+        if self.isDragging then
+            if not self._debounceTimer then
+                self._debounceTimer = true
+                if C_Timer and C_Timer.After then
+                    C_Timer.After(0.15, function()
+                        self._debounceTimer = nil
+                        Akimbo:ApplyFullLayout()
+                    end)
+                else
+                    self._debounceTimer = nil
+                    Akimbo:ApplyFullLayout()
+                end
+            end
+        else
+            Akimbo:ApplyFullLayout()
+        end
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(scaleSlider, L["WIZARD_UI_SCALE_TIP_TITLE"], L["WIZARD_UI_SCALE_TIP_DESC"]) end
 
@@ -541,9 +704,15 @@ function Wizard:CreateFrame()
 
         seamSlider:SetValue(seam)
         seamValText:SetText(string.format("Seam: %.1f%%", seam * 100))
+        if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
+            seamEditBox:SetText(string.format("%.1f%%", seam * 100))
+        end
 
         scaleSlider:SetValue(hud)
         scaleValText:SetText(string.format("Scale: %.0f%%", hud * 100))
+        if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
+            scaleEditBox:SetText(string.format("%.0f%%", hud * 100))
+        end
 
         btnPl:SetEnabled(not (p == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and pos == "RIGHT"))
         btnPr:SetEnabled(not (p == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and pos == "LEFT"))
@@ -582,8 +751,10 @@ function Wizard:CreateFrame()
 
     f.seamSlider = seamSlider
     f.seamValText = seamValText
+    f.seamEditBox = seamEditBox
     f.scaleSlider = scaleSlider
     f.scaleValText = scaleValText
+    f.scaleEditBox = scaleEditBox
 
     wizardFrame = f
     return f

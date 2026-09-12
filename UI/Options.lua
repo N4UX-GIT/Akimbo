@@ -213,6 +213,34 @@ end
 
 local registeredSliders = {}
 
+local function ParseSliderInput(inputStr, minVal, maxVal, step, formatStr)
+    if not inputStr then return nil end
+    local hasExplicitPercent = tostring(inputStr):find("%%") ~= nil
+    local cleaned = tostring(inputStr):gsub("%%", ""):gsub("[^%d%.%-]", "")
+    local num = tonumber(cleaned)
+    if not num then return nil end
+    local isPercent = formatStr and formatStr:find("%%%%")
+    if isPercent then
+        if hasExplicitPercent then
+            num = num / 100
+        elseif maxVal <= 2.5 and num > 2.5 then
+            num = num / 100
+        end
+    end
+    local clamped = math.max(minVal, math.min(maxVal, num))
+    local stepped = math.floor(((clamped - minVal) / step) + 0.5) * step + minVal
+    stepped = math.floor(stepped * 10000 + 0.5) / 10000
+    return math.max(minVal, math.min(maxVal, stepped))
+end
+
+Akimbo.ParseSliderInput = function(self, ...)
+    if type(self) == "table" and self == Akimbo then
+        return ParseSliderInput(...)
+    else
+        return ParseSliderInput(self, ...)
+    end
+end
+
 local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, setVal, formatStr, tooltipTitle, tooltipText)
     local slider = CreateFrame("Slider", nil, parent, "BackdropTemplate")
     slider:SetOrientation("HORIZONTAL")
@@ -244,30 +272,176 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     slider:SetThumbTexture(thumb)
     slider.thumb = thumb
 
-    local valueText = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    valueText:SetPoint("BOTTOMRIGHT", slider, "TOPRIGHT", 0, 4)
     local function FormatValue(value)
+        if not value then value = 0 end
         if formatStr and formatStr:find("%%%%") then value = value * 100 end
         return string.format(formatStr or "%d", value)
     end
-    valueText:SetText(FormatValue(getVal()))
 
+    -- Value Stepper [+] Button (Top-Right)
+    local btnPlus = CreateFrame("Button", nil, slider, "UIPanelButtonTemplate")
+    btnPlus:SetSize(20, 20)
+    btnPlus:SetPoint("BOTTOMRIGHT", slider, "TOPRIGHT", 0, 3)
+    btnPlus:SetText("+")
+    slider.btnPlus = btnPlus
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(btnPlus, "Step Up (+)", string.format("Increases value by %s.", FormatValue(step)))
+    end
+
+    -- Direct Value Entry EditBox
+    local editBox = CreateFrame("EditBox", nil, slider, "BackdropTemplate")
+    editBox:SetSize(52, 20)
+    editBox:SetPoint("RIGHT", btnPlus, "LEFT", -2, 0)
+    editBox:SetAutoFocus(false)
+    if editBox.SetFontObject then editBox:SetFontObject("GameFontHighlightSmall") end
+    if editBox.SetJustifyH then editBox:SetJustifyH("CENTER") end
+    if editBox.SetBackdrop then
+        editBox:SetBackdrop({
+            bgFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 1,
+            insets = { left = 1, right = 1, top = 1, bottom = 1 },
+        })
+        editBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
+        editBox:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
+    end
+    editBox:SetText(FormatValue(getVal()))
+    slider.editBox = editBox
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(editBox, "Manual Value Entry", "Click to type an exact numeric or percentage value and press Enter.")
+    end
+
+    -- Value Stepper [-] Button
+    local btnMinus = CreateFrame("Button", nil, slider, "UIPanelButtonTemplate")
+    btnMinus:SetSize(20, 20)
+    btnMinus:SetPoint("RIGHT", editBox, "LEFT", -2, 0)
+    btnMinus:SetText("-")
+    slider.btnMinus = btnMinus
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(btnMinus, "Step Down (-)", string.format("Decreases value by %s.", FormatValue(step)))
+    end
+
+    -- Header Title
     local title = slider:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    title:SetPoint("BOTTOMLEFT", slider, "TOPLEFT", 0, 4)
-    title:SetPoint("BOTTOMRIGHT", valueText, "BOTTOMLEFT", -6, 0)
+    title:SetPoint("BOTTOMLEFT", slider, "TOPLEFT", 0, 5)
+    title:SetPoint("BOTTOMRIGHT", btnMinus, "BOTTOMLEFT", -6, 0)
     title:SetJustifyH("LEFT")
     title:SetText(text)
     slider.title = title
 
+    -- Backward-compatible valueText proxy object
+    local valueText = {
+        SetText = function(self, t)
+            if editBox and not (editBox.HasFocus and editBox:HasFocus()) then
+                editBox:SetText(t)
+            end
+        end,
+        GetText = function(self)
+            return editBox:GetText()
+        end,
+    }
+    slider.valueText = valueText
+
+    local function CommitEditBox()
+        local txt = editBox:GetText()
+        local parsed = ParseSliderInput(txt, minVal, maxVal, step, formatStr)
+        if parsed then
+            slider:SetValue(parsed)
+        else
+            editBox:SetText(FormatValue(slider:GetValue() or getVal()))
+        end
+        if editBox.ClearFocus then editBox:ClearFocus() end
+    end
+
+    editBox:SetScript("OnEnterPressed", function(self)
+        CommitEditBox()
+    end)
+
+    editBox:SetScript("OnEscapePressed", function(self)
+        self:SetText(FormatValue(slider:GetValue() or getVal()))
+        if self.ClearFocus then self:ClearFocus() end
+    end)
+
+    editBox:SetScript("OnEditFocusLost", function(self)
+        CommitEditBox()
+        if self.SetBackdropBorderColor then
+            self:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
+        end
+    end)
+
+    editBox:SetScript("OnEditFocusGained", function(self)
+        if self.HighlightText then self:HighlightText() end
+        if self.SetBackdropBorderColor then
+            self:SetBackdropBorderColor(1.0, 0.82, 0.0, 1.0)
+        end
+    end)
+
+    btnMinus:SetScript("OnClick", function()
+        local cur = slider:GetValue() or getVal()
+        local stepAmount = step
+        if IsShiftKeyDown and IsShiftKeyDown() then stepAmount = step * 5 end
+        local newVal = math.max(minVal, cur - stepAmount)
+        newVal = math.floor(((newVal - minVal) / step) + 0.5) * step + minVal
+        newVal = math.floor(newVal * 10000 + 0.5) / 10000
+        slider:SetValue(newVal)
+    end)
+
+    btnPlus:SetScript("OnClick", function()
+        local cur = slider:GetValue() or getVal()
+        local stepAmount = step
+        if IsShiftKeyDown and IsShiftKeyDown() then stepAmount = step * 5 end
+        local newVal = math.min(maxVal, cur + stepAmount)
+        newVal = math.floor(((newVal - minVal) / step) + 0.5) * step + minVal
+        newVal = math.floor(newVal * 10000 + 0.5) / 10000
+        slider:SetValue(newVal)
+    end)
+
+    slider:SetScript("OnMouseDown", function(self, button)
+        if button == "LeftButton" then
+            self.isDragging = true
+        end
+    end)
+
+    slider:SetScript("OnMouseUp", function(self, button)
+        if self.isDragging then
+            self.isDragging = false
+            self._debounceTimer = nil
+            Akimbo:ApplyFullLayout()
+        end
+    end)
+
     slider:SetScript("OnValueChanged", function(self, val)
-        val = math.floor((val / step) + 0.5) * step
-        valueText:SetText(FormatValue(val))
+        val = math.max(minVal, math.min(maxVal, val))
+        val = math.floor(((val - minVal) / step) + 0.5) * step + minVal
+        val = math.floor(val * 10000 + 0.5) / 10000
+        local formatted = FormatValue(val)
+        if editBox and not (editBox.HasFocus and editBox:HasFocus()) then
+            editBox:SetText(formatted)
+        end
         setVal(val)
-        Akimbo:ApplyFullLayout()
+        if self.isDragging then
+            if not self._debounceTimer then
+                self._debounceTimer = true
+                if C_Timer and C_Timer.After then
+                    C_Timer.After(0.15, function()
+                        self._debounceTimer = nil
+                        Akimbo:ApplyFullLayout()
+                    end)
+                else
+                    self._debounceTimer = nil
+                    Akimbo:ApplyFullLayout()
+                end
+            end
+        else
+            Akimbo:ApplyFullLayout()
+        end
     end)
 
     slider.UpdateText = function(self)
-        valueText:SetText(FormatValue(getVal()))
+        local formatted = FormatValue(getVal())
+        if editBox and not (editBox.HasFocus and editBox:HasFocus()) then
+            editBox:SetText(formatted)
+        end
     end
 
     slider.UpdateTheme = function(self, trimKey)
@@ -660,6 +834,47 @@ function Options:CreateFloatingPanel()
     )
     hudSlider:SetPoint("TOPLEFT", 360, -46)
     hudSlider:SetWidth(300)
+
+    local p56Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
+    p56Btn:SetSize(56, 22)
+    p56Btn:SetPoint("TOPLEFT", 360, -74)
+    p56Btn:SetText("56%")
+    p56Btn:SetScript("OnClick", function() hudSlider:SetValue(0.56) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"] or "56% UI Scale", L["WIZARD_PRESET_SCALE_56_TIP_DESC"] or "Ultra-compact UI scale fit.") end
+
+    local p65Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
+    p65Btn:SetSize(56, 22)
+    p65Btn:SetPoint("LEFT", p56Btn, "RIGHT", 5, 0)
+    p65Btn:SetText("65%")
+    p65Btn:SetScript("OnClick", function() hudSlider:SetValue(0.65) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"] or "65% UI Scale", L["WIZARD_PRESET_SCALE_65_TIP_DESC"] or "Balanced compact UI scale.") end
+
+    local p70Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
+    p70Btn:SetSize(56, 22)
+    p70Btn:SetPoint("LEFT", p65Btn, "RIGHT", 5, 0)
+    p70Btn:SetText("70%")
+    p70Btn:SetScript("OnClick", function() hudSlider:SetValue(0.70) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"] or "70% UI Scale (Default)", L["WIZARD_PRESET_SCALE_70_TIP_DESC"] or "Recommended standard UI scale.") end
+
+    local p85Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
+    p85Btn:SetSize(56, 22)
+    p85Btn:SetPoint("LEFT", p70Btn, "RIGHT", 5, 0)
+    p85Btn:SetText("85%")
+    p85Btn:SetScript("OnClick", function() hudSlider:SetValue(0.85) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"] or "85% UI Scale", L["WIZARD_PRESET_SCALE_85_TIP_DESC"] or "Enlarged comfortable UI scale.") end
+
+    local p100Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
+    p100Btn:SetSize(56, 22)
+    p100Btn:SetPoint("LEFT", p85Btn, "RIGHT", 5, 0)
+    p100Btn:SetText("100%")
+    p100Btn:SetScript("OnClick", function() hudSlider:SetValue(1.00) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, "100% UI Scale", "Native 1:1 Blizzard UI scale.") end
+
+    local hudNote = card1_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    hudNote:SetPoint("TOPLEFT", 360, -104)
+    hudNote:SetPoint("TOPRIGHT", -12, -104)
+    hudNote:SetJustifyH("LEFT")
+    hudNote:SetText("|cff888888Scales Blizzard action bars, unit frames, and dialogs relative to primary display resolution.|r")
 
     -- ========================================================================
     -- TAB 2: WORKSPACE & WORLD MAP
