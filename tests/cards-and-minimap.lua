@@ -174,6 +174,16 @@ local lastPoint = MinimapCluster.points[#MinimapCluster.points]
 assert(lastPoint[1] == "BOTTOMLEFT", "MinimapCluster on workspace must remain at BOTTOMLEFT point")
 assert(lastPoint[4] < metrics.deckWidth, "MinimapCluster must remain within workspace boundaries")
 
+-- 3b. Drag MinimapCluster back to game monitor (x >= deckWidth)
+MinimapCluster.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 2500, 500 } }
+if MinimapZoneTextButton.scripts["OnDragStop"] then
+    MinimapZoneTextButton.scripts["OnDragStop"]()
+end
+assert(addon.db.savedWorkspacePositions["MinimapCluster"] == nil, "MinimapCluster must clear workspace position on game screen")
+local mmPt = MinimapCluster.points[#MinimapCluster.points]
+assert(mmPt[1] == "TOPRIGHT", "MinimapCluster must re-anchor to TOPRIGHT on game screen")
+assert(mmPt[4] == metrics.gameRight, "MinimapCluster must anchor to gameRight on game screen")
+
 -- 4. Test ContainerFrame1 dragging to workspace
 ContainerFrame1:Show()
 ContainerFrame1.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 200, 300 } }

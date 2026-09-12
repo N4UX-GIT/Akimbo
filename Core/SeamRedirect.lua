@@ -218,8 +218,17 @@ function HUD:AlignHUDFrames(m)
                         if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
                             Akimbo.Canvas.RestoreWorkspacePosition(frame)
                         end
-                    elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
-                        Anchor(frame, item[2], m, item[3], item[4], false)
+                    else
+                        if item[1] == "MinimapCluster" then
+                            pcall(function() frame:SetUserPlaced(false) end)
+                            Anchor(frame, item[2], m, item[3], item[4], true)
+                            if frame.IsShown and not frame:IsShown() and frame.Show then
+                                frame:Show()
+                            end
+                            if frame.SetAlpha then frame:SetAlpha(1) end
+                        elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                            Anchor(frame, item[2], m, item[3], item[4], false)
+                        end
                     end
                 end
             end
@@ -290,8 +299,14 @@ function HUD:HookFrames()
                 hooksecurefunc(frame, "SetPoint", function()
                     if name == "MinimapCluster" and HasCustomMinimapAddon() then return end
                     local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-                    if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
-                        HUD:RequestLayout()
+                    if not isWs then
+                        if name == "MinimapCluster" then
+                            if not frame._akimboDragging then
+                                HUD:RequestLayout()
+                            end
+                        elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                            HUD:RequestLayout()
+                        end
                     end
                 end)
             end

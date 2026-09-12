@@ -340,6 +340,8 @@ OnPanelDragStop = function(frame)
         local yInParent = (frame:GetBottom() or 0) * scaleFactor
         local frameWidth = (frame:GetWidth() or 0) * (frame.GetScale and frame:GetScale() or 1)
         local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
+        if frameWidth <= 0 then frameWidth = 192 end
+        if frameHeight <= 0 then frameHeight = 192 end
 
         -- Clamp strictly within the workspace boundaries so panels never bleed across the seam
         local minX, maxX
@@ -408,7 +410,10 @@ OnPanelDragStop = function(frame)
                 end
             end
         elseif name == "MinimapCluster" then
-            pcall(function() frame:SetUserPlaced(true) end)
+            pcall(function() frame:SetUserPlaced(false) end)
+            if Akimbo.HUD and Akimbo.HUD.AlignHUDFrames then
+                Akimbo.HUD:AlignHUDFrames()
+            end
         else
             RemodalizePanel(frame)
             RegisterSpecialFrame(name)
@@ -439,6 +444,8 @@ RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
         local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
         local frameWidth = (frame:GetWidth() or 0) * (frame.GetScale and frame:GetScale() or 1)
         local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
+        if frameWidth <= 0 then frameWidth = 192 end
+        if frameHeight <= 0 then frameHeight = 192 end
 
         -- Sanitize/clamp in case DB had bad coordinates (like y = -4.2 or x = 493.6)
         local minX, maxX
@@ -513,28 +520,31 @@ local function MakePanelDraggable(frame)
     frame:SetClampedToScreen(false)
 
     -- Create an elevated drag handle across the title bar area so clicks aren't swallowed by child elements
-    local handle = frame._akimboHandle
-    if not handle and CreateFrame then
-        handle = CreateFrame("Frame", nil, frame)
-        handle:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 0)
-        handle:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -36, 0)
-        handle:SetHeight(32)
-        local lvl = (frame.GetFrameLevel and frame:GetFrameLevel()) or 1
-        if handle.SetFrameLevel then handle:SetFrameLevel(lvl + 25) end
-        handle:EnableMouse(true)
-        handle:RegisterForDrag("LeftButton")
+    -- MinimapCluster uses MinimapZoneTextButton as its natural drag handle and must not have an overlaid handle
+    if frame ~= MinimapCluster then
+        local handle = frame._akimboHandle
+        if not handle and CreateFrame then
+            handle = CreateFrame("Frame", nil, frame)
+            handle:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 0)
+            handle:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -36, 0)
+            handle:SetHeight(32)
+            local lvl = (frame.GetFrameLevel and frame:GetFrameLevel()) or 1
+            if handle.SetFrameLevel then handle:SetFrameLevel(lvl + 25) end
+            handle:EnableMouse(true)
+            handle:RegisterForDrag("LeftButton")
 
-        handle:HookScript("OnDragStart", function(self)
-            if InCombatLockdown() or not Akimbo.db.enabled then return end
-            frame._akimboDragging = true
-            frame:StartMoving()
-        end)
+            handle:HookScript("OnDragStart", function(self)
+                if InCombatLockdown() or not Akimbo.db.enabled then return end
+                frame._akimboDragging = true
+                frame:StartMoving()
+            end)
 
-        handle:HookScript("OnDragStop", function(self)
-            OnPanelDragStop(frame)
-        end)
+            handle:HookScript("OnDragStop", function(self)
+                OnPanelDragStop(frame)
+            end)
 
-        frame._akimboHandle = handle
+            frame._akimboHandle = handle
+        end
     end
 
     frame:EnableMouse(true)

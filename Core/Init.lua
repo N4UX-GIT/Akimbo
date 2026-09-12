@@ -103,6 +103,9 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
             if ContainerFrameCombinedBags then ContainerFrameCombinedBags:SetUserPlaced(false) end
             if PlayerFrame then PlayerFrame:SetUserPlaced(false) end
             if TargetFrame then TargetFrame:SetUserPlaced(false) end
+            if MinimapCluster and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"]) then
+                MinimapCluster:SetUserPlaced(false)
+            end
             if SetCVar then
                 SetCVar("rawMouseEnable", "1")
                 SetCVar("rawMouseAccelerationEnable", "0")
