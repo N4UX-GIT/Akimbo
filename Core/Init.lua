@@ -441,10 +441,10 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
             end
         end)
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("v%s loaded! Type |cffffcc00/akimbo|r to configure.", Akimbo.version)
+        Akimbo:Print(L["MSG_LOADED"], Akimbo.version)
         if not Akimbo.db.firstRunComplete then
             C_Timer.After(1.5, function()
-                Akimbo:Print("First time using Akimbo? Type |cff00ff00/akimbo wizard|r for 1-click auto-setup & calibration.")
+                Akimbo:Print(L["MSG_FIRST_RUN"])
             end)
         end
 
@@ -508,7 +508,7 @@ function Akimbo:ApplyFullLayout()
 
     isApplyingLayout = false
     if not success then
-        Akimbo:Print("Layout error: %s", tostring(err))
+        Akimbo:Print(L["MSG_LAYOUT_ERROR"], tostring(err))
     end
 end
 
@@ -526,21 +526,21 @@ SlashCmdList["AKIMBO"] = function(msg)
     if cmd == "16:9" or cmd == "16/9" or cmd == "169" then
         Akimbo.db.aspectRatioMode = "16_9"
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Aspect Ratio locked to 16:9 (Standard Widescreen).")
+        Akimbo:Print(L["MSG_AR_16_9"])
     elseif cmd == "21:9" or cmd == "21/9" or cmd == "219" then
         Akimbo.db.aspectRatioMode = "21_9"
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Aspect Ratio locked to 21:9 (Ultrawide).")
+        Akimbo:Print(L["MSG_AR_21_9"])
     elseif cmd == "fill" then
         Akimbo.db.aspectRatioMode = "FILL"
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Using configured game height. Adjust with /akimbo height <5-100 percent>.")
+        Akimbo:Print(L["MSG_AR_FILL"])
     elseif (cmd == "ar" or cmd == "fov") and tonumber(arg) then
         local ratio = tonumber(arg)
         Akimbo.db.aspectRatioMode = "CUSTOM"
         Akimbo.db.customAspectRatio = ratio
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Custom Aspect Ratio set to %.3f:1.", ratio)
+        Akimbo:Print(L["MSG_AR_CUSTOM"], ratio)
     elseif cmd == "hud" or cmd == "scale" then
         if tonumber(arg) then
             local scale = tonumber(arg)
@@ -548,25 +548,25 @@ SlashCmdList["AKIMBO"] = function(msg)
             scale = math.max(0.25, math.min(1.25, scale))
             Akimbo.db.hudScale = scale
             Akimbo:ApplyFullLayout()
-            Akimbo:Print("Global UI size set to %.0f%% of game view.", scale * 100)
+            Akimbo:Print(L["MSG_HUD_SET"], scale * 100)
         else
-            Akimbo:Print("Current global UI size multiplier: %.2f (default 0.70). Usage: /akimbo hud <25-125 percent>", Akimbo.db.hudScale or 0.70)
+            Akimbo:Print(L["MSG_HUD_CURRENT"], Akimbo.db.hudScale or 0.70)
         end
     elseif cmd == "chat" then
         arg = strtrim(arg or ""):lower()
         if arg == "deck" or arg == "secondary" or arg == "bay" then
             Akimbo.db.chatPosition = "DECK"
             Akimbo:ApplyFullLayout()
-            Akimbo:Print("Chat docked to Command Deck (Bottom Bay).")
+            Akimbo:Print(L["MSG_CHAT_DECK"])
         elseif arg == "game" or arg == "hud" or arg == "primary" then
             Akimbo.db.chatPosition = "GAME"
             Akimbo:ApplyFullLayout()
-            Akimbo:Print("Chat locked to 3D Game Monitor (Bottom-Left).")
+            Akimbo:Print(L["MSG_CHAT_GAME"])
         else
             -- Toggle
             Akimbo.db.chatPosition = (Akimbo.db.chatPosition == "DECK") and "GAME" or "DECK"
             Akimbo:ApplyFullLayout()
-            Akimbo:Print("Chat position toggled to: %s.", Akimbo.db.chatPosition)
+            Akimbo:Print(L["MSG_CHAT_TOGGLED"], Akimbo.db.chatPosition)
         end
     elseif (cmd == "deck" or cmd == "seam") and tonumber(arg) then
         local pct = tonumber(arg)
@@ -574,44 +574,45 @@ SlashCmdList["AKIMBO"] = function(msg)
         pct = math.max(0.15, math.min(0.80, pct))
         Akimbo.db.deckWidthRatio = pct
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Seam & Secondary Deck width set to %.1f%%.", pct * 100)
+        Akimbo:Print(L["MSG_SEAM_SET"], pct * 100)
     elseif cmd == "bottom" and tonumber(arg) then
         Akimbo.db.gameBottomPixels = math.max(0, tonumber(arg))
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Game bottom inset set to %.0f pixels.", Akimbo.db.gameBottomPixels)
+        Akimbo:Print(L["MSG_BOTTOM_SET"], Akimbo.db.gameBottomPixels)
     elseif cmd == "height" and tonumber(arg) then
         local pct = tonumber(arg)
         if pct > 1 then pct = pct / 100 end
         pct = math.max(0.05, math.min(1, pct))
         Akimbo.db.gameHeightRatio = pct
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Game height set to %.0f%% of canvas (used in Fill mode).", pct * 100)
+        Akimbo:Print(L["MSG_HEIGHT_SET"], pct * 100)
     elseif cmd == "diag" or cmd == "metrics" or cmd == "info" then
         local snapshot = Akimbo.Viewport:CaptureDiagnostics()
-        Akimbo:Print("Viewport bounds check: %s.", snapshot.viewportMatches and "PASS" or "MISMATCH")
+        local vpStatus = snapshot.viewportMatches and L["MSG_DIAG_PASS"] or L["MSG_DIAG_MISMATCH"]
+        Akimbo:Print(L["MSG_DIAG_VIEWPORT"], vpStatus)
         local physW, physH = 0, 0
         if GetPhysicalScreenSize then pcall(function() physW, physH = GetPhysicalScreenSize() end) end
         local screenW = GetScreenWidth()
         local screenH = GetScreenHeight()
         local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics() or {}
         local effScale = UIParent and UIParent:GetEffectiveScale() or 1.0
-        Akimbo:Print("Game pixels: %dx%d at (%d, %d), global UI scale %.3f.",
+        Akimbo:Print(L["MSG_DIAG_GAME_PIX"],
             m.gamePixelWidth or 0, m.gamePixelHeight or 0, m.gamePixelLeft or 0,
             m.gamePixelBottom or 0, effScale)
-        Akimbo:Print("Diagnostics: Phys=%dx%d | Screen=%dx%d | EffScale=%.3f | DeckWidth=%d (%.1f%%) | GameArea=%dx%d",
+        Akimbo:Print(L["MSG_DIAG_FULL"],
             physW, physH, screenW, screenH, effScale, m.deckWidth or 0, (Akimbo.db.deckWidthRatio or 0) * 100, m.gameWidth or 0, m.gameHeight or 0)
     elseif msg == "apply" or msg == "reload" then
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Layout reapplied!")
+        Akimbo:Print(L["LAYOUT_REAPPLIED"])
     elseif msg == "reset" then
         Akimbo:ResetConfig()
     elseif msg == "toggle" then
         Akimbo.db.enabled = not Akimbo.db.enabled
-        Akimbo:Print("Akimbo is now %s.", Akimbo.db.enabled and "|cff00ff00Enabled|r" or "|cffff3333Disabled|r")
+        Akimbo:Print(L["MSG_TOGGLED"], Akimbo.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
         Akimbo:ApplyFullLayout()
     elseif msg == "debug" then
         Akimbo.db.debugMode = not Akimbo.db.debugMode
-        Akimbo:Print("Debug mode %s.", Akimbo.db.debugMode and "|cff00ff00On|r" or "|cffff3333Off|r")
+        Akimbo:Print(L["MSG_DEBUG_TOGGLED"], Akimbo.db.debugMode and L["MSG_DEBUG_ON"] or L["MSG_DEBUG_OFF"])
     elseif cmd == "wizard" or cmd == "setup" or cmd == "calibrate" then
         if Akimbo.Wizard and Akimbo.Wizard.Open then
             Akimbo.Wizard:Open()
@@ -626,14 +627,14 @@ SlashCmdList["AKIMBO"] = function(msg)
         if Akimbo.Options and Akimbo.Options.ShowSetupGuide then
             Akimbo.Options:ShowSetupGuide()
         else
-            Akimbo:Print("Use the included Akimbo-Span.bat to stretch WoW across both monitors.")
+            Akimbo:Print(L["MSG_SPAN_GUIDE"])
         end
     else
         if Akimbo.Options and Akimbo.Options.Open then
             Akimbo.Options:Open()
         else
-            Akimbo:Print("Status: %s. Type |cffffcc00/akimbo|r for options, or |cff00ff00/akimbo wizard|r for auto-setup.", 
-                Akimbo.db.enabled and "|cff00ff00Enabled|r" or "|cffff3333Disabled|r")
+            Akimbo:Print(L["MSG_STATUS"],
+                Akimbo.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
         end
     end
 end

@@ -1,6 +1,7 @@
 -- Keep standard panels inside a physically visible monitor rectangle.
 -- Leave UIPanelWindows intact so Blizzard's opening/closing logic still works.
 local _, Akimbo = ...
+local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
 local Panels = {}
 Akimbo.modules.CharacterDock = Panels
 Akimbo.Panels = Panels
@@ -144,7 +145,7 @@ function Panels:Place(frame)
         end
     end)
     placing=false
-    if not ok then Akimbo:Print("Panel layout error: %s",tostring(err)) end
+    if not ok then Akimbo:Print(L["MSG_PANEL_LAYOUT_ERROR"], tostring(err)) end
 end
 
 -- SetPoint may be one of several anchors in a Blizzard layout transaction.

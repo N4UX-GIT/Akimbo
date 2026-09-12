@@ -37,7 +37,7 @@ events.OnEvent(nil, "PLAYER_REGEN_ENABLED")
 assert(calls == 1, "combat requests were not coalesced")
 addon.UpdateCanvas = function() error("injected layout failure") end
 addon:ApplyFullLayout()
-assert(messages[#messages] == "Layout error: %s", "failure was hidden")
+assert(messages[#messages] == "MSG_LAYOUT_ERROR", "failure was hidden")
 addon.UpdateCanvas = function() addon:ApplyFullLayout() end
 addon:ApplyFullLayout()
 assert(calls == 3, "layout guard did not recover or prevent recursion")

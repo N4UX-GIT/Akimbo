@@ -107,7 +107,7 @@ function Wizard:CreateFrame()
         end
     end)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(closeBtn, "Close Wizard", "Close the setup wizard without saving new preferences.")
+        Akimbo:SetTooltip(closeBtn, L["WIZARD_BTN_CLOSE_TIP_TITLE"], L["WIZARD_BTN_CLOSE_TIP_DESC"])
     end
 
     f:SetScript("OnHide", function()
@@ -163,7 +163,7 @@ function Wizard:CreateFrame()
         if Akimbo.Options and Akimbo.Options.AutoConfigure then
             local info = Akimbo.Options:AutoConfigure(false)
             f:UpdateState()
-            statusText:SetText(string.format("|cff00ff00[Applied]|r " .. (L["WIZARD_STATUS_APPLIED"] and string.format(L["WIZARD_STATUS_APPLIED"], info.description) or "Setup automatically configured for " .. info.description)))
+            statusText:SetText(string.format(L["WIZARD_STATUS_APPLIED"], info.description))
         end
     end)
 
@@ -290,12 +290,12 @@ function Wizard:CreateFrame()
     seamEditBox:SetText(string.format("%.1f%%", ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
     f.seamEditBox = seamEditBox
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(seamEditBox, "Manual Seam Width Entry", "Type a percentage (e.g. 36%) or ratio (e.g. 0.36) and press Enter.")
+        Akimbo:SetTooltip(seamEditBox, L["WIZARD_SEAM_EDIT_TIP_TITLE"], L["WIZARD_SEAM_EDIT_TIP_DESC"])
     end
 
     local seamValText = card3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     seamValText:SetPoint("LEFT", seamEditBox, "RIGHT", 8, 0)
-    seamValText:SetText(string.format("Seam: %.1f%%", ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
+    seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
     f.seamValText = seamValText
 
     -- Seam Slider
@@ -395,7 +395,7 @@ function Wizard:CreateFrame()
     seamSlider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.floor((val / 0.005) + 0.5) * 0.005
         Akimbo.db.deckWidthRatio = val
-        seamValText:SetText(string.format("Seam: %.1f%%", val * 100))
+        seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], val * 100))
         if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
             seamEditBox:SetText(string.format("%.1f%%", val * 100))
         end
@@ -510,12 +510,12 @@ function Wizard:CreateFrame()
     scaleEditBox:SetText(string.format("%.0f%%", ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
     f.scaleEditBox = scaleEditBox
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(scaleEditBox, "Manual UI Scale Entry", "Type a percentage (e.g. 70%) or number (e.g. 0.70) and press Enter.")
+        Akimbo:SetTooltip(scaleEditBox, L["WIZARD_SCALE_EDIT_TIP_TITLE"], L["WIZARD_SCALE_EDIT_TIP_DESC"])
     end
 
     local scaleValText = card4:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     scaleValText:SetPoint("LEFT", scaleEditBox, "RIGHT", 8, 0)
-    scaleValText:SetText(string.format("Scale: %.0f%%", ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
+    scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
     f.scaleValText = scaleValText
 
     -- Continuous UI Scale Slider
@@ -586,22 +586,22 @@ function Wizard:CreateFrame()
     btnScaleMinus:SetSize(46, 22)
     btnScaleMinus:SetPoint("LEFT", scaleSlider, "RIGHT", 12, 0)
     btnScaleMinus:SetText("- 1%")
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleMinus, "Scale Down", "Decreases the global UI scale by 1%.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleMinus, L["WIZARD_BTN_SCALE_DOWN_TIP_TITLE"], L["WIZARD_BTN_SCALE_DOWN_TIP_DESC"]) end
 
     local btnScalePlus = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnScalePlus:SetSize(46, 22)
     btnScalePlus:SetPoint("LEFT", btnScaleMinus, "RIGHT", 4, 0)
     btnScalePlus:SetText("+ 1%")
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScalePlus, "Scale Up", "Increases the global UI scale by 1%.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScalePlus, L["WIZARD_BTN_SCALE_UP_TIP_TITLE"], L["WIZARD_BTN_SCALE_UP_TIP_DESC"]) end
 
     local btnScaleReset = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnScaleReset:SetSize(138, 22)
     btnScaleReset:SetPoint("LEFT", btnScalePlus, "RIGHT", 12, 0)
-    btnScaleReset:SetText("Reset (70%)")
+    btnScaleReset:SetText(L["WIZARD_BTN_SCALE_RESET"])
     btnScaleReset:SetScript("OnClick", function()
         scaleSlider:SetValueDirect(0.70)
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, "Reset UI Scale", "Resets the Global UI Scale to the recommended standard default of 70%.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"], L["WIZARD_BTN_SCALE_RESET_TIP_DESC"]) end
 
     scaleSlider:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then self.isDragging = true end
@@ -619,7 +619,7 @@ function Wizard:CreateFrame()
     scaleSlider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.floor((val / 0.01) + 0.5) * 0.01
         Akimbo.db.hudScale = val
-        scaleValText:SetText(string.format("Scale: %.0f%%", val * 100))
+        scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], val * 100))
         if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
             scaleEditBox:SetText(string.format("%.0f%%", val * 100))
         end
@@ -739,13 +739,13 @@ function Wizard:CreateFrame()
         local seam = Akimbo.db.deckWidthRatio or 0.36
 
         seamSlider:SetValue(seam)
-        seamValText:SetText(string.format("Seam: %.1f%%", seam * 100))
+        seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], seam * 100))
         if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
             seamEditBox:SetText(string.format("%.1f%%", seam * 100))
         end
 
         scaleSlider:SetValue(hud)
-        scaleValText:SetText(string.format("Scale: %.0f%%", hud * 100))
+        scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], hud * 100))
         if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
             scaleEditBox:SetText(string.format("%.0f%%", hud * 100))
         end

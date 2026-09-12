@@ -109,8 +109,8 @@ function Options:AutoConfigure(silent)
             end)
         end
         if Akimbo.Print then
-            Akimbo:Print("|cff00ff00[Akimbo] 1-Click Auto-Configuration applied:|r %s", info.description)
-            Akimbo:Print("Preset: |cffffd100%s|r | Seam: |cffffd100%.1f%%|r | Viewport: |cffffd100%s|r",
+            Akimbo:Print(L["MSG_AUTOCONFIG_APPLIED"], info.description)
+            Akimbo:Print(L["MSG_AUTOCONFIG_DETAILS"],
                 info.recommendedPreset, info.recommendedDeckRatio * 100, info.recommendedAR or "16_9")
         end
         if configFrame and configFrame.IsShown and configFrame:IsShown() then
@@ -285,7 +285,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     btnPlus:SetText("+")
     slider.btnPlus = btnPlus
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(btnPlus, "Step Up (+)", string.format("Increases value by %s.", FormatValue(step)))
+        Akimbo:SetTooltip(btnPlus, L["SLIDER_STEP_UP_TIP_TITLE"], string.format(L["SLIDER_STEP_UP_TIP_DESC_FMT"], FormatValue(step)))
     end
 
     -- Direct Value Entry EditBox
@@ -308,7 +308,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     editBox:SetText(FormatValue(getVal()))
     slider.editBox = editBox
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(editBox, "Manual Value Entry", "Click to type an exact numeric or percentage value and press Enter.")
+        Akimbo:SetTooltip(editBox, L["SLIDER_EDITBOX_TIP_TITLE"], L["SLIDER_EDITBOX_TIP_DESC"])
     end
 
     -- Value Stepper [-] Button
@@ -318,7 +318,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     btnMinus:SetText("-")
     slider.btnMinus = btnMinus
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(btnMinus, "Step Down (-)", string.format("Decreases value by %s.", FormatValue(step)))
+        Akimbo:SetTooltip(btnMinus, L["SLIDER_STEP_DOWN_TIP_TITLE"], string.format(L["SLIDER_STEP_DOWN_TIP_DESC_FMT"], FormatValue(step)))
     end
 
     -- Header Title
@@ -497,7 +497,7 @@ function Options:CreateBottomControl(parent)
     row:SetSize(280, 46)
     local label = row:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     label:SetPoint("TOPLEFT", 0, 0)
-    label:SetText("Game bottom offset (pixels):")
+    label:SetText(L["LABEL_BOTTOM_OFFSET_SHORT"])
     local input = CreateFrame("EditBox", nil, row, "InputBoxTemplate")
     input:SetSize(55, 22)
     input:SetPoint("TOPLEFT", 4, -20)
@@ -600,17 +600,17 @@ function Options:CreateFloatingPanel()
     local tab1Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     tab1Btn:SetSize(220, 26)
     tab1Btn:SetPoint("TOPLEFT", 18, -84)
-    tab1Btn:SetText("Display & Viewport")
+    tab1Btn:SetText(L["TAB_DISPLAY"])
 
     local tab2Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     tab2Btn:SetSize(220, 26)
     tab2Btn:SetPoint("LEFT", tab1Btn, "RIGHT", 12, 0)
-    tab2Btn:SetText("Workspace & Map")
+    tab2Btn:SetText(L["TAB_WORKSPACE"])
 
     local tab3Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     tab3Btn:SetSize(220, 26)
     tab3Btn:SetPoint("LEFT", tab2Btn, "RIGHT", 12, 0)
-    tab3Btn:SetText("Themes & Colors")
+    tab3Btn:SetText(L["TAB_THEMES"])
 
     -- Tab Content Containers (Anchored below tab headers)
     local tab1 = CreateFrame("Frame", nil, configFrame)
@@ -862,35 +862,35 @@ function Options:CreateFloatingPanel()
     p56Btn:SetPoint("TOPLEFT", 360, -74)
     p56Btn:SetText("56%")
     p56Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.56) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"] or "56% UI Scale", L["WIZARD_PRESET_SCALE_56_TIP_DESC"] or "Ultra-compact UI scale fit.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
 
     local p65Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p65Btn:SetSize(56, 22)
     p65Btn:SetPoint("LEFT", p56Btn, "RIGHT", 5, 0)
     p65Btn:SetText("65%")
     p65Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.65) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"] or "65% UI Scale", L["WIZARD_PRESET_SCALE_65_TIP_DESC"] or "Balanced compact UI scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
 
     local p70Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p70Btn:SetSize(56, 22)
     p70Btn:SetPoint("LEFT", p65Btn, "RIGHT", 5, 0)
     p70Btn:SetText("70%")
     p70Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.70) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"] or "70% UI Scale (Default)", L["WIZARD_PRESET_SCALE_70_TIP_DESC"] or "Recommended standard UI scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
 
     local p85Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p85Btn:SetSize(56, 22)
     p85Btn:SetPoint("LEFT", p70Btn, "RIGHT", 5, 0)
     p85Btn:SetText("85%")
     p85Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.85) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"] or "85% UI Scale", L["WIZARD_PRESET_SCALE_85_TIP_DESC"] or "Enlarged comfortable UI scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"], L["WIZARD_PRESET_SCALE_85_TIP_DESC"]) end
 
     local p100Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p100Btn:SetSize(56, 22)
     p100Btn:SetPoint("LEFT", p85Btn, "RIGHT", 5, 0)
     p100Btn:SetText("100%")
     p100Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(1.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, "100% UI Scale", "Native 1:1 Blizzard UI scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     local hudNote = card1_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     hudNote:SetPoint("TOPLEFT", 360, -104)
@@ -943,35 +943,35 @@ function Options:CreateFloatingPanel()
         local computedScale = math.max(0.50, math.min(2.50, math.floor((availableWidth / baseWidth) * 100 + 0.5) / 100))
         mapScaleSlider:SetValue(computedScale)
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(autoFitBtn, "Auto-Fit Map", "Automatically scales the World Map to fit the exact width of your secondary monitor deck.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(autoFitBtn, L["BTN_MAP_AUTOFIT_TIP_TITLE"], L["BTN_MAP_AUTOFIT_TIP_DESC"]) end
 
     local p100Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p100Btn:SetSize(48, 22)
     p100Btn:SetPoint("LEFT", autoFitBtn, "RIGHT", 5, 0)
     p100Btn:SetText("100%")
     p100Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, "100% Scale", "Sets the World Map to standard 100% scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, L["BTN_MAP_100_TIP_TITLE"], L["BTN_MAP_100_TIP_DESC"]) end
 
     local p150Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p150Btn:SetSize(48, 22)
     p150Btn:SetPoint("LEFT", p100Btn, "RIGHT", 5, 0)
     p150Btn:SetText("150%")
     p150Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p150Btn, "150% Scale", "Sets the World Map to 150% scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p150Btn, L["BTN_MAP_150_TIP_TITLE"], L["BTN_MAP_150_TIP_DESC"]) end
 
     local p200Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p200Btn:SetSize(48, 22)
     p200Btn:SetPoint("LEFT", p150Btn, "RIGHT", 5, 0)
     p200Btn:SetText("200%")
     p200Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p200Btn, "200% Scale", "Sets the World Map to 200% scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p200Btn, L["BTN_MAP_200_TIP_TITLE"], L["BTN_MAP_200_TIP_DESC"]) end
 
     local p250Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p250Btn:SetSize(48, 22)
     p250Btn:SetPoint("LEFT", p200Btn, "RIGHT", 5, 0)
     p250Btn:SetText("250%")
     p250Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p250Btn, "250% Scale", "Sets the World Map to 250% scale.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(p250Btn, L["BTN_MAP_250_TIP_TITLE"], L["BTN_MAP_250_TIP_DESC"]) end
 
     local mapTip = card2_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     mapTip:SetPoint("TOPLEFT", 12, -76)
@@ -1061,9 +1061,9 @@ function Options:CreateFloatingPanel()
     local guideLinkBtn = CreateFrame("Button", nil, card2_3, "UIPanelButtonTemplate")
     guideLinkBtn:SetSize(240, 24)
     guideLinkBtn:SetPoint("TOPLEFT", 350, -38)
-    guideLinkBtn:SetText("View Window Spanning Guide")
+    guideLinkBtn:SetText(L["BTN_GUIDE_LINK"])
     guideLinkBtn:SetScript("OnClick", function() Options:ShowSetupGuide() end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(guideLinkBtn, "Window Spanning Guide", "View instructions and batch files for spanning World of Warcraft across multiple physical monitors.") end
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(guideLinkBtn, L["BTN_GUIDE_LINK_TIP_TITLE"], L["BTN_GUIDE_LINK_TIP_DESC"]) end
 
     local bezelNote = card2_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     bezelNote:SetPoint("TOPLEFT", 12, -76)
@@ -1184,7 +1184,7 @@ function Options:CreateFloatingPanel()
             Options:RefreshPanel()
         end)
         if Akimbo.SetTooltip then
-            Akimbo:SetTooltip(btn, t[2] .. " Accent", "Applies " .. t[2] .. " highlight tint to dialog borders, slider handles, and UI frames.")
+            Akimbo:SetTooltip(btn, string.format(L["BTN_TRIM_ACCENT_TIP_TITLE_FMT"], t[2]), string.format(L["BTN_TRIM_ACCENT_TIP_DESC_FMT"], t[2]))
         end
         tinsert(trimBtnFrames, btn)
     end
@@ -1192,7 +1192,7 @@ function Options:CreateFloatingPanel()
     customTrimBtn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
     customTrimBtn:SetSize(155, 24)
     customTrimBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
-    customTrimBtn:SetText("Custom Accent...")
+    customTrimBtn:SetText(L["BTN_TRIM_CUSTOM"])
     customTrimBtn:SetScript("OnClick", function()
         local cur = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
         Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, 1.0, false, function(r, g, b)
@@ -1203,7 +1203,7 @@ function Options:CreateFloatingPanel()
         end)
     end)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(customTrimBtn, "Custom Accent Color", "Open the color picker wheel to select any custom accent tint for borders, headers, and slider thumbs.")
+        Akimbo:SetTooltip(customTrimBtn, L["BTN_TRIM_CUSTOM_TIP_TITLE"], L["BTN_TRIM_CUSTOM_TIP_DESC"])
     end
 
     function Options:UpdateTrimHighlights()
@@ -1227,12 +1227,12 @@ function Options:CreateFloatingPanel()
             local isCustom = (curTrim == "CUSTOM")
             local c = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
             if isCustom then
-                customTrimBtn:SetText(string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
+                customTrimBtn:SetText(string.format(L["BTN_TRIM_CUSTOM_ACTIVE_FMT"], math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
                 if customTrimBtn.LockHighlight then customTrimBtn:LockHighlight() end
                 local fs = customTrimBtn.GetFontString and customTrimBtn:GetFontString()
                 if fs and fs.SetTextColor then fs:SetTextColor(0.2, 1.0, 0.4, 1.0) end
             else
-                customTrimBtn:SetText("Custom Accent...")
+                customTrimBtn:SetText(L["BTN_TRIM_CUSTOM"])
                 if customTrimBtn.UnlockHighlight then customTrimBtn:UnlockHighlight() end
                 local fs = customTrimBtn.GetFontString and customTrimBtn:GetFontString()
                 if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.82, 0.0, 1.0) end
@@ -1272,7 +1272,7 @@ function Options:CreateFloatingPanel()
             Options:RefreshPanel()
         end)
         if Akimbo.SetTooltip then
-            Akimbo:SetTooltip(btn, c[2] .. " Tone", "Sets the secondary monitor workspace background tone to " .. c[2] .. ".")
+            Akimbo:SetTooltip(btn, string.format(L["BTN_CANVAS_TONE_TIP_TITLE_FMT"], c[2]), string.format(L["BTN_CANVAS_TONE_TIP_DESC_FMT"], c[2]))
         end
         tinsert(canvasBtnFrames, btn)
     end
@@ -1282,7 +1282,7 @@ function Options:CreateFloatingPanel()
     customCanvasBtn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
     customCanvasBtn:SetSize(155, 24)
     customCanvasBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
-    customCanvasBtn:SetText("Custom Color...")
+    customCanvasBtn:SetText(L["BTN_CANVAS_CUSTOM"])
     local function OpenCustomCanvasPicker()
         local cur = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
         local curA = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
@@ -1303,7 +1303,7 @@ function Options:CreateFloatingPanel()
     end
     customCanvasBtn:SetScript("OnClick", OpenCustomCanvasPicker)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(customCanvasBtn, "Custom Canvas Color", "Open the color wheel to choose any custom background color and opacity for your secondary workspace monitor.")
+        Akimbo:SetTooltip(customCanvasBtn, L["BTN_CANVAS_CUSTOM_TIP_TITLE"], L["BTN_CANVAS_CUSTOM_TIP_DESC"])
     end
 
     -- Live Workspace Canvas Swatch Preview (Interactive click-to-pick)
@@ -1313,7 +1313,7 @@ function Options:CreateFloatingPanel()
     if swatchCard.EnableMouse then swatchCard:EnableMouse(true) end
     swatchCard:SetScript("OnMouseDown", OpenCustomCanvasPicker)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(swatchCard, "Live Background Preview", "Click this swatch preview to open the Color Picker and customize your secondary screen background.")
+        Akimbo:SetTooltip(swatchCard, L["BTN_CANVAS_PREVIEW_TIP_TITLE"], L["BTN_CANVAS_PREVIEW_TIP_DESC"])
     end
 
     local swatchText = swatchCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -1341,12 +1341,12 @@ function Options:CreateFloatingPanel()
             local isCustom = (curColor == "CUSTOM")
             local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
             if isCustom then
-                customCanvasBtn:SetText(string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
+                customCanvasBtn:SetText(string.format(L["BTN_CANVAS_CUSTOM_ACTIVE_FMT"], math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
                 if customCanvasBtn.LockHighlight then customCanvasBtn:LockHighlight() end
                 local fs = customCanvasBtn.GetFontString and customCanvasBtn:GetFontString()
                 if fs and fs.SetTextColor then fs:SetTextColor(0.2, 1.0, 0.4, 1.0) end
             else
-                customCanvasBtn:SetText("Custom Color...")
+                customCanvasBtn:SetText(L["BTN_CANVAS_CUSTOM"])
                 if customCanvasBtn.UnlockHighlight then customCanvasBtn:UnlockHighlight() end
                 local fs = customCanvasBtn.GetFontString and customCanvasBtn:GetFontString()
                 if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.82, 0.0, 1.0) end
@@ -1392,24 +1392,24 @@ function Options:CreateFloatingPanel()
     local applyBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     applyBtn:SetSize(150, 28)
     applyBtn:SetPoint("BOTTOMLEFT", 20, 14)
-    applyBtn:SetText("Apply Layout")
+    applyBtn:SetText(L["BTN_APPLY_LAYOUT"])
     applyBtn:SetScript("OnClick", function()
         Akimbo:ApplyFullLayout()
-        Akimbo:Print("Layout applied successfully.")
+        Akimbo:Print(L["MSG_LAYOUT_APPLIED"])
     end)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(applyBtn, "Apply Layout", "Immediately forces all viewports, seams, and UI elements to update with current settings.")
+        Akimbo:SetTooltip(applyBtn, L["BTN_APPLY_LAYOUT_TIP_TITLE"], L["BTN_APPLY_LAYOUT_TIP_DESC"])
     end
 
     local closePanelBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     closePanelBtn:SetSize(150, 28)
     closePanelBtn:SetPoint("BOTTOMRIGHT", -20, 14)
-    closePanelBtn:SetText("|cffffd100Save & Close|r")
+    closePanelBtn:SetText("|cffffd100" .. L["BTN_SAVE_CLOSE"] .. "|r")
     closePanelBtn:SetScript("OnClick", function()
         Options:Close()
     end)
     if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(closePanelBtn, "Save & Close", "Saves all settings and closes the configuration dashboard.")
+        Akimbo:SetTooltip(closePanelBtn, L["BTN_SAVE_CLOSE_TIP_TITLE"], L["BTN_SAVE_CLOSE_TIP_DESC"])
     end
 
     function Options:RefreshPanel()

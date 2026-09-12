@@ -272,6 +272,10 @@ L["WIZARD_PRESET_SCALE_100"] = "Default (100%)"
 L["WIZARD_PRESET_SCALE_100_TIP_TITLE"] = "Unscaled UI (100%)"
 L["WIZARD_PRESET_SCALE_100_TIP_DESC"] = "Standard 100% Blizzard UI size without scaling reductions."
 
+L["WIZARD_PRESET_SCALE_85"] = "Comfortable (85%)"
+L["WIZARD_PRESET_SCALE_85_TIP_TITLE"] = "Comfortable UI (85%)"
+L["WIZARD_PRESET_SCALE_85_TIP_DESC"] = "A larger, relaxed scale for players who prefer bigger text and icons at normal viewing distance."
+
 L["WIZARD_BTN_ADVANCED"] = "Advanced Settings (/akimbo)"
 L["WIZARD_BTN_ADVANCED_TIP_TITLE"] = "Advanced Settings"
 L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab Akimbo options dashboard with complete customization controls."
@@ -279,3 +283,122 @@ L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab 
 L["WIZARD_BTN_FINISH"] = "Save & Finish Setup"
 L["WIZARD_BTN_FINISH_TIP_TITLE"] = "Finish Calibration"
 L["WIZARD_BTN_FINISH_TIP_DESC"] = "Saves your configuration, marks initial setup complete, and applies your new multi-monitor layout."
+
+L["WIZARD_BTN_CLOSE"] = "Close Wizard"
+L["WIZARD_BTN_CLOSE_TIP_TITLE"] = "Close Wizard"
+L["WIZARD_BTN_CLOSE_TIP_DESC"] = "Close the setup wizard without saving any new changes."
+
+-- ============================================================================
+-- Wizard — Inline Display Text (non-button)
+-- ============================================================================
+L["WIZARD_SEAM_VAL_FMT"] = "Seam: %.1f%%"
+L["WIZARD_SCALE_VAL_FMT"] = "Scale: %.0f%%"
+L["WIZARD_SEAM_EDIT_TIP_TITLE"] = "Manual Seam Width Entry"
+L["WIZARD_SEAM_EDIT_TIP_DESC"] = "Type a percentage (e.g. 36%) or ratio (e.g. 0.36) and press Enter to apply the seam position."
+L["WIZARD_SCALE_EDIT_TIP_TITLE"] = "Manual UI Scale Entry"
+L["WIZARD_SCALE_EDIT_TIP_DESC"] = "Type a percentage (e.g. 70%) or decimal (e.g. 0.70) and press Enter to apply the global UI scale."
+L["WIZARD_BTN_SCALE_DOWN_TIP_TITLE"] = "Scale Down"
+L["WIZARD_BTN_SCALE_DOWN_TIP_DESC"] = "Decreases the global UI scale by 1%."
+L["WIZARD_BTN_SCALE_UP_TIP_TITLE"] = "Scale Up"
+L["WIZARD_BTN_SCALE_UP_TIP_DESC"] = "Increases the global UI scale by 1%."
+L["WIZARD_BTN_SCALE_RESET"] = "Reset (70%)"
+L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"] = "Reset UI Scale"
+L["WIZARD_BTN_SCALE_RESET_TIP_DESC"] = "Resets the Global UI Scale to the recommended standard default of 70%."
+
+-- ============================================================================
+-- Options Panel — Tab Labels & General Buttons
+-- ============================================================================
+L["BTN_APPLY_LAYOUT"] = "Apply Layout"
+L["BTN_APPLY_LAYOUT_TIP_TITLE"] = "Apply Layout"
+L["BTN_APPLY_LAYOUT_TIP_DESC"] = "Immediately forces all viewports, seams, and UI elements to update with the current settings."
+L["BTN_SAVE_CLOSE"] = "Save & Close"
+L["BTN_SAVE_CLOSE_TIP_TITLE"] = "Save & Close"
+L["BTN_SAVE_CLOSE_TIP_DESC"] = "Saves all settings and closes the configuration dashboard."
+L["LABEL_BOTTOM_OFFSET_SHORT"] = "Game bottom offset (pixels):"
+
+-- ============================================================================
+-- Options Panel — Slider Step & Edit Tooltips (shared factory)
+-- ============================================================================
+L["SLIDER_STEP_UP_TIP_TITLE"] = "Step Up"
+L["SLIDER_STEP_UP_TIP_DESC_FMT"] = "Increases the value by %s."
+L["SLIDER_STEP_DOWN_TIP_TITLE"] = "Step Down"
+L["SLIDER_STEP_DOWN_TIP_DESC_FMT"] = "Decreases the value by %s."
+L["SLIDER_EDITBOX_TIP_TITLE"] = "Manual Value Entry"
+L["SLIDER_EDITBOX_TIP_DESC"] = "Click to type an exact numeric or percentage value and press Enter."
+
+-- ============================================================================
+-- Options Panel — World Map Section
+-- ============================================================================
+L["BTN_MAP_AUTOFIT"] = "Auto-Fit"
+L["BTN_MAP_AUTOFIT_TIP_TITLE"] = "Auto-Fit World Map"
+L["BTN_MAP_AUTOFIT_TIP_DESC"] = "Automatically scales the World Map to fit the exact width of your secondary monitor deck."
+L["BTN_MAP_100_TIP_TITLE"] = "100% Map Scale"
+L["BTN_MAP_100_TIP_DESC"] = "Sets the World Map to standard 100% scale."
+L["BTN_MAP_150_TIP_TITLE"] = "150% Map Scale"
+L["BTN_MAP_150_TIP_DESC"] = "Sets the World Map to 150% scale for a larger, more detailed view."
+L["BTN_MAP_200_TIP_TITLE"] = "200% Map Scale"
+L["BTN_MAP_200_TIP_DESC"] = "Sets the World Map to 200% scale."
+L["BTN_MAP_250_TIP_TITLE"] = "250% Map Scale"
+L["BTN_MAP_250_TIP_DESC"] = "Sets the World Map to 250% scale, filling a large portion of your secondary deck."
+
+-- ============================================================================
+-- Options Panel — Canvas & Trim Color Buttons
+-- ============================================================================
+L["BTN_CANVAS_TONE_TIP_TITLE_FMT"] = "%s Tone"
+L["BTN_CANVAS_TONE_TIP_DESC_FMT"] = "Sets the secondary monitor workspace background tone to %s."
+L["BTN_CANVAS_CUSTOM"] = "Custom Color..."
+L["BTN_CANVAS_CUSTOM_ACTIVE_FMT"] = "Custom (#%02x%02x%02x)"
+L["BTN_CANVAS_CUSTOM_TIP_TITLE"] = "Custom Canvas Color"
+L["BTN_CANVAS_CUSTOM_TIP_DESC"] = "Open the color wheel to choose any custom background color and opacity for your secondary workspace monitor."
+L["BTN_CANVAS_PREVIEW_TIP_TITLE"] = "Live Background Preview"
+L["BTN_CANVAS_PREVIEW_TIP_DESC"] = "Click this swatch to open the Color Picker and customize your secondary screen background color."
+L["BTN_TRIM_ACCENT_TIP_TITLE_FMT"] = "%s Accent"
+L["BTN_TRIM_ACCENT_TIP_DESC_FMT"] = "Applies %s highlight tint to dialog borders, slider handles, and UI frames."
+L["BTN_TRIM_CUSTOM"] = "Custom Accent..."
+L["BTN_TRIM_CUSTOM_ACTIVE_FMT"] = "Custom (#%02x%02x%02x)"
+L["BTN_TRIM_CUSTOM_TIP_TITLE"] = "Custom Accent Color"
+L["BTN_TRIM_CUSTOM_TIP_DESC"] = "Open the color picker wheel to select any custom accent tint for borders, headers, and slider thumbs."
+
+-- ============================================================================
+-- Options Panel — Guide Link & Autoconfig Print
+-- ============================================================================
+L["BTN_GUIDE_LINK"] = "View Window Spanning Guide"
+L["BTN_GUIDE_LINK_TIP_TITLE"] = "Window Spanning Guide"
+L["BTN_GUIDE_LINK_TIP_DESC"] = "View instructions and batch files for spanning World of Warcraft across multiple physical monitors."
+L["MSG_AUTOCONFIG_APPLIED"] = "|cff00ff00[Akimbo] 1-Click Auto-Configuration applied:|r %s"
+L["MSG_AUTOCONFIG_DETAILS"] = "Preset: |cffffd100%s|r | Seam: |cffffd100%.1f%%|r | Viewport: |cffffd100%s|r"
+L["MSG_LAYOUT_APPLIED"] = "Layout applied successfully."
+
+-- ============================================================================
+-- Slash Command System Messages
+-- ============================================================================
+L["MSG_LOADED"] = "v%s loaded! Type |cffffcc00/akimbo|r to configure."
+L["MSG_FIRST_RUN"] = "First time using Akimbo? Type |cff00ff00/akimbo wizard|r for 1-click auto-setup & calibration."
+L["MSG_LAYOUT_ERROR"] = "Layout error: %s"
+L["MSG_AR_16_9"] = "Aspect Ratio locked to 16:9 (Standard Widescreen)."
+L["MSG_AR_21_9"] = "Aspect Ratio locked to 21:9 (Ultrawide)."
+L["MSG_AR_FILL"] = "Using configured game height. Adjust with /akimbo height <5-100 percent>."
+L["MSG_AR_CUSTOM"] = "Custom Aspect Ratio set to %.3f:1."
+L["MSG_HUD_SET"] = "Global UI size set to %.0f%% of game view."
+L["MSG_HUD_CURRENT"] = "Current global UI size multiplier: %.2f (default 0.70). Usage: /akimbo hud <25-125 percent>"
+L["MSG_CHAT_DECK"] = "Chat docked to Command Deck (Bottom Bay)."
+L["MSG_CHAT_GAME"] = "Chat locked to 3D Game Monitor (Bottom-Left)."
+L["MSG_CHAT_TOGGLED"] = "Chat position toggled to: %s."
+L["MSG_SEAM_SET"] = "Seam & Secondary Deck width set to %.1f%%."
+L["MSG_BOTTOM_SET"] = "Game bottom inset set to %.0f pixels."
+L["MSG_HEIGHT_SET"] = "Game height set to %.0f%% of canvas (used in Fill mode)."
+L["MSG_DIAG_VIEWPORT"] = "Viewport bounds check: %s."
+L["MSG_DIAG_PASS"] = "PASS"
+L["MSG_DIAG_MISMATCH"] = "MISMATCH"
+L["MSG_DIAG_GAME_PIX"] = "Game pixels: %dx%d at (%d, %d), global UI scale %.3f."
+L["MSG_DIAG_FULL"] = "Diagnostics: Phys=%dx%d | Screen=%dx%d | EffScale=%.3f | DeckWidth=%d (%.1f%%) | GameArea=%dx%d"
+L["MSG_TOGGLE_ON"] = "|cff00ff00Enabled|r"
+L["MSG_TOGGLE_OFF"] = "|cffff3333Disabled|r"
+L["MSG_TOGGLED"] = "Akimbo is now %s."
+L["MSG_DEBUG_ON"] = "|cff00ff00On|r"
+L["MSG_DEBUG_OFF"] = "|cffff3333Off|r"
+L["MSG_DEBUG_TOGGLED"] = "Debug mode %s."
+L["MSG_SPAN_GUIDE"] = "Use the included Akimbo-Span.bat to stretch WoW across both monitors."
+L["MSG_STATUS"] = "Status: %s. Type |cffffcc00/akimbo|r for options, or |cff00ff00/akimbo wizard|r for auto-setup."
+L["MSG_PANEL_LAYOUT_ERROR"] = "Panel layout error: %s"
+L["MSG_MAP_LAYOUT_ERROR"] = "Map layout error: %s"

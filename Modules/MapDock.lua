@@ -1,5 +1,6 @@
 -- Docked map is an independent window; other panels retain Blizzard behavior.
 local _, Akimbo = ...
+local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
 local Map = {}
 Akimbo.modules.MapDock = Map
 local busy=false
@@ -130,7 +131,7 @@ function Map:Configure()
         if Akimbo.Panels then Akimbo.Panels:Place(frame) end
     end)
     busy=false
-    if not ok then Akimbo:Print("Map layout error: %s",tostring(err)) end
+    if not ok then Akimbo:Print(L["MSG_MAP_LAYOUT_ERROR"],tostring(err)) end
 end
 
 function Map:Initialize()
