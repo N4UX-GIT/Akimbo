@@ -103,6 +103,10 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
             if ContainerFrameCombinedBags then ContainerFrameCombinedBags:SetUserPlaced(false) end
             if PlayerFrame then PlayerFrame:SetUserPlaced(false) end
             if TargetFrame then TargetFrame:SetUserPlaced(false) end
+            if SetCVar then
+                SetCVar("rawMouseEnable", "1")
+                SetCVar("rawMouseAccelerationEnable", "0")
+            end
         end)
         Akimbo:ApplyFullLayout()
         Akimbo:Print("v%s loaded! Type |cffffcc00/akimbo|r to configure.", Akimbo.version)

@@ -246,10 +246,15 @@ function HUD:HookFrames()
             end)
         end
     end
-    -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
-    -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
+
+    -- Center Game Menu (Escape menu), AddonList, and settings panels onto the primary game monitor
+    local menuFrameNames = {
+        "GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame",
+        "AddonList", "KeyBindingFrame", "HelpFrame"
+    }
+
     local function CenterGameMenu()
-        for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+        for _, name in ipairs(menuFrameNames) do
             local frame = _G[name]
             if frame and frame:IsShown() and not InCombatLockdown() and Akimbo.db and Akimbo.db.enabled then
                 local m = Akimbo.Viewport:GetMetrics()
@@ -263,7 +268,7 @@ function HUD:HookFrames()
     end
 
     if UIPanelWindows then
-        for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+        for _, name in ipairs(menuFrameNames) do
             if UIPanelWindows[name] then
                 UIPanelWindows[name].area = nil
                 UIPanelWindows[name].centerFrameSkipAnchoring = true
@@ -271,7 +276,7 @@ function HUD:HookFrames()
         end
     end
 
-    for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+    for _, name in ipairs(menuFrameNames) do
         local frame = _G[name]
         if frame then
             if SetUIPanelAttribute then
@@ -284,8 +289,30 @@ function HUD:HookFrames()
                     C_Timer.After(0, CenterGameMenu)
                 end)
             end
+            if name == "AddonList" and UISpecialFrames then
+                local found = false
+                for _, sName in ipairs(UISpecialFrames) do
+                    if sName == "AddonList" then found = true; break end
+                end
+                if not found then table.insert(UISpecialFrames, "AddonList") end
+            end
         end
     end
+
+    local function UpdateUIPanelOffsets()
+        if InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
+        local m = Akimbo.Viewport:GetMetrics()
+        if m and m.isSpanned and UIParent.SetAttribute then
+            local left = m.gameLeft or 0
+            UIParent:SetAttribute("LEFT_OFFSET", left)
+            local topDelta = (UIParent:GetHeight() or 0) - (m.gameTop or 0)
+            if topDelta > 0 then
+                UIParent:SetAttribute("TOP_OFFSET", -topDelta)
+            end
+        end
+    end
+
+    UpdateUIPanelOffsets()
 
     if not self.menuHooksInstalled then
         self.menuHooksInstalled = true
@@ -297,10 +324,20 @@ function HUD:HookFrames()
         end
         if ShowUIPanel then
             hooksecurefunc("ShowUIPanel", function(frame)
-                if frame == GameMenuFrame or frame == SettingsPanel then
-                    CenterGameMenu()
-                    C_Timer.After(0, CenterGameMenu)
+                if frame then
+                    for _, name in ipairs(menuFrameNames) do
+                        if frame == _G[name] then
+                            CenterGameMenu()
+                            C_Timer.After(0, CenterGameMenu)
+                            break
+                        end
+                    end
                 end
+            end)
+        end
+        if UpdateUIPanelPositions then
+            hooksecurefunc("UpdateUIPanelPositions", function()
+                UpdateUIPanelOffsets()
             end)
         end
     end

@@ -84,16 +84,48 @@ function Canvas:UpdateMapMovementBehavior()
     end
 end
 
+function Canvas:ConfigureWorldMap()
+    local map = WorldMapFrame
+    if not map or HasLeatrixMaps() or not Akimbo.db or not Akimbo.db.enabled then return end
+
+    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    if not m or not m.isSpanned then return end
+
+    -- Ensure windowed mini world map in Classic Era
+    pcall(function()
+        if GetCVar("miniWorldMap") ~= "1" then
+            SetCVar("miniWorldMap", "1")
+        end
+        if map.IsMaximized and map:IsMaximized() and map.Minimize then
+            map:Minimize()
+        end
+    end)
+
+    -- If map is on the workspace, scale it down to fit the portrait width cleanly
+    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]
+    if pos or IsFrameOnWorkspace(map) then
+        local baseWidth = map:GetWidth() or 610
+        if baseWidth > 0 then
+            local availableWidth = m.deckWidth - 24
+            local fitScale = math.min(1, availableWidth / baseWidth)
+            map:SetScale(fitScale)
+        end
+    end
+end
+
 local function IsFrameOnWorkspace(frame)
     if not frame then return false end
     local x = frame:GetLeft()
     if not x then return false end
     local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
     if not m then return false end
+    local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
+    local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+    local xInParent = x * (frameScale / parentScale)
     if Akimbo.db.primaryPosition ~= "LEFT" then
-        return x < m.deckWidth
+        return xInParent < (m.deckWidth + 10)
     else
-        return x >= (m.gameWidth + m.bezel)
+        return xInParent >= (m.gameWidth + m.bezel - 10)
     end
 end
 
@@ -173,9 +205,15 @@ local function OnPanelDragStop(frame)
                 DemodalizePanel(frame)
             end
         end
+        if frame == WorldMapFrame then
+            Canvas:ConfigureWorldMap()
+        end
     else
         Akimbo.db.savedWorkspacePositions[name] = nil
         RemodalizePanel(frame)
+        if frame == WorldMapFrame then
+            frame:SetScale(1)
+        end
     end
 end
 
@@ -190,29 +228,56 @@ local function RestoreWorkspacePosition(frame)
         end
         frame:ClearAllPoints()
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+        if frame == WorldMapFrame then
+            Canvas:ConfigureWorldMap()
+        end
     end
 end
 
 -- ============================================================================
 -- Universal Panel Dragger (Allows moving panels to the secondary monitor)
 -- ============================================================================
-local function MakePanelDraggable(frame, dragHandle)
+local function MakePanelDraggable(frame)
     if not frame or frame._akimboMovable then return end
 
-    dragHandle = dragHandle or frame
     frame:SetMovable(true)
     frame:SetClampedToScreen(false)
 
-    dragHandle:EnableMouse(true)
-    dragHandle:RegisterForDrag("LeftButton")
+    -- Create an elevated drag handle across the title bar area so clicks aren't swallowed by child elements
+    local handle = frame._akimboHandle
+    if not handle and CreateFrame then
+        handle = CreateFrame("Frame", nil, frame)
+        handle:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 0)
+        handle:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -36, 0)
+        handle:SetHeight(32)
+        local lvl = (frame.GetFrameLevel and frame:GetFrameLevel()) or 1
+        handle:SetFrameLevel(lvl + 25)
+        handle:EnableMouse(true)
+        handle:RegisterForDrag("LeftButton")
 
-    dragHandle:HookScript("OnDragStart", function(self)
+        handle:HookScript("OnDragStart", function(self)
+            if InCombatLockdown() or not Akimbo.db.enabled then return end
+            frame._akimboDragging = true
+            frame:StartMoving()
+        end)
+
+        handle:HookScript("OnDragStop", function(self)
+            OnPanelDragStop(frame)
+        end)
+
+        frame._akimboHandle = handle
+    end
+
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+
+    frame:HookScript("OnDragStart", function(self)
         if InCombatLockdown() or not Akimbo.db.enabled then return end
         frame._akimboDragging = true
         frame:StartMoving()
     end)
 
-    dragHandle:HookScript("OnDragStop", function(self)
+    frame:HookScript("OnDragStop", function(self)
         OnPanelDragStop(frame)
     end)
 
@@ -221,6 +286,20 @@ local function MakePanelDraggable(frame, dragHandle)
     end)
 
     frame._akimboMovable = true
+end
+
+function Canvas:TryMakeFrameDraggable(frame)
+    if not frame or frame._akimboMovable or not frame.GetName then return end
+    local name = frame:GetName()
+    if not name then return end
+    local isPanel = UIPanelWindows and UIPanelWindows[name]
+    if isPanel or frame.TitleContainer or frame.TitleText or _G[name .. "TitleText"] then
+        frame:SetClampedToScreen(false)
+        MakePanelDraggable(frame)
+        if Akimbo.db and Akimbo.db.independentWorkspacePanels and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name] then
+            DemodalizePanel(frame)
+        end
+    end
 end
 
 function Canvas:EnableFreeDragging()
@@ -267,6 +346,8 @@ function Canvas:EnableFreeDragging()
             end
         end
     end
+
+    self:ConfigureWorldMap()
 end
 
 function Akimbo:InitializeCanvas()
@@ -278,8 +359,17 @@ function Akimbo:InitializeCanvas()
     loader:SetScript("OnEvent", function()
         Canvas:EnableFreeDragging()
         Canvas:UpdateMapMovementBehavior()
+        Canvas:ConfigureWorldMap()
     end)
     Canvas:UpdateMapMovementBehavior()
+    Canvas:ConfigureWorldMap()
+
+    if not Canvas.showUIPanelHooked and ShowUIPanel then
+        Canvas.showUIPanelHooked = true
+        hooksecurefunc("ShowUIPanel", function(frame)
+            Canvas:TryMakeFrameDraggable(frame)
+        end)
+    end
 end
 
 function Akimbo:UpdateCanvas()
