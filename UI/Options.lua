@@ -255,22 +255,57 @@ function Options:CreateFloatingPanel()
     local bottomControl = Options:CreateBottomControl(configFrame)
     bottomControl:SetPoint("TOPLEFT", deckRatioSlider, "BOTTOMLEFT", 0, -14)
 
-    -- Module Toggles
+    -- Module & Navigation Features
     local modLabel = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     modLabel:SetPoint("TOPLEFT", bottomControl, "BOTTOMLEFT", 0, -10)
-    modLabel:SetText("Command Deck Modules:")
+    modLabel:SetText("Workspace & Navigation Options:")
 
     local seamCheck = CreateNativeCheckbox(configFrame, "Reroute Popups & Dialogs away from the center bezel",
         function() return Akimbo.db.seamRedirect end,
         function(val) Akimbo.db.seamRedirect = val end
     )
-    seamCheck:SetPoint("TOPLEFT", modLabel, "BOTTOMLEFT", 0, -6)
+    seamCheck:SetPoint("TOPLEFT", modLabel, "BOTTOMLEFT", 0, -4)
+
+    local mapMoveCheck = CreateNativeCheckbox(configFrame, "Keep World Map open while running / walking",
+        function() return Akimbo.db.preventMapCloseOnMove end,
+        function(val)
+            Akimbo.db.preventMapCloseOnMove = val
+            if Akimbo.Canvas and Akimbo.Canvas.UpdateMapMovementBehavior then
+                Akimbo.Canvas:UpdateMapMovementBehavior()
+            end
+        end
+    )
+    mapMoveCheck:SetPoint("TOPLEFT", seamCheck, "BOTTOMLEFT", 0, -4)
+
+    local mapDesc = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    mapDesc:SetPoint("TOPLEFT", mapMoveCheck, "BOTTOMLEFT", 28, -2)
+    local hasLMap = C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Leatrix_Maps") or (IsAddOnLoaded and IsAddOnLoaded("Leatrix_Maps"))
+    if hasLMap then
+        mapDesc:SetText("|cff00ff00Leatrix Maps detected:|r Map movement behavior can also be managed via Leatrix.")
+    else
+        mapDesc:SetText("|cff888888Tip: Leatrix Maps is also recommended for full map customization.|r")
+    end
+
+    local panelCheck = CreateNativeCheckbox(configFrame, "Keep panels placed on workspace open independently",
+        function() return Akimbo.db.independentWorkspacePanels end,
+        function(val) Akimbo.db.independentWorkspacePanels = val end
+    )
+    panelCheck:SetPoint("TOPLEFT", mapDesc, "BOTTOMLEFT", -28, -6)
+
+    local panelDesc = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    panelDesc:SetPoint("TOPLEFT", panelCheck, "BOTTOMLEFT", 28, -2)
+    local hasLPlus = C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Leatrix_Plus") or (IsAddOnLoaded and IsAddOnLoaded("Leatrix_Plus"))
+    if hasLPlus then
+        panelDesc:SetText("|cff00ff00Leatrix Plus detected:|r Both Akimbo and Leatrix Plus support independent panels.")
+    else
+        panelDesc:SetText("|cff888888Panels dragged to the workspace won't close when opening other panels.|r")
+    end
 
     local forceCheck = CreateNativeCheckbox(configFrame, "Force Dual Mode (Preview on single display)",
         function() return Akimbo.db.forceDualOnSingle or false end,
         function(val) Akimbo.db.forceDualOnSingle = val end
     )
-    forceCheck:SetPoint("TOPLEFT", seamCheck, "BOTTOMLEFT", 0, -6)
+    forceCheck:SetPoint("TOPLEFT", panelDesc, "BOTTOMLEFT", -28, -6)
 
     -- Action Buttons (Bottom)
     local setupBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")

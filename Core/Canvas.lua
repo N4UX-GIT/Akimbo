@@ -51,6 +51,101 @@ function Canvas:UpdateLayout()
 
     -- Enable free dragging for standard Blizzard frames so the player can move them anywhere on the workspace
     self:EnableFreeDragging()
+    self:UpdateMapMovementBehavior()
+end
+
+local function HasLeatrixMaps()
+    if C_AddOns and C_AddOns.IsAddOnLoaded then
+        return C_AddOns.IsAddOnLoaded("Leatrix_Maps")
+    elseif IsAddOnLoaded then
+        return IsAddOnLoaded("Leatrix_Maps")
+    end
+    return false
+end
+
+local function HasLeatrixPlus()
+    if C_AddOns and C_AddOns.IsAddOnLoaded then
+        return C_AddOns.IsAddOnLoaded("Leatrix_Plus")
+    elseif IsAddOnLoaded then
+        return IsAddOnLoaded("Leatrix_Plus")
+    end
+    return false
+end
+
+function Canvas:UpdateMapMovementBehavior()
+    local map = WorldMapFrame
+    if not map then return end
+    if HasLeatrixMaps() then return end
+
+    if Akimbo.db and Akimbo.db.enabled and Akimbo.db.preventMapCloseOnMove then
+        pcall(function() map:UnregisterEvent("PLAYER_STARTED_MOVING") end)
+    else
+        pcall(function() map:RegisterEvent("PLAYER_STARTED_MOVING") end)
+    end
+end
+
+local function IsFrameOnWorkspace(frame)
+    if not frame then return false end
+    local x = frame:GetLeft()
+    if not x then return false end
+    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    if not m then return false end
+    if Akimbo.db.primaryPosition ~= "LEFT" then
+        return x < m.deckWidth
+    else
+        return x >= (m.gameWidth + m.bezel)
+    end
+end
+
+local originalAreas = {}
+
+local function OnPanelDragStop(frame)
+    frame:StopMovingOrSizing()
+    pcall(function() frame:SetUserPlaced(true) end)
+    frame._akimboDragging = false
+
+    if not Akimbo.db or not Akimbo.db.enabled then return end
+    local name = frame:GetName()
+    if not name then return end
+
+    Akimbo.db.savedWorkspacePositions = Akimbo.db.savedWorkspacePositions or {}
+
+    if IsFrameOnWorkspace(frame) then
+        local x, y = frame:GetLeft(), frame:GetBottom()
+        if x and y then
+            Akimbo.db.savedWorkspacePositions[name] = { x = x, y = y }
+            if Akimbo.db.independentWorkspacePanels and SetUIPanelAttribute then
+                local currentArea = GetUIPanelAttribute and GetUIPanelAttribute(frame, "area")
+                if currentArea and not originalAreas[name] then
+                    originalAreas[name] = currentArea
+                end
+                SetUIPanelAttribute(frame, "area", nil)
+            end
+        end
+    else
+        Akimbo.db.savedWorkspacePositions[name] = nil
+        if originalAreas[name] and SetUIPanelAttribute then
+            SetUIPanelAttribute(frame, "area", originalAreas[name])
+        end
+    end
+end
+
+local function RestoreWorkspacePosition(frame)
+    if not frame or not Akimbo.db or not Akimbo.db.enabled then return end
+    local name = frame:GetName()
+    if not name then return end
+    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+    if pos and pos.x and pos.y then
+        if Akimbo.db.independentWorkspacePanels and SetUIPanelAttribute then
+            local currentArea = GetUIPanelAttribute and GetUIPanelAttribute(frame, "area")
+            if currentArea and not originalAreas[name] then
+                originalAreas[name] = currentArea
+            end
+            SetUIPanelAttribute(frame, "area", nil)
+        end
+        frame:ClearAllPoints()
+        frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+    end
 end
 
 -- ============================================================================
@@ -73,9 +168,11 @@ local function MakePanelDraggable(frame, dragHandle)
     end)
 
     dragHandle:HookScript("OnDragStop", function(self)
-        frame:StopMovingOrSizing()
-        pcall(function() frame:SetUserPlaced(true) end)
-        frame._akimboDragging = false
+        OnPanelDragStop(frame)
+    end)
+
+    frame:HookScript("OnShow", function(self)
+        RestoreWorkspacePosition(frame)
     end)
 
     frame._akimboMovable = true
@@ -142,7 +239,9 @@ function Akimbo:InitializeCanvas()
     loader:RegisterEvent("ADDON_LOADED")
     loader:SetScript("OnEvent", function()
         Canvas:EnableFreeDragging()
+        Canvas:UpdateMapMovementBehavior()
     end)
+    Canvas:UpdateMapMovementBehavior()
 end
 
 function Akimbo:UpdateCanvas()

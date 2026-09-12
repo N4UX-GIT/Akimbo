@@ -25,10 +25,9 @@ local defaultSettings = {
 
     -- Feature toggles
     seamRedirect = true,            -- Redirect popups and errors away from center bezel
-    dockMap = true,                 -- Host WorldMap on secondary monitor
-    dockBags = true,                -- Organize bags on secondary monitor
-    dockCharacter = true,           -- Decouple and dock Character Sheet on secondary monitor
     preventMapCloseOnMove = true,   -- Keep WorldMap open while running/walking
+    independentWorkspacePanels = true, -- Panels placed on the secondary workspace stay open independently
+    savedWorkspacePositions = {},   -- Persisted coordinates for frames placed on the secondary workspace
 }
 
 local function CopyDefaults(src, dst)
