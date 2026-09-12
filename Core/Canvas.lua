@@ -130,16 +130,66 @@ function Canvas:ConfigureWorldMap()
         end)
     end
 
-    -- If map is on the workspace, scale it down to fit the portrait width cleanly
+    -- Interactive Ctrl + MouseWheel scaling
+    local function OnMapMouseWheel(self, delta)
+        if not IsControlKeyDown() then return end
+        if not Akimbo.db or not Akimbo.db.enabled then return end
+        local current = map:GetScale() or 1.0
+        local newScale
+        if delta > 0 then
+            newScale = math.min(1.6, current + 0.05)
+        else
+            newScale = math.max(0.4, current - 0.05)
+        end
+        newScale = math.floor(newScale * 100 + 0.5) / 100
+
+        if IsFrameOnWorkspace(map) then
+            Akimbo.db.workspaceMapScale = newScale
+            Canvas:ConfigureWorldMap()
+            OnPanelDragStop(map)
+        else
+            Akimbo.db.mainMapScale = newScale
+            map:SetScale(newScale)
+            OnPanelDragStop(map)
+        end
+
+        if UIErrorsFrame and UIErrorsFrame.AddMessage then
+            UIErrorsFrame:AddMessage(string.format("World Map Scale: %d%%", math.floor(newScale * 100 + 0.5)), 1.0, 0.82, 0.0, 1.0, 1.2)
+        end
+    end
+
+    if not map._akimboWheelHooked then
+        map._akimboWheelHooked = true
+        if map.EnableMouseWheel then map:EnableMouseWheel(true) end
+        if map.HookScript then map:HookScript("OnMouseWheel", OnMapMouseWheel) end
+    end
+    if WorldMapTitleButton and not WorldMapTitleButton._akimboWheelHooked then
+        WorldMapTitleButton._akimboWheelHooked = true
+        if WorldMapTitleButton.EnableMouseWheel then WorldMapTitleButton:EnableMouseWheel(true) end
+        if WorldMapTitleButton.HookScript then WorldMapTitleButton:HookScript("OnMouseWheel", OnMapMouseWheel) end
+    end
+
+    -- If map is on the workspace, apply preferred or auto-fit scale
     local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]
     if pos or IsFrameOnWorkspace(map) then
-        local baseWidth = map:GetWidth() or 610
-        if baseWidth <= 0 then baseWidth = 610 end
-        local availableWidth = m.deckWidth - 24
-        local fitScale = math.min(1.0, availableWidth / baseWidth)
+        local userScale = Akimbo.db.workspaceMapScale
+        local fitScale
+        if userScale and userScale ~= "AUTO" and tonumber(userScale) and tonumber(userScale) > 0 then
+            fitScale = tonumber(userScale)
+        else
+            local baseWidth = map:GetWidth() or 610
+            if baseWidth <= 0 then baseWidth = 610 end
+            local availableWidth = m.deckWidth - 24
+            fitScale = math.min(1.0, availableWidth / baseWidth)
+        end
         map:SetScale(fitScale)
     else
-        map:SetScale(1.0)
+        local userMainScale = Akimbo.db.mainMapScale
+        if userMainScale and tonumber(userMainScale) and tonumber(userMainScale) > 0 then
+            map:SetScale(tonumber(userMainScale))
+        else
+            map:SetScale(1.0)
+        end
     end
 end
 
