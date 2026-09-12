@@ -97,16 +97,26 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 1: DISPLAY TOPOLOGY & 1-CLICK AUTO-SETUP
     -- ========================================================================
-    local card1 = CreateWizardCard(f, "1. Display Topology & 1-Click Auto-Setup", -38, 120)
+    local card1 = CreateWizardCard(f, "1. Display Topology & 1-Click Auto-Setup", -38, 122)
+
+    local logoIcon = card1:CreateTexture(nil, "ARTWORK")
+    local textLeft = 12
+    if logoIcon and logoIcon.SetSize and logoIcon.SetPoint and logoIcon.SetTexture then
+        logoIcon:SetSize(40, 40)
+        logoIcon:SetPoint("TOPLEFT", 12, -22)
+        logoIcon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
+        card1.logoIcon = logoIcon
+        textLeft = 60
+    end
 
     local topoText = card1:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    topoText:SetPoint("TOPLEFT", 12, -26)
-    topoText:SetPoint("TOPRIGHT", -12, -26)
+    topoText:SetPoint("TOPLEFT", textLeft, -24)
+    topoText:SetPoint("TOPRIGHT", -12, -24)
     topoText:SetJustifyH("LEFT")
     f.topoText = topoText
 
     local recomText = card1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    recomText:SetPoint("TOPLEFT", 12, -42)
+    recomText:SetPoint("TOPLEFT", textLeft, -42)
     recomText:SetPoint("TOPRIGHT", -12, -42)
     recomText:SetJustifyH("LEFT")
     f.recomText = recomText

@@ -57,27 +57,42 @@ local THEME_DATA = {
         headerColor = { 0.05, 0.05, 0.05, 1.0 },
         headerTextColor = { 0.8, 0.8, 0.8, 1.0 },
     },
+    GNOMISH_TINKER = {
+        name = "Gnomish Tinker",
+        description = "Clockwork brass borders with glowing cyan engineering accents",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+        bgColor = { 0.05, 0.07, 0.10, 0.97 },      -- Deep Tinker Blueprint Slate
+        borderColor = { 0.85, 0.65, 0.18, 1.0 },    -- Antique Clockwork Brass
+        headerColor = { 0.08, 0.12, 0.18, 1.0 },     -- Goggle Housing Blue-Slate
+        headerTextColor = { 0.00, 0.82, 1.0, 1.0 }, -- Electric Cyan Lens Glow
+    },
 }
 
 -- Preset color options for trim/accents
 local COLOR_PALETTES = {
-    GOLD    = { name = "Blizzard Gold", r = 1.0,  g = 0.82, b = 0.0,  a = 1.0 },
-    SILVER  = { name = "Pewter Silver", r = 0.72, g = 0.75, b = 0.78, a = 1.0 },
-    BRONZE  = { name = "Warm Bronze",  r = 0.85, g = 0.58, b = 0.25, a = 1.0 },
-    EMERALD = { name = "Emerald Green",r = 0.22, g = 0.82, b = 0.35, a = 1.0 },
-    CRIMSON = { name = "Crimson Red",  r = 0.85, g = 0.22, b = 0.22, a = 1.0 },
+    GOLD         = { name = "Blizzard Gold",    r = 1.00, g = 0.82, b = 0.00, a = 1.0 },
+    TINKER_BRASS = { name = "Clockwork Brass",  r = 0.85, g = 0.65, b = 0.18, a = 1.0 },
+    CYAN_GLOW    = { name = "Goggle Cyan",      r = 0.00, g = 0.82, b = 1.00, a = 1.0 },
+    SILVER       = { name = "Pewter Silver",    r = 0.72, g = 0.75, b = 0.78, a = 1.0 },
+    BRONZE       = { name = "Warm Bronze",      r = 0.85, g = 0.58, b = 0.25, a = 1.0 },
+    EMERALD      = { name = "Emerald Green",    r = 0.22, g = 0.82, b = 0.35, a = 1.0 },
+    CRIMSON      = { name = "Crimson Red",      r = 0.85, g = 0.22, b = 0.22, a = 1.0 },
 }
 
 -- Preset color options for the workspace background
 local CANVAS_PALETTES = {
-    CHARCOAL   = { name = "Charcoal Slate", r = 0.07, g = 0.08, b = 0.09 },
-    WARM_NIGHT = { name = "Warm Night",     r = 0.08, g = 0.07, b = 0.06 },
-    PURE_BLACK = { name = "Pitch Black",    r = 0.00, g = 0.00, b = 0.00 },
-    DEEP_BLUE  = { name = "Midnight Navy",  r = 0.05, g = 0.06, b = 0.10 },
+    TINKER_SLATE = { name = "Tinker Workshop",  r = 0.05, g = 0.07, b = 0.10 },
+    CHARCOAL     = { name = "Charcoal Slate",   r = 0.07, g = 0.08, b = 0.09 },
+    WARM_NIGHT   = { name = "Warm Night",       r = 0.08, g = 0.07, b = 0.06 },
+    PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00 },
+    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.05, g = 0.06, b = 0.10 },
 }
 
 function Themes:GetThemeList()
-    return { "CLASSIC", "BLIZZARD_SLATE", "OBSIDIAN", "PITCH_BLACK" }
+    return { "CLASSIC", "BLIZZARD_SLATE", "GNOMISH_TINKER", "OBSIDIAN", "PITCH_BLACK" }
 end
 
 function Themes:GetColorPalettes()
@@ -142,8 +157,18 @@ function Themes:CreateBayHeader(parent, titleText)
         insets = { left = 2, right = 2, top = 2, bottom = 2 },
     })
 
+    local iconOffset = 12
+    local icon = header:CreateTexture(nil, "OVERLAY")
+    if icon and icon.SetTexture and icon.SetSize and icon.SetPoint then
+        icon:SetSize(20, 20)
+        icon:SetPoint("LEFT", header, "LEFT", 8, 0)
+        icon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
+        header.icon = icon
+        iconOffset = 34
+    end
+
     local title = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("LEFT", header, "LEFT", 12, 0)
+    title:SetPoint("LEFT", header, "LEFT", iconOffset, 0)
     title:SetText(titleText or "")
     header.title = title
 

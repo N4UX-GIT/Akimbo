@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akimbo | Dual-Monitor Workstation for World of Warcraft</title>
-    <meta name="description" content="Transform dual monitors into a dedicated 3D gaming viewport and tactical secondary command deck in World of Warcraft.">
+    <meta name="description" content="Transform dual monitors into a dedicated 3D gaming viewport and tactical secondary command deck in World of Warcraft. Powered by Gnomish dual-optics engineering.">
+    <link rel="icon" type="image/png" href="assets/akimbo-logo.png">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Akimbo | Dual-Monitor WoW Battlestation">
+    <meta property="og:description" content="One lens for your workspace. One lens for your world. Lock 3D gameplay to your gaming display while turning your secondary screen into a tactical command deck.">
+    <meta property="og:image" content="assets/akimbo-logo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="assets/akimbo-logo.png">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,8 +23,12 @@
     <header class="navbar">
         <div class="nav-container">
             <div class="logo">
-                <span class="logo-accent">AKIMBO</span>
-                <span class="badge">Classic & Retail</span>
+                <img src="assets/akimbo-logo.png" alt="Akimbo Master Tinker Logo" class="nav-logo-img">
+                <div class="logo-text-group">
+                    <span class="logo-accent">AKIMBO</span>
+                    <span class="logo-sub">DUAL WORKSTATION</span>
+                </div>
+                <span class="badge badge-tinker">⚙️ Gnomish Engineering</span>
             </div>
             <nav class="nav-links">
                 <a href="#features">Features</a>
@@ -35,40 +46,70 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-container">
-            <div class="hero-badge">Dual-Monitor WoW Workstation</div>
-            <h1 class="hero-title">
-                Turn your dual monitors into a <span class="gradient-text">tactical battlestation</span>.
-            </h1>
-            <p class="hero-subtitle">
-                Lock your 3D world strictly to your main gaming display with distortion-free 16:9 FOV, while transforming your vertical or secondary monitor into an unsegmented, live GPS & command workspace.
-            </p>
-            <div class="hero-actions" id="download">
-                <a href="https://www.curseforge.com/wow/addons/akimbo" target="_blank" class="btn btn-primary btn-lg">
-                    <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                    Install on CurseForge
-                </a>
-                <a href="#companion" class="btn btn-secondary btn-lg">
-                    <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    Download Companion App
-                </a>
-            </div>
-            
-            <div class="hero-trust-bar">
-                <div class="trust-item">
-                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <span>100% Blizzard ToS Compliant</span>
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="gear-icon">⚙️</span>
+                        <span>Gnomish Dual-Optics Battlestation</span>
+                    </div>
+                    <h1 class="hero-title">
+                        One lens for your workspace.<br>
+                        <span class="gradient-text-tinker">One lens for your world.</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Lock your 3D world strictly to your main gaming display with distortion-free 16:9 FOV, while transforming your vertical or secondary monitor into an unsegmented, live GPS & tactical command deck.
+                    </p>
+                    <div class="hero-actions" id="download">
+                        <a href="https://www.curseforge.com/wow/addons/akimbo" target="_blank" class="btn btn-primary btn-lg">
+                            <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                            Install on CurseForge
+                        </a>
+                        <a href="#companion" class="btn btn-secondary btn-lg">
+                            <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            Download Companion App
+                        </a>
+                    </div>
+                    
+                    <div class="hero-trust-bar">
+                        <div class="trust-item">
+                            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>100% Blizzard ToS Compliant</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
+                            <span>Zero Memory Injection</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <span>Auditable Plain-Text Script</span>
+                        </div>
+                        <div class="trust-item">
+                            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                            <span>100% Offline (Zero Telemetry)</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="trust-item">
-                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
-                    <span>Zero Memory Injection / Hooking</span>
-                </div>
-                <div class="trust-item">
-                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <span>Auditable Plain-Text PowerShell</span>
-                </div>
-                <div class="trust-item">
-                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
-                    <span>100% Offline (Zero Telemetry)</span>
+
+                <!-- Master Tinker Goggle Showcase Card -->
+                <div class="hero-mascot">
+                    <div class="tinker-card">
+                        <div class="tinker-glow-ring"></div>
+                        <div class="tinker-avatar-frame">
+                            <img src="assets/akimbo-logo.png" alt="Akimbo Master Tinker Mascot" class="tinker-avatar">
+                            <div class="lens-tag tag-left">
+                                <span class="lens-tag-badge">LEFT LENS</span>
+                                <span class="lens-tag-text">Live GPS Map & Panels</span>
+                            </div>
+                            <div class="lens-tag tag-right">
+                                <span class="lens-tag-badge">RIGHT LENS</span>
+                                <span class="lens-tag-text">Uncompromised 3D World</span>
+                            </div>
+                        </div>
+                        <div class="tinker-card-caption">
+                            <span class="caption-gear">⚙️</span>
+                            <span>The Master Tinker's Goggles: Dual displays, unified without compromise.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -382,12 +423,16 @@
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-left">
-                <strong>Akimbo Workstation</strong> • Dual Monitor UI Addon for World of Warcraft
+                <img src="assets/akimbo-logo.png" alt="Akimbo Logo" class="footer-logo">
+                <div class="footer-text">
+                    <strong>Akimbo Dual Workstation</strong> • Engineered for World of Warcraft
+                    <span class="footer-sub">Two Lenses. Zero Compromises. Gnomish Dual-Optics Engine.</span>
+                </div>
             </div>
             <div class="footer-right">
                 <a href="https://www.curseforge.com/wow/addons/akimbo" target="_blank">CurseForge</a>
-                <a href="https://github.com/your-repo/Akimbo" target="_blank">GitHub</a>
-                <a href="#faq">Support</a>
+                <a href="https://github.com/bradnaus-git/Akimbo" target="_blank">GitHub</a>
+                <a href="#faq">FAQ</a>
             </div>
         </div>
     </footer>

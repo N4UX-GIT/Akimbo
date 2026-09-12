@@ -742,7 +742,7 @@ function Options:CreateFloatingPanel()
 
     local subClassic = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     subClassic:SetPoint("TOPLEFT", 34, -46)
-    subClassic:SetText("|cff888888Authentic WoW dialog & gold trim|r")
+    subClassic:SetText("|cff888888Authentic WoW gold & stone|r")
 
     local rSlate = CreateNativeRadioButton(card3_1, "Blizzard Slate",
         function() return (Akimbo.db and Akimbo.db.theme == "BLIZZARD_SLATE") end,
@@ -752,11 +752,26 @@ function Options:CreateFloatingPanel()
             Akimbo:UpdateTheme()
         end
     )
-    rSlate:SetPoint("TOPLEFT", 320, -26)
+    rSlate:SetPoint("TOPLEFT", 236, -26)
 
     local subSlate = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    subSlate:SetPoint("TOPLEFT", 342, -46)
-    subSlate:SetText("|cff888888Charcoal dialog & pewter trim|r")
+    subSlate:SetPoint("TOPLEFT", 258, -46)
+    subSlate:SetText("|cff888888Charcoal dialog & silver trim|r")
+
+    local rTinker = CreateNativeRadioButton(card3_1, "⚡ Gnomish Tinker",
+        function() return (Akimbo.db and Akimbo.db.theme == "GNOMISH_TINKER") end,
+        function()
+            Akimbo.db.theme = "GNOMISH_TINKER"
+            Akimbo.db.trimColor = "TINKER_BRASS"
+            Akimbo.db.canvasColor = "TINKER_SLATE"
+            Akimbo:UpdateTheme()
+        end
+    )
+    rTinker:SetPoint("TOPLEFT", 470, -26)
+
+    local subTinker = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    subTinker:SetPoint("TOPLEFT", 492, -46)
+    subTinker:SetText("|cff00ccffClockwork brass & cyan glow|r")
 
     local rObsidian = CreateNativeRadioButton(card3_1, "Obsidian Dark",
         function() return (Akimbo.db and Akimbo.db.theme == "OBSIDIAN") end,
@@ -779,26 +794,27 @@ function Options:CreateFloatingPanel()
             Akimbo:UpdateTheme()
         end
     )
-    rPitchBlack:SetPoint("TOPLEFT", 350, -68)
+    rPitchBlack:SetPoint("TOPLEFT", 236, -68)
 
     local subPitchBlack = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    subPitchBlack:SetPoint("TOPLEFT", 372, -88)
+    subPitchBlack:SetPoint("TOPLEFT", 258, -88)
     subPitchBlack:SetText("|cff888888True OLED pure black canvas|r")
 
 
     local card3_2 = CreateCard(tab3, "Dialog Header & Border Trim Palette", -132, 78)
 
     local trimButtons = {
-        { "GOLD", "Blizzard Gold", 1.0, 0.82, 0.0 },
-        { "SILVER", "Pewter Silver", 0.72, 0.75, 0.78 },
-        { "BRONZE", "Warm Bronze", 0.85, 0.58, 0.25 },
-        { "EMERALD", "Emerald Green", 0.22, 0.82, 0.35 },
-        { "CRIMSON", "Crimson Red", 0.85, 0.22, 0.22 },
+        { "GOLD", "Gold", 1.00, 0.82, 0.00 },
+        { "TINKER_BRASS", "Brass", 0.85, 0.65, 0.18 },
+        { "CYAN_GLOW", "Cyan Glow", 0.00, 0.82, 1.00 },
+        { "SILVER", "Silver", 0.72, 0.75, 0.78 },
+        { "BRONZE", "Bronze", 0.85, 0.58, 0.25 },
+        { "EMERALD", "Emerald", 0.22, 0.82, 0.35 },
     }
     local prevTrimBtn = nil
     for _, t in ipairs(trimButtons) do
         local btn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
-        btn:SetSize(126, 24)
+        btn:SetSize(104, 24)
         if not prevTrimBtn then
             btn:SetPoint("TOPLEFT", 12, -32)
         else
@@ -818,6 +834,7 @@ function Options:CreateFloatingPanel()
     local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -224, 154)
 
     local canvasButtons = {
+        { "TINKER_SLATE", "Tinker Slate", 0.05, 0.07, 0.10 },
         { "CHARCOAL", "Charcoal Slate", 0.07, 0.08, 0.09 },
         { "WARM_NIGHT", "Warm Night", 0.08, 0.07, 0.06 },
         { "PURE_BLACK", "Pitch Black", 0.00, 0.00, 0.00 },
@@ -826,7 +843,7 @@ function Options:CreateFloatingPanel()
     local prevCanvasBtn = nil
     for _, c in ipairs(canvasButtons) do
         local btn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
-        btn:SetSize(156, 24)
+        btn:SetSize(126, 24)
         if not prevCanvasBtn then
             btn:SetPoint("TOPLEFT", 12, -32)
         else
@@ -907,6 +924,7 @@ function Options:CreateFloatingPanel()
         local curTheme = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
         rClassic:SetChecked(curTheme == "CLASSIC")
         rSlate:SetChecked(curTheme == "BLIZZARD_SLATE")
+        rTinker:SetChecked(curTheme == "GNOMISH_TINKER")
         rObsidian:SetChecked(curTheme == "OBSIDIAN")
         rPitchBlack:SetChecked(curTheme == "PITCH_BLACK")
 
