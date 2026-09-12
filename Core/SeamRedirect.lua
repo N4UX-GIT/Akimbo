@@ -247,34 +247,82 @@ function HUD:HookFrames()
         end
     end
     -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
+    local isCenteringMenu = false
+    local function CenterMenuFrame(frame)
+        if isCenteringMenu or not frame or not frame:IsShown() or InCombatLockdown() or not Akimbo.db.enabled then return end
+        isCenteringMenu = true
+        local m = Akimbo.Viewport:GetMetrics()
+        Prepare(frame, m)
+        Anchor(frame, "CENTER", m, 0, 0, true)
+        isCenteringMenu = false
+    end
+
     for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
         local frame = _G[name]
-        if frame and not hooks[frame] then
-            hooks[frame] = true
-            frame:HookScript("OnShow", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled then return end
-                local m = Akimbo.Viewport:GetMetrics()
-                Prepare(self, m)
-                Anchor(self, "CENTER", m, 0, 0, true)
-            end)
+        if frame then
+            if SetUIPanelAttribute then
+                pcall(function() SetUIPanelAttribute(frame, "centerFrameSkipAnchoring", true) end)
+            end
+            if not hooks[frame] then
+                hooks[frame] = true
+                frame:HookScript("OnShow", function(self) CenterMenuFrame(self) end)
+                hooksecurefunc(frame, "SetPoint", function(self)
+                    if not isCenteringMenu and self:IsShown() then
+                        CenterMenuFrame(self)
+                    end
+                end)
+            end
         end
     end
+
+    if not self.uiPanelPositionsHooked and UpdateUIPanelPositions then
+        self.uiPanelPositionsHooked = true
+        hooksecurefunc("UpdateUIPanelPositions", function()
+            if InCombatLockdown() or not Akimbo.db.enabled then return end
+            for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+                local frame = _G[name]
+                if frame and frame:IsShown() then
+                    CenterMenuFrame(frame)
+                end
+            end
+        end)
+    end
+
     -- Keep bags on regular monitor unless user explicitly dragged them to workspace
+    local isPositioningBags = false
+    local function RepositionBags()
+        if isPositioningBags or InCombatLockdown() or not Akimbo.db.enabled then return end
+        local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrame1"]
+        if not pos and ContainerFrame1 and ContainerFrame1:IsShown() then
+            isPositioningBags = true
+            pcall(function() ContainerFrame1:SetUserPlaced(false) end)
+            local m = Akimbo.Viewport:GetMetrics()
+            Prepare(ContainerFrame1, m)
+            Anchor(ContainerFrame1, "BOTTOMRIGHT", m, -16, 32, true)
+            isPositioningBags = false
+        end
+    end
+
     for _, name in ipairs({"ContainerFrame1", "ContainerFrameCombinedBags"}) do
         local frame = _G[name]
         if frame and not hooks[frame] then
             hooks[frame] = true
             frame:HookScript("OnShow", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled then return end
-                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-                if not pos then
-                    pcall(function() self:SetUserPlaced(false) end)
-                    local m = Akimbo.Viewport:GetMetrics()
-                    Prepare(self, m)
-                    Anchor(self, "BOTTOMRIGHT", m, -16, 32, true)
+                RepositionBags()
+            end)
+            hooksecurefunc(frame, "SetPoint", function(self)
+                if not isPositioningBags and not (Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]) then
+                    RepositionBags()
                 end
             end)
         end
+    end
+
+    if not self.bagAnchorsHooked and updateContainerFrameAnchors then
+        self.bagAnchorsHooked = true
+        hooksecurefunc("updateContainerFrameAnchors", function()
+            RepositionBags()
+        end)
     end
     for i = 1, 4 do
         local frame = _G["StaticPopup" .. i]

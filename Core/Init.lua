@@ -98,6 +98,12 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
         end
 
     elseif event == "PLAYER_LOGIN" then
+        pcall(function()
+            if ContainerFrame1 then ContainerFrame1:SetUserPlaced(false) end
+            if ContainerFrameCombinedBags then ContainerFrameCombinedBags:SetUserPlaced(false) end
+            if PlayerFrame then PlayerFrame:SetUserPlaced(false) end
+            if TargetFrame then TargetFrame:SetUserPlaced(false) end
+        end)
         Akimbo:ApplyFullLayout()
         Akimbo:Print("v%s loaded! Type |cffffcc00/akimbo|r to configure.", Akimbo.version)
         if not Akimbo.db.firstRunComplete then
