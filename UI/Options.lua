@@ -336,7 +336,7 @@ function Options:CreateFloatingPanel()
     local autoWizardBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     autoWizardBtn:SetSize(155, 20)
     autoWizardBtn:SetPoint("TOPRIGHT", -18, -35)
-    autoWizardBtn:SetText("⚡ Auto-Setup Wizard")
+    autoWizardBtn:SetText("Auto-Setup Wizard")
     autoWizardBtn:SetScript("OnClick", function()
         if Akimbo.Wizard and Akimbo.Wizard.Open then
             Akimbo.Wizard:Open()
@@ -398,8 +398,8 @@ function Options:CreateFloatingPanel()
             edgeSize = 12,
             insets = { left = 3, right = 3, top = 3, bottom = 3 },
         })
-        card:SetBackdropColor(0.04, 0.04, 0.05, 0.70)
-        card:SetBackdropBorderColor(0.35, 0.35, 0.40, 0.75)
+        card:SetBackdropColor(1.0, 1.0, 1.0, 0.85)
+        card:SetBackdropBorderColor(0.55, 0.50, 0.35, 0.85)
 
         local title = card:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         title:SetPoint("TOPLEFT", card, "TOPLEFT", 12, -8)
@@ -412,13 +412,24 @@ function Options:CreateFloatingPanel()
 
     function Options:UpdateCardThemes()
         local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
         local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
         local c = pals and pals[trimKey]
-        local br = c and { c.r * 0.75, c.g * 0.75, c.b * 0.75, 0.85 } or { 0.5, 0.4, 0.1, 0.85 }
+        local br = c and { c.r * 0.75, c.g * 0.75, c.b * 0.75, 0.85 } or { 0.55, 0.50, 0.35, 0.85 }
         local textR, textG, textB = (c and c.r) or 1.0, (c and c.g) or 0.82, (c and c.b) or 0.0
 
         for _, card in ipairs(registeredCards) do
-            card:SetBackdropBorderColor(br[1], br[2], br[3], br[4])
+            if themeKey == "CLASSIC" then
+                card:SetBackdropColor(1.0, 1.0, 1.0, 0.85)
+                if trimKey == "GOLD" then
+                    card:SetBackdropBorderColor(0.55, 0.50, 0.35, 0.85)
+                else
+                    card:SetBackdropBorderColor(br[1], br[2], br[3], br[4])
+                end
+            else
+                card:SetBackdropColor(0.04, 0.04, 0.05, 0.70)
+                card:SetBackdropBorderColor(br[1], br[2], br[3], br[4])
+            end
             if card.title then
                 card.title:SetTextColor(textR, textG, textB, 1.0)
             end
@@ -496,7 +507,7 @@ function Options:CreateFloatingPanel()
     local autoDetectBtn = CreateFrame("Button", nil, card1_1, "UIPanelButtonTemplate")
     autoDetectBtn:SetSize(200, 22)
     autoDetectBtn:SetPoint("TOPLEFT", 360, -74)
-    autoDetectBtn:SetText("⚡ 1-Click Auto-Configure")
+    autoDetectBtn:SetText("1-Click Auto-Configure")
     autoDetectBtn:SetScript("OnClick", function()
         Options:AutoConfigure()
     end)
@@ -758,7 +769,7 @@ function Options:CreateFloatingPanel()
     subSlate:SetPoint("TOPLEFT", 258, -46)
     subSlate:SetText("|cff888888Charcoal dialog & silver trim|r")
 
-    local rTinker = CreateNativeRadioButton(card3_1, "⚡ Gnomish Tinker",
+    local rTinker = CreateNativeRadioButton(card3_1, "Gnomish Tinker",
         function() return (Akimbo.db and Akimbo.db.theme == "GNOMISH_TINKER") end,
         function()
             Akimbo.db.theme = "GNOMISH_TINKER"

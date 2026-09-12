@@ -203,7 +203,7 @@ assert(wizardFrame.recomText:GetText():find("36.0%%"), "Wizard recomText must sh
 addon.db.deckWidthRatio = 0.55
 wizardFrame.autoBtn.scripts["OnClick"]()
 assert(math.abs(addon.db.deckWidthRatio - 0.36) < 0.001, "AutoConfigure button in Wizard must set 36% seam")
-assert(wizardFrame.statusText:GetText():find("✓ Applied!"), "Wizard status text must confirm applied setup")
+assert(wizardFrame.statusText:GetText():find("%[Applied%]"), "Wizard status text must confirm applied setup")
 
 -- Test Laser Toggle in Wizard
 assert(addon.Options.IsSeamGuideShown ~= nil, "Options:IsSeamGuideShown must exist")
@@ -244,7 +244,7 @@ assert(optPanel.autoWizardBtn ~= nil, "Options dashboard must have autoWizardBtn
 local wizardOpenedFromOpt = false
 addon.Wizard.Open = function() wizardOpenedFromOpt = true end
 optPanel.autoWizardBtn.scripts["OnClick"]()
-assert(wizardOpenedFromOpt == true, "Clicking ⚡ Auto-Setup Wizard button must open Wizard")
+assert(wizardOpenedFromOpt == true, "Clicking Auto-Setup Wizard button must open Wizard")
 addon.Wizard.Open = originalWizardOpen
 
 -- Card 1_1 1-Click button
@@ -253,13 +253,13 @@ local card1_1 = optPanel.tab1
 -- card1_1 has autoDetectBtn
 local foundAutoDetectBtn = false
 for _, f in ipairs(frames) do
-    if f.text == "⚡ 1-Click Auto-Configure" then
+    if f.text == "1-Click Auto-Configure" then
         foundAutoDetectBtn = true
         addon.db.deckWidthRatio = 0.50
         f.scripts["OnClick"]()
         assert(math.abs(addon.db.deckWidthRatio - 0.36) < 0.001, "Card 1_1 1-Click button must auto-configure")
     end
 end
-assert(foundAutoDetectBtn, "Card 1_1 must contain ⚡ 1-Click Auto-Configure button")
+assert(foundAutoDetectBtn, "Card 1_1 must contain 1-Click Auto-Configure button")
 
 print("PASS: 1-click auto-configuration, topology heuristics, wizard frame, and UI buttons verified!")

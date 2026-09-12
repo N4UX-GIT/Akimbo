@@ -14,12 +14,12 @@ local THEME_DATA = {
         description = "Authentic WoW dialog style with gold trim and stone backdrop",
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
-        bgColor = { 0.08, 0.08, 0.08, 0.96 },
-        borderColor = { 1.0, 0.82, 0.0, 1.0 },       -- Blizzard Gold
-        headerColor = { 0.18, 0.14, 0.09, 1.0 },      -- Warm Dark Bronze
-        headerTextColor = { 1.0, 0.82, 0.0, 1.0 },  -- Classic Gold
+        edgeSize = 32,
+        insets = { left = 11, right = 12, top = 12, bottom = 11 },
+        bgColor = { 1.0, 1.0, 1.0, 1.0 },
+        borderColor = { 1.0, 1.0, 1.0, 1.0 },
+        headerColor = { 1.0, 1.0, 1.0, 1.0 },
+        headerTextColor = { 1.0, 0.82, 0.0, 1.0 },
     },
     BLIZZARD_SLATE = {
         name = "Blizzard Slate",
@@ -109,7 +109,9 @@ end
 
 function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
     if not frame then return end
-    local theme = self:GetThemeInfo(themeKey or (Akimbo.db and Akimbo.db.theme))
+    local currentThemeKey = themeKey or (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local theme = self:GetThemeInfo(currentThemeKey)
+    local isClassic = (currentThemeKey == "CLASSIC")
     local alpha = customAlpha or (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
 
     if not frame.SetBackdrop then
@@ -119,25 +121,35 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
     frame:SetBackdrop({
         bgFile = theme.bgFile,
         edgeFile = theme.edgeFile,
-        tile = false,
-        tileSize = 16,
+        tile = isClassic,
+        tileSize = isClassic and 32 or 16,
         edgeSize = theme.edgeSize,
         insets = theme.insets,
     })
 
-    -- Canvas color overrides
+    -- Background color
     local bg = theme.bgColor
     if frame == AkimboCanvasFrame and Akimbo.db and Akimbo.db.canvasColor and CANVAS_PALETTES[Akimbo.db.canvasColor] then
         local c = CANVAS_PALETTES[Akimbo.db.canvasColor]
         bg = { c.r, c.g, c.b }
     end
-    frame:SetBackdropColor(bg[1], bg[2], bg[3], alpha)
 
-    -- Window border color overrides
+    if isClassic and frame ~= AkimboCanvasFrame then
+        frame:SetBackdropColor(1.0, 1.0, 1.0, alpha)
+    else
+        frame:SetBackdropColor(bg[1], bg[2], bg[3], alpha)
+    end
+
+    -- Window border color
     local br = theme.borderColor
     if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
-        local c = COLOR_PALETTES[Akimbo.db.trimColor]
-        br = { c.r, c.g, c.b, c.a }
+        if isClassic and Akimbo.db.trimColor == "GOLD" then
+            -- Default Blizzard Gold on UI-DialogBox-Border is pre-rendered; keep untainted
+            br = { 1.0, 1.0, 1.0, 1.0 }
+        else
+            local c = COLOR_PALETTES[Akimbo.db.trimColor]
+            br = { c.r, c.g, c.b, c.a }
+        end
     end
     frame:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 end
@@ -145,11 +157,11 @@ end
 function Themes:CreateBayHeader(parent, titleText)
     local header = CreateFrame("Frame", nil, parent, "BackdropTemplate")
     header:SetHeight(30)
-    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -6)
-    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -6, -6)
+    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 11, -11)
+    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -12, -11)
 
     header:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
         tile = true,
         tileSize = 16,
@@ -178,15 +190,25 @@ end
 
 function Themes:UpdateHeader(header, titleText)
     if not header then return end
-    local theme = self:GetThemeInfo(Akimbo.db and Akimbo.db.theme)
+    local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local theme = self:GetThemeInfo(themeKey)
+    local isClassic = (themeKey == "CLASSIC")
 
     local headBg = theme.headerColor
-    header:SetBackdropColor(headBg[1], headBg[2], headBg[3], headBg[4] or 0.95)
+    if isClassic then
+        header:SetBackdropColor(1.0, 1.0, 1.0, 0.90)
+    else
+        header:SetBackdropColor(headBg[1], headBg[2], headBg[3], headBg[4] or 0.95)
+    end
 
     local br = theme.borderColor
     if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
-        local c = COLOR_PALETTES[Akimbo.db.trimColor]
-        br = { c.r, c.g, c.b, c.a or 1.0 }
+        if isClassic and Akimbo.db.trimColor == "GOLD" then
+            br = { 0.85, 0.70, 0.20, 1.0 }
+        else
+            local c = COLOR_PALETTES[Akimbo.db.trimColor]
+            br = { c.r, c.g, c.b, c.a or 1.0 }
+        end
     end
     header:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 

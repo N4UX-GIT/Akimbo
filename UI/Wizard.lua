@@ -41,8 +41,14 @@ local function CreateWizardCard(parent, titleText, yOffset, height)
         edgeSize = 12,
         insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
-    card:SetBackdropColor(0.04, 0.04, 0.05, 0.75)
-    card:SetBackdropBorderColor(0.40, 0.40, 0.45, 0.85)
+    local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    if themeKey == "CLASSIC" then
+        card:SetBackdropColor(1.0, 1.0, 1.0, 0.85)
+        card:SetBackdropBorderColor(0.55, 0.50, 0.35, 0.85)
+    else
+        card:SetBackdropColor(0.04, 0.04, 0.05, 0.75)
+        card:SetBackdropBorderColor(0.40, 0.40, 0.45, 0.85)
+    end
 
     local title = card:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     title:SetPoint("TOPLEFT", card, "TOPLEFT", 12, -8)
@@ -124,7 +130,7 @@ function Wizard:CreateFrame()
     local autoBtn = CreateFrame("Button", nil, card1, "UIPanelButtonTemplate")
     autoBtn:SetSize(584, 30)
     autoBtn:SetPoint("TOPLEFT", 12, -60)
-    autoBtn:SetText("|cff00ff00⚡ 1-Click Auto-Configure & Apply (Recommended)|r")
+    autoBtn:SetText("|cff00ff001-Click Auto-Configure & Apply (Recommended)|r")
     f.autoBtn = autoBtn
 
     local statusText = card1:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
@@ -138,7 +144,7 @@ function Wizard:CreateFrame()
         if Akimbo.Options and Akimbo.Options.AutoConfigure then
             local info = Akimbo.Options:AutoConfigure(false)
             f:UpdateState()
-            statusText:SetText(string.format("|cff00ff00✓ Applied!|r Setup automatically configured for %s", info.description))
+            statusText:SetText(string.format("|cff00ff00[Applied]|r Setup automatically configured for %s", info.description))
         end
     end)
 
