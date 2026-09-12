@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: akimbo-wow
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

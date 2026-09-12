@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akimbo | Dual-Monitor Workstation for World of Warcraft</title>
+    <meta name="description" content="Transform dual monitors into a dedicated 3D gaming viewport and tactical secondary command deck in World of Warcraft.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-accent">AKIMBO</span>
+                <span class="badge">Classic & Retail</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#safety">Safety & ToS</a>
+                <a href="#companion">Companion App</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#faq">FAQ</a>
+            </nav>
+            <div class="nav-cta">
+                <a href="#download" class="btn btn-primary btn-sm">Get Akimbo</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-badge">Dual-Monitor WoW Workstation</div>
+            <h1 class="hero-title">
+                Turn your dual monitors into a <span class="gradient-text">tactical battlestation</span>.
+            </h1>
+            <p class="hero-subtitle">
+                Lock your 3D world strictly to your main gaming display with distortion-free 16:9 FOV, while transforming your vertical or secondary monitor into an unsegmented, live GPS & command workspace.
+            </p>
+            <div class="hero-actions" id="download">
+                <a href="https://www.curseforge.com/wow/addons/akimbo" target="_blank" class="btn btn-primary btn-lg">
+                    <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    Install on CurseForge
+                </a>
+                <a href="#companion" class="btn btn-secondary btn-lg">
+                    <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Download Companion App
+                </a>
+            </div>
+            
+            <div class="hero-trust-bar">
+                <div class="trust-item">
+                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>100% Blizzard ToS Compliant</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M4.93 19.07l4.24-4.24"/></svg>
+                    <span>Zero Memory Injection / Hooking</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Auditable Plain-Text PowerShell</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                    <span>100% Offline (Zero Telemetry)</span>
+                </div>
+            </div>
+            
+            <!-- Dual Monitor Visual Preview Mockup -->
+            <div class="monitor-setup-preview">
+                <div class="monitor monitor-vertical">
+                    <div class="monitor-screen">
+                        <div class="screen-header">SECONDARY WORKSPACE</div>
+                        <div class="mock-map">
+                            <div class="map-label">LIVE GPS WORLD MAP</div>
+                            <div class="map-status">Active • Never Closes on Move</div>
+                        </div>
+                        <div class="mock-panels">
+                            <div class="mock-panel">Character & Gear</div>
+                            <div class="mock-panel">Quest Log</div>
+                            <div class="mock-panel">Inventory Vault</div>
+                        </div>
+                    </div>
+                    <div class="monitor-bezel">Portrait Display (1440x2560)</div>
+                </div>
+                
+                <div class="monitor monitor-landscape">
+                    <div class="monitor-screen">
+                        <div class="screen-header">PRIMARY 3D VIEWPORT</div>
+                        <div class="game-view-content">
+                            <div class="unit-frames">
+                                <div class="player-box">Player (100%)</div>
+                                <div class="target-box">Target (100%)</div>
+                            </div>
+                            <div class="minimap-box">Minimap</div>
+                            <div class="action-bars-box">
+                                <div class="xp-bar">Experience / Reputation Bar</div>
+                                <div class="action-buttons">Action Bars (1-12)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monitor-bezel">Curved Gaming Display (2560x1440 16:9)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-container">
+            <h2 class="section-title">Engineered for Dual-Screen Perfection</h2>
+            <p class="section-subtitle">No stretched 3D fisheye. No dialogs split across monitor bezels. Just clean, tactical control.</p>
+
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <h3 class="card-title">1:1 Aspect Ratio Lock</h3>
+                    <p class="card-desc">Calculates native 16:9 or 21:9 coordinates, locking your camera strictly to your primary gaming display without distortion or camera zoom bugs.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🗺️</div>
+                    <h3 class="card-title">Persistent Live GPS Deck</h3>
+                    <p class="card-desc">Unhooks Blizzard's movement cancellation so your World Map remains live on your secondary screen while running, traveling, or riding flights.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🪟</div>
+                    <h3 class="card-title">Multi-Window Freedom</h3>
+                    <p class="card-desc">Decouples panels from Blizzard's restrictive mutual-exclusion manager. Open your Character Sheet, Quest Log, Spellbook, and Bags simultaneously.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3 class="card-title">Bezel & Seam Redirection</h3>
+                    <p class="card-desc">Intercepts error messages, raid warnings, dialogs, and popups, redirecting them directly to the center of your 3D gaming screen instead of the monitor split.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🪄</div>
+                    <h3 class="card-title">In-Game Setup Wizard</h3>
+                    <p class="card-desc">Type <code>/akimbo wizard</code> to auto-detect your resolution, pick your orientation, and calibrate the bezel seam with a live visual alignment guide.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🛡️</div>
+                    <h3 class="card-title">100% Blizzard ToS Compliant</h3>
+                    <p class="card-desc">Built purely with standard World of Warcraft Lua APIs and clean Windows borderless window management. Zero memory reading, zero automation, zero bans.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety & Anti-Cheat Compliance Section -->
+    <section class="safety-section" id="safety">
+        <div class="section-container">
+            <div class="section-header-center">
+                <span class="tag">Security & Anti-Cheat Compliance</span>
+                <h2 class="section-title">Engineered for 100% Account Safety</h2>
+                <p class="section-subtitle">
+                    We understand player skepticism regarding third-party tools and Warden anti-cheat bans. Here is the exact technical proof why Akimbo is completely safe, transparent, and fully compliant with Blizzard's Terms of Service.
+                </p>
+            </div>
+
+            <!-- The 4 Pillars of Safety -->
+            <div class="grid grid-4 safety-pillars">
+                <div class="safety-card">
+                    <div class="safety-card-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                    </div>
+                    <h4>Zero Process Injection</h4>
+                    <p>Akimbo never calls <code>WriteProcessMemory</code>, injects DLLs, or hooks WoW's executable. Blizzard's Warden scans for foreign code injected into WoW's memory; Akimbo leaves game memory 100% untouched.</p>
+                </div>
+
+                <div class="safety-card">
+                    <div class="safety-card-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    </div>
+                    <h4>Zero Memory Reading</h4>
+                    <p>Akimbo has no access to your player coordinates, inventory, gold, health, or combat logs. The companion runs in standard user space with zero <code>ReadProcessMemory</code> calls.</p>
+                </div>
+
+                <div class="safety-card">
+                    <div class="safety-card-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"/></svg>
+                    </div>
+                    <h4>Zero Input Automation</h4>
+                    <p>Akimbo contains zero input simulation (no <code>SendInput</code> or synthetic key events). It is purely a display layout tool. One physical click or keypress always equals exactly one game action.</p>
+                </div>
+
+                <div class="safety-card">
+                    <div class="safety-card-icon green">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h4>Plain-Text Auditable Code</h4>
+                    <p>No compiled mystery <code>.exe</code> binaries or packed code. The companion is open-source PowerShell (<code>Akimbo-Companion.ps1</code>) that you can open and inspect line-by-line in Notepad before running.</p>
+                </div>
+            </div>
+
+            <!-- Side-by-Side Comparison: Cheats vs Akimbo -->
+            <div class="comparison-container">
+                <h3 class="comparison-title">How Akimbo Compares to Bannable Third-Party Software</h3>
+                <div class="comparison-grid">
+                    <div class="comparison-card danger-card">
+                        <div class="comparison-header">
+                            <span class="status-indicator red"></span>
+                            <h4>Bannable Cheats & Bots (What Warden Bans)</h4>
+                        </div>
+                        <ul class="comparison-list">
+                            <li><span class="icon-bad">✕</span> Injects foreign DLLs/code directly into <code>WowClassic.exe</code> memory</li>
+                            <li><span class="icon-bad">✕</span> Scans process memory pointers to detect mobs, player health, or spell cooldowns</li>
+                            <li><span class="icon-bad">✕</span> Automates rotations, mouse movements, or keystrokes (Macro botting)</li>
+                            <li><span class="icon-bad">✕</span> Distributed as obfuscated, packed binaries hiding malicious network payloads</li>
+                            <li><span class="icon-bad">✕</span> Phones home to remote command servers or logs account telemetry</li>
+                        </ul>
+                    </div>
+
+                    <div class="comparison-card safe-card">
+                        <div class="comparison-header">
+                            <span class="status-indicator green"></span>
+                            <h4>Akimbo Companion (Pure OS Window Positioning)</h4>
+                        </div>
+                        <ul class="comparison-list">
+                            <li><span class="icon-good">✓</span> Uses standard Windows OS API (<code>user32.dll SetWindowPos</code>) to span borders</li>
+                            <li><span class="icon-good">✓</span> Zero process memory access — WoW operates in 100% untouched isolation</li>
+                            <li><span class="icon-good">✓</span> Zero automation — strictly handles screen coordinates and visual canvas placement</li>
+                            <li><span class="icon-good">✓</span> 100% Plain-text PowerShell script — fully transparent and auditable by anyone</li>
+                            <li><span class="icon-good">✓</span> 100% Offline — makes zero HTTP or socket calls; never phones home</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why an External Tool is Needed Callout -->
+            <div class="safety-callout">
+                <div class="callout-icon">💡</div>
+                <div class="callout-body">
+                    <h4>Why is an external companion tool needed at all?</h4>
+                    <p>
+                        Blizzard's in-game Lua engine runs inside a restricted security sandbox with <strong>zero access to the Windows operating system</strong>. An in-game addon cannot resize or reposition the actual OS window across physical monitors.
+                    </p>
+                    <p>
+                        Simultaneously, CurseForge & Overwolf enforce strict policies that forbid packaging executable scripts (<code>.bat</code>, <code>.ps1</code>, <code>.exe</code>) inside addon zip archives. Akimbo cleanly separates these concerns: the <strong>CurseForge Addon</strong> manages your in-game frames and 3D camera viewport, while the <strong>Open-Source Companion</strong> tells Windows to stretch the borderless window across both displays.
+                    </p>
+                    <div class="callout-alt">
+                        <strong>Prefer not to use our companion script?</strong> You don't have to! Akimbo is 100% compatible with veteran window management software like <strong>Borderless Gaming</strong> (used by over 5 million players on Steam) or <strong>DisplayFusion</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Companion App Section -->
+    <section class="companion-section" id="companion">
+        <div class="section-container">
+            <div class="companion-box">
+                <div class="companion-content">
+                    <span class="tag">Zero-Config Companion</span>
+                    <h2>Akimbo Desktop Companion</h2>
+                    <p>Because CurseForge strictly prohibits packaging executable scripts inside game addons, the Akimbo Companion is provided as a free, lightweight, open-source Windows utility.</p>
+                    
+                    <ul class="feature-checklist">
+                        <li><strong>Silent Background Watcher:</strong> Sits in your Windows System Tray and automatically spans WoW across your displays whenever the game launches.</li>
+                        <li><strong>Smart Addon Verification:</strong> Automatically checks if the Akimbo addon is installed and active in your WoW directory before spanning, preventing unexpected window behavior.</li>
+                        <li><strong>1-Click Manual Control:</strong> Start, pause, or manually snap your game window anytime from the dashboard or tray icon.</li>
+                        <li><strong>Zero Dependencies:</strong> Runs natively on Windows 10 & 11 without requiring Python, Node.js, or external runtimes.</li>
+                    </ul>
+
+                    <div class="companion-actions">
+                        <a href="https://github.com/your-repo/Akimbo/releases/latest" class="btn btn-primary">
+                            Download Companion App (.zip)
+                        </a>
+                        <span class="version-label">v1.1 • Windows 10/11 • 100% Free & Open Source</span>
+                    </div>
+                </div>
+                <div class="companion-preview">
+                    <div class="tray-card">
+                        <div class="tray-header">
+                            <span class="dot green"></span>
+                            <span>Akimbo Companion — System Tray</span>
+                        </div>
+                        <div class="tray-body">
+                            <div class="status-row">
+                                <span class="label">WoW Status:</span>
+                                <span class="val green">Running (Classic Era)</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="label">Akimbo Addon:</span>
+                                <span class="val green">Installed & Active</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="label">Auto-Span:</span>
+                                <span class="val cyan">Enabled (Background)</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="label">Displays:</span>
+                                <span class="val">4000 x 2560 (Mixed Portrait+16:9)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-container">
+            <h2 class="section-title">3 Simple Steps to Dual-Screen Glory</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <h3>Install In-Game Addon</h3>
+                    <p>Search for <strong>Akimbo</strong> on CurseForge, the CurseForge App, or WowUp and install it directly into your WoW client.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <h3>Launch Companion</h3>
+                    <p>Download and run <code>Akimbo-Companion.bat</code> once. It sits silently in your system tray and spans WoW whenever you start the game.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <h3>Type <code>/akimbo wizard</code></h3>
+                    <p>In-game, run the automated wizard to detect your screen layout, align your monitor bezel, and enjoy your dual-screen setup!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="section-container">
+            <div class="section-header-center">
+                <span class="tag">Common Questions</span>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Everything you need to know about setup, safety, and compatibility.</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4>Will Blizzard's Warden anti-cheat flag or ban me?</h4>
+                    <p>No. Blizzard's Warden monitors for unauthorized process tampering (such as <code>WriteProcessMemory</code> or DLL injection) and input automation bots. Akimbo uses standard Windows desktop manager APIs (<code>user32.dll SetWindowPos</code>) strictly to resize and position the window frame, exactly like OBS, Discord, and Borderless Gaming. It touches zero game RAM and automates zero inputs.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Why can't this be packaged 100% inside CurseForge?</h4>
+                    <p>CurseForge / Overwolf has a strict, positive security rule that bans executable scripts (<code>.bat</code>, <code>.ps1</code>, <code>.exe</code>) inside addon packages. Furthermore, Blizzard's Lua sandbox prevents in-game code from manipulating the Windows desktop. Therefore, the in-game addon (CurseForge) manages camera FOV & UI layout, while the companion script (GitHub) spans the desktop window.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Can I inspect the companion code before running it?</h4>
+                    <p>Yes, 100%! We intentionally built the companion as an uncompiled, plain-text PowerShell script (<code>Akimbo-Companion.ps1</code>). You can right-click it and open it in Windows Notepad, VS Code, or view it directly on GitHub. There are no obfuscated binaries, hidden compilers, or mystery code.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Does Akimbo connect to the internet or collect telemetry?</h4>
+                    <p>No. The Akimbo companion contains zero network sockets, zero HTTP requests, and zero analytics or phone-home beacons. It is 100% offline and functions entirely locally on your machine.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Can I use Borderless Gaming or DisplayFusion instead?</h4>
+                    <p>Absolutely! The in-game Akimbo addon only cares that the game window spans both monitors. If you already use Borderless Gaming (on Steam), DisplayFusion, or AMD Eyefinity / NVIDIA Surround, you do not need our companion at all. Simply span the window and run <code>/akimbo wizard</code> in-game.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Why does the companion check if the addon is installed?</h4>
+                    <p>To prevent awkward window states! If you ever disable or uninstall the Akimbo addon, the companion detects that the addon TOC file is missing and safely refuses to span WoW. This guarantees your game window only spans when your UI and camera are ready for it.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>Does it work with different monitor sizes & refresh rates?</h4>
+                    <p>Yes. Akimbo was specifically designed for mixed setups, such as a vertical portrait monitor (e.g. 1440x2560) paired with a curved 16:9 or ultrawide 21:9 gaming monitor, as well as matching side-by-side displays. Monitors with different refresh rates (e.g., 144Hz + 60Hz) work smoothly in Windows borderless mode.</p>
+                </div>
+                <div class="faq-item">
+                    <h4>What happens if I pause or exit the companion?</h4>
+                    <p>The companion has a "Pause Monitoring" toggle and an "Exit" button in both the GUI and system tray. When closed, it leaves zero persistent services, drivers, or background tasks running.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-left">
+                <strong>Akimbo Workstation</strong> • Dual Monitor UI Addon for World of Warcraft
+            </div>
+            <div class="footer-right">
+                <a href="https://www.curseforge.com/wow/addons/akimbo" target="_blank">CurseForge</a>
+                <a href="https://github.com/your-repo/Akimbo" target="_blank">GitHub</a>
+                <a href="#faq">Support</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

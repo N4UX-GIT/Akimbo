@@ -1,0 +1,28 @@
+## Interface: 11509
+## Interface-Vanilla: 11509
+## Interface-Classic: 11509
+## Interface-Cata: 40402
+## Interface-Retail: 110100
+## Title: |cff00ccffAkimbo|r |cffffffff[Dual Monitor Workstation]|r
+## Notes: Transforms dual monitor setups into a dedicated primary 3D viewport and secondary command deck.
+## Author: Akimbo Team
+## Version: 1.0.1
+## SavedVariables: AkimboDB
+## SavedVariablesPerCharacter: AkimboCharDB
+
+# Core Subsystems
+Core\Init.lua
+Core\Config.lua
+Core\Viewport.lua
+Core\SeamRedirect.lua
+Core\Canvas.lua
+
+# UI & Themes
+UI\Themes.lua
+UI\Options.lua
+UI\Wizard.lua
+
+# Docking Modules
+Modules\MapDock.lua
+Modules\BagDock.lua
+Modules\CharacterDock.lua
