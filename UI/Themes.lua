@@ -84,11 +84,12 @@ local COLOR_PALETTES = {
 
 -- Preset color options for the workspace background
 local CANVAS_PALETTES = {
-    TINKER_SLATE = { name = "Tinker Workshop",  r = 0.05, g = 0.07, b = 0.10 },
-    CHARCOAL     = { name = "Charcoal Slate",   r = 0.07, g = 0.08, b = 0.09 },
-    WARM_NIGHT   = { name = "Warm Night",       r = 0.08, g = 0.07, b = 0.06 },
-    PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00 },
-    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.05, g = 0.06, b = 0.10 },
+    CLASSIC_STONE= { name = "Classic Stone",    r = 0.65, g = 0.65, b = 0.68, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
+    TINKER_SLATE = { name = "Tinker Slate",     r = 0.12, g = 0.22, b = 0.35, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CHARCOAL     = { name = "Charcoal Slate",   r = 0.22, g = 0.24, b = 0.28, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    WARM_NIGHT   = { name = "Warm Night",       r = 0.26, g = 0.20, b = 0.16, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.10, g = 0.14, b = 0.30, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00, bg = "Interface\\Buttons\\WHITE8X8" },
 }
 
 function Themes:GetThemeList()
@@ -107,8 +108,47 @@ function Themes:GetThemeInfo(themeKey)
     return THEME_DATA[themeKey] or THEME_DATA.CLASSIC
 end
 
+function Themes:ApplyCanvasTheme(canvasFrame)
+    if not canvasFrame then
+        canvasFrame = _G["AkimboCanvasFrame"] or Akimbo.canvas
+    end
+    if not canvasFrame then return end
+
+    local colorKey = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
+    local c = CANVAS_PALETTES[colorKey] or CANVAS_PALETTES.CHARCOAL
+    local alpha = (Akimbo.db and Akimbo.db.canvasAlpha)
+    if alpha == nil then alpha = 0.95 end
+
+    if not canvasFrame.SetBackdrop then
+        Mixin(canvasFrame, BackdropTemplateMixin)
+    end
+
+    local bgFile = c.bg or "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
+    local isPureBlack = (colorKey == "PURE_BLACK")
+
+    canvasFrame:SetBackdrop({
+        bgFile = bgFile,
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = not isPureBlack,
+        tileSize = 64,
+        edgeSize = 1,
+        insets = { left = 0, right = 0, top = 0, bottom = 0 },
+    })
+
+    canvasFrame:SetBackdropColor(c.r, c.g, c.b, alpha)
+
+    local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+    local p = COLOR_PALETTES[trimKey] or COLOR_PALETTES.GOLD
+    canvasFrame:SetBackdropBorderColor(p.r * 0.4, p.g * 0.4, p.b * 0.4, math.min(alpha, 0.7))
+end
+
 function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
     if not frame then return end
+    if frame == _G["AkimboCanvasFrame"] or frame == Akimbo.canvas then
+        self:ApplyCanvasTheme(frame)
+        return
+    end
+
     local currentThemeKey = themeKey or (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(currentThemeKey)
     local isClassic = (currentThemeKey == "CLASSIC")
@@ -129,12 +169,7 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
 
     -- Background color
     local bg = theme.bgColor
-    if frame == AkimboCanvasFrame and Akimbo.db and Akimbo.db.canvasColor and CANVAS_PALETTES[Akimbo.db.canvasColor] then
-        local c = CANVAS_PALETTES[Akimbo.db.canvasColor]
-        bg = { c.r, c.g, c.b }
-    end
-
-    if isClassic and frame ~= AkimboCanvasFrame then
+    if isClassic then
         frame:SetBackdropColor(1.0, 1.0, 1.0, alpha)
     else
         frame:SetBackdropColor(bg[1], bg[2], bg[3], alpha)
@@ -154,11 +189,12 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
     frame:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 end
 
-function Themes:CreateBayHeader(parent, titleText)
+function Themes:CreateBayHeader(parent, titleText, customHeight)
     local header = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    header:SetHeight(30)
-    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 11, -11)
-    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -12, -11)
+    local h = customHeight or 36
+    header:SetHeight(h)
+    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 14, -14)
+    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -14, -14)
 
     header:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
@@ -166,17 +202,17 @@ function Themes:CreateBayHeader(parent, titleText)
         tile = true,
         tileSize = 16,
         edgeSize = 12,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
+        insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
 
-    local iconOffset = 12
     local icon = header:CreateTexture(nil, "OVERLAY")
+    local iconOffset = 12
     if icon and icon.SetTexture and icon.SetSize and icon.SetPoint then
-        icon:SetSize(20, 20)
-        icon:SetPoint("LEFT", header, "LEFT", 8, 0)
+        icon:SetSize(22, 22)
+        icon:SetPoint("LEFT", header, "LEFT", 10, 0)
         icon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
         header.icon = icon
-        iconOffset = 34
+        iconOffset = 38
     end
 
     local title = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -228,9 +264,7 @@ function Akimbo:UpdateTheme()
     local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
 
     -- Update background workspace canvas
-    if AkimboCanvasFrame then
-        Themes:ApplyBackdrop(AkimboCanvasFrame, themeKey, Akimbo.db and Akimbo.db.canvasAlpha)
-    end
+    Themes:ApplyCanvasTheme()
 
     -- Update config dialog if created
     local config = Akimbo.Options and Akimbo.Options.GetConfigFrame and Akimbo.Options:GetConfigFrame()

@@ -205,7 +205,7 @@ assert(bagPoint[1] == "BOTTOMRIGHT", "ContainerFrame1 must be re-docked to BOTTO
 -- 6. Test BayHeader creation, border, and close button docking
 local mockParent = makeMockFrame("MockConfig", 660, 560)
 local header = addon.Themes:CreateBayHeader(mockParent, "TEST HEADER")
-assert(header:GetHeight() == 30, "BayHeader height must be 30px")
+assert(header:GetHeight() == 36, "BayHeader height must be 36px")
 assert(header.template == "BackdropTemplate", "BayHeader must use BackdropTemplate")
 
 -- 7. Test 3rd-party Bag Addon detection and yielding (e.g. Bagnon / AdiBags)

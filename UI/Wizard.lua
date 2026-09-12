@@ -63,7 +63,7 @@ function Wizard:CreateFrame()
     if not CreateFrame then return nil end
 
     local f = CreateFrame("Frame", "AkimboSetupWizardFrame", UIParent, "BackdropTemplate")
-    f:SetSize(640, 520)
+    f:SetSize(640, 545)
     f:SetFrameStrata("DIALOG")
     f:EnableMouse(true)
     f:SetMovable(true)
@@ -86,7 +86,7 @@ function Wizard:CreateFrame()
     local closeBtn = CreateFrame("Button", nil, f.header or f, "UIPanelCloseButton")
     closeBtn:SetSize(28, 28)
     if f.header then
-        closeBtn:SetPoint("RIGHT", f.header, "RIGHT", -2, 0)
+        closeBtn:SetPoint("RIGHT", f.header, "RIGHT", -4, 0)
     else
         closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -4, -4)
     end
@@ -103,7 +103,7 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 1: DISPLAY TOPOLOGY & 1-CLICK AUTO-SETUP
     -- ========================================================================
-    local card1 = CreateWizardCard(f, "1. Display Topology & 1-Click Auto-Setup", -38, 122)
+    local card1 = CreateWizardCard(f, "1. Display Topology & 1-Click Auto-Setup", -58, 122)
 
     local logoIcon = card1:CreateTexture(nil, "ARTWORK")
     local textLeft = 12
@@ -151,7 +151,7 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 2: MONITOR ORIENTATION & 3D VIEWPORT
     -- ========================================================================
-    local card2 = CreateWizardCard(f, "2. Monitor Orientation & 3D Viewport", -166, 125)
+    local card2 = CreateWizardCard(f, "2. Monitor Orientation & 3D Viewport", -188, 125)
 
     local orientLabel = card2:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     orientLabel:SetPoint("TOPLEFT", 12, -26)
@@ -234,7 +234,7 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 3: BEZEL SEAM ALIGNMENT & LASER GUIDE
     -- ========================================================================
-    local card3 = CreateWizardCard(f, "3. Physical Monitor Seam Alignment & Calibration", -299, 160)
+    local card3 = CreateWizardCard(f, "3. Physical Monitor Seam Alignment & Calibration", -322, 160)
 
     local seamHelp = card3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     seamHelp:SetPoint("TOPLEFT", 12, -26)
@@ -257,13 +257,20 @@ function Wizard:CreateFrame()
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 },
     })
-    seamSlider:SetBackdropColor(0.08, 0.08, 0.09, 0.95)
-    seamSlider:SetBackdropBorderColor(0.55, 0.48, 0.32, 0.9)
+    seamSlider:SetBackdropColor(0.06, 0.06, 0.08, 0.95)
+    seamSlider:SetBackdropBorderColor(0.40, 0.38, 0.30, 0.9)
 
     local thumb = seamSlider:CreateTexture(nil, "OVERLAY")
-    thumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
-    thumb:SetSize(12, 16)
+    if thumb and thumb.SetTexture then
+        thumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+    elseif thumb and thumb.SetColorTexture then
+        thumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
+    end
+    if thumb and thumb.SetSize then
+        thumb:SetSize(18, 20)
+    end
     seamSlider:SetThumbTexture(thumb)
+    seamSlider.thumb = thumb
 
     local seamValText = seamSlider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     seamValText:SetPoint("BOTTOMRIGHT", seamSlider, "TOPRIGHT", 0, 4)
@@ -429,6 +436,15 @@ function Wizard:CreateFrame()
         btnHud56:SetEnabled(math.abs(hud - 0.56) > 0.03)
         btnHud65:SetEnabled(math.abs(hud - 0.65) > 0.03)
         btnHud70:SetEnabled(math.abs(hud - 0.70) > 0.03)
+
+        local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+        local c = pals and pals[trimKey]
+        if c and seamSlider.thumb and seamSlider.thumb.SetVertexColor then
+            seamSlider.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
+        elseif seamSlider.thumb and seamSlider.thumb.SetVertexColor then
+            seamSlider.thumb:SetVertexColor(1.0, 0.82, 0.0, 1.0)
+        end
 
         self:UpdateLaserButton()
     end

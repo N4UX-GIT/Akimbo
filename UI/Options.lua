@@ -199,6 +199,8 @@ local function CreateNativeRadioButton(parent, text, getVal, setVal)
     return radio
 end
 
+local registeredSliders = {}
+
 local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, setVal, formatStr)
     local slider = CreateFrame("Slider", nil, parent, "BackdropTemplate")
     slider:SetOrientation("HORIZONTAL")
@@ -215,13 +217,20 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         edgeSize = 1,
         insets = { left = 1, right = 1, top = 1, bottom = 1 },
     })
-    slider:SetBackdropColor(0.08, 0.08, 0.09, 0.95)
-    slider:SetBackdropBorderColor(0.55, 0.48, 0.32, 0.9)
+    slider:SetBackdropColor(0.06, 0.06, 0.08, 0.95)
+    slider:SetBackdropBorderColor(0.40, 0.38, 0.30, 0.9)
 
     local thumb = slider:CreateTexture(nil, "OVERLAY")
-    thumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
-    thumb:SetSize(12, 16)
+    if thumb and thumb.SetTexture then
+        thumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+    elseif thumb and thumb.SetColorTexture then
+        thumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
+    end
+    if thumb and thumb.SetSize then
+        thumb:SetSize(18, 20)
+    end
     slider:SetThumbTexture(thumb)
+    slider.thumb = thumb
 
     local valueText = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     valueText:SetPoint("BOTTOMRIGHT", slider, "TOPRIGHT", 0, 4)
@@ -236,6 +245,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     title:SetPoint("BOTTOMRIGHT", valueText, "BOTTOMLEFT", -6, 0)
     title:SetJustifyH("LEFT")
     title:SetText(text)
+    slider.title = title
 
     slider:SetScript("OnValueChanged", function(self, val)
         val = math.floor((val / step) + 0.5) * step
@@ -248,6 +258,18 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         valueText:SetText(FormatValue(getVal()))
     end
 
+    slider.UpdateTheme = function(self, trimKey)
+        local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+        local c = pals and pals[trimKey or (Akimbo.db and Akimbo.db.trimColor) or "GOLD"]
+        if c and self.thumb and self.thumb.SetVertexColor then
+            self.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
+        elseif self.thumb and self.thumb.SetVertexColor then
+            self.thumb:SetVertexColor(1.0, 0.82, 0.0, 1.0)
+        end
+    end
+    slider:UpdateTheme()
+
+    tinsert(registeredSliders, slider)
     return slider
 end
 
@@ -305,7 +327,7 @@ function Options:CreateFloatingPanel()
     if configFrame then return configFrame end
 
     configFrame = CreateFrame("Frame", "AkimboFloatingConfigFrame", UIParent, "BackdropTemplate")
-    configFrame:SetSize(720, 630)
+    configFrame:SetSize(720, 650)
     configFrame:SetFrameStrata("DIALOG")
     configFrame:EnableMouse(true)
     configFrame:SetMovable(true)
@@ -323,7 +345,7 @@ function Options:CreateFloatingPanel()
 
     local closeBtn = CreateFrame("Button", nil, configFrame.header, "UIPanelCloseButton")
     closeBtn:SetSize(28, 28)
-    closeBtn:SetPoint("RIGHT", configFrame.header, "RIGHT", -2, 0)
+    closeBtn:SetPoint("RIGHT", configFrame.header, "RIGHT", -4, 0)
     closeBtn:SetScript("OnClick", function()
         Options:Close()
     end)
@@ -334,8 +356,8 @@ function Options:CreateFloatingPanel()
 
     -- Auto-Setup Wizard Button
     local autoWizardBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
-    autoWizardBtn:SetSize(155, 20)
-    autoWizardBtn:SetPoint("TOPRIGHT", -18, -35)
+    autoWizardBtn:SetSize(155, 22)
+    autoWizardBtn:SetPoint("TOPRIGHT", -18, -56)
     autoWizardBtn:SetText("Auto-Setup Wizard")
     autoWizardBtn:SetScript("OnClick", function()
         if Akimbo.Wizard and Akimbo.Wizard.Open then
@@ -346,7 +368,7 @@ function Options:CreateFloatingPanel()
 
     -- Status & Topology Detection Banner
     local banner = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    banner:SetPoint("TOPLEFT", 18, -40)
+    banner:SetPoint("TOPLEFT", 18, -60)
     banner:SetPoint("TOPRIGHT", autoWizardBtn, "TOPLEFT", -8, 0)
     banner:SetJustifyH("LEFT")
     configFrame.banner = banner
@@ -354,7 +376,7 @@ function Options:CreateFloatingPanel()
     -- Three Distinct Tab Switchers
     local tab1Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
     tab1Btn:SetSize(220, 26)
-    tab1Btn:SetPoint("TOPLEFT", 18, -60)
+    tab1Btn:SetPoint("TOPLEFT", 18, -84)
     tab1Btn:SetText("Display & Viewport")
 
     local tab2Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
@@ -369,18 +391,18 @@ function Options:CreateFloatingPanel()
 
     -- Tab Content Containers (Anchored below tab headers)
     local tab1 = CreateFrame("Frame", nil, configFrame)
-    tab1:SetPoint("TOPLEFT", 16, -92)
-    tab1:SetPoint("BOTTOMRIGHT", -16, 50)
+    tab1:SetPoint("TOPLEFT", 16, -118)
+    tab1:SetPoint("BOTTOMRIGHT", -16, 52)
     configFrame.tab1 = tab1
 
     local tab2 = CreateFrame("Frame", nil, configFrame)
-    tab2:SetPoint("TOPLEFT", 16, -92)
-    tab2:SetPoint("BOTTOMRIGHT", -16, 50)
+    tab2:SetPoint("TOPLEFT", 16, -118)
+    tab2:SetPoint("BOTTOMRIGHT", -16, 52)
     configFrame.tab2 = tab2
 
     local tab3 = CreateFrame("Frame", nil, configFrame)
-    tab3:SetPoint("TOPLEFT", 16, -92)
-    tab3:SetPoint("BOTTOMRIGHT", -16, 50)
+    tab3:SetPoint("TOPLEFT", 16, -118)
+    tab3:SetPoint("BOTTOMRIGHT", -16, 52)
     configFrame.tab3 = tab3
 
     local registeredCards = {}
@@ -433,6 +455,19 @@ function Options:CreateFloatingPanel()
             if card.title then
                 card.title:SetTextColor(textR, textG, textB, 1.0)
             end
+        end
+
+        for _, slider in ipairs(registeredSliders) do
+            if slider.UpdateTheme then
+                slider:UpdateTheme(trimKey)
+            end
+        end
+
+        if Options.UpdateTrimHighlights then
+            Options:UpdateTrimHighlights()
+        end
+        if Options.UpdateCanvasHighlights then
+            Options:UpdateCanvasHighlights()
         end
     end
 
@@ -822,6 +857,7 @@ function Options:CreateFloatingPanel()
         { "BRONZE", "Bronze", 0.85, 0.58, 0.25 },
         { "EMERALD", "Emerald", 0.22, 0.82, 0.35 },
     }
+    local trimBtnFrames = {}
     local prevTrimBtn = nil
     for _, t in ipairs(trimButtons) do
         local btn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
@@ -831,59 +867,108 @@ function Options:CreateFloatingPanel()
         else
             btn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 8, 0)
         end
-        btn:SetText(string.format("|cff%02x%02x%02x%s|r", t[3]*255, t[4]*255, t[5]*255, t[2]))
         local trimKey = t[1]
+        btn.trimKey = trimKey
+        btn.trimData = t
         btn:SetScript("OnClick", function()
             Akimbo.db.trimColor = trimKey
             Akimbo:UpdateTheme()
             Options:RefreshPanel()
         end)
+        tinsert(trimBtnFrames, btn)
         prevTrimBtn = btn
     end
 
+    function Options:UpdateTrimHighlights()
+        local curTrim = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        for _, btn in ipairs(trimBtnFrames) do
+            local t = btn.trimData
+            if btn.trimKey == curTrim then
+                btn:SetText(string.format("|cff%02x%02x%02x[%s]|r", t[3]*255, t[4]*255, t[5]*255, t[2]))
+            else
+                btn:SetText(string.format("|cff%02x%02x%02x%s|r", t[3]*255*0.70, t[4]*255*0.70, t[5]*255*0.70, t[2]))
+            end
+        end
+    end
+    Options:UpdateTrimHighlights()
 
-    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -224, 154)
+
+    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -224, 160)
 
     local canvasButtons = {
-        { "TINKER_SLATE", "Tinker Slate", 0.05, 0.07, 0.10 },
-        { "CHARCOAL", "Charcoal Slate", 0.07, 0.08, 0.09 },
-        { "WARM_NIGHT", "Warm Night", 0.08, 0.07, 0.06 },
-        { "PURE_BLACK", "Pitch Black", 0.00, 0.00, 0.00 },
-        { "DEEP_BLUE", "Midnight Navy", 0.05, 0.06, 0.10 },
+        { "CLASSIC_STONE", "Classic Stone" },
+        { "TINKER_SLATE",  "Tinker Slate" },
+        { "CHARCOAL",      "Charcoal Slate" },
+        { "WARM_NIGHT",    "Warm Night" },
+        { "DEEP_BLUE",     "Midnight Navy" },
+        { "PURE_BLACK",    "Pitch Black" },
     }
+    local canvasBtnFrames = {}
     local prevCanvasBtn = nil
     for _, c in ipairs(canvasButtons) do
         local btn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
-        btn:SetSize(126, 24)
+        btn:SetSize(104, 24)
         if not prevCanvasBtn then
             btn:SetPoint("TOPLEFT", 12, -32)
         else
-            btn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 10, 0)
+            btn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 8, 0)
         end
-        btn:SetText(c[2])
         local canvasKey = c[1]
+        btn.canvasKey = canvasKey
+        btn.canvasTitle = c[2]
         btn:SetScript("OnClick", function()
             Akimbo.db.canvasColor = canvasKey
             Akimbo:UpdateTheme()
             Options:RefreshPanel()
         end)
+        tinsert(canvasBtnFrames, btn)
         prevCanvasBtn = btn
     end
 
-    local alphaSlider = CreateNativeSlider(card3_3, "Workspace Background Opacity", 0.20, 1.0, 0.05,
+    -- Live Workspace Canvas Swatch Preview
+    local swatchCard = CreateFrame("Frame", nil, card3_3, "BackdropTemplate")
+    swatchCard:SetSize(280, 40)
+    swatchCard:SetPoint("TOPLEFT", 380, -70)
+    local swatchText = swatchCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    swatchText:SetPoint("CENTER", swatchCard, "CENTER", 0, 0)
+    card3_3.swatchCard = swatchCard
+
+    function Options:UpdateCanvasHighlights()
+        local curColor = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
+        local curAlpha = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
+        for _, btn in ipairs(canvasBtnFrames) do
+            if btn.canvasKey == curColor then
+                btn:SetText(string.format("|cff00ff00[%s]|r", btn.canvasTitle))
+            else
+                btn:SetText(btn.canvasTitle)
+            end
+        end
+
+        if Akimbo.Themes and Akimbo.Themes.ApplyCanvasTheme then
+            Akimbo.Themes:ApplyCanvasTheme(swatchCard)
+            local pals = Akimbo.Themes:GetCanvasPalettes()
+            local pName = pals and pals[curColor] and pals[curColor].name or curColor
+            swatchText:SetText(string.format("|cffffd100Preview:|r %s (%d%%)", pName, math.floor(curAlpha * 100 + 0.5)))
+        end
+    end
+
+    local alphaSlider = CreateNativeSlider(card3_3, "Workspace Background Opacity", 0.10, 1.0, 0.05,
         function() return (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95 end,
         function(val)
             Akimbo.db.canvasAlpha = val
             Akimbo:UpdateTheme()
+            if Options.UpdateCanvasHighlights then
+                Options:UpdateCanvasHighlights()
+            end
         end,
         "%.0f%%"
     )
-    alphaSlider:SetPoint("TOPLEFT", 12, -80)
+    alphaSlider:SetPoint("TOPLEFT", 12, -76)
     alphaSlider:SetWidth(350)
 
     local themeNote = card3_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    themeNote:SetPoint("TOPLEFT", 12, -118)
-    themeNote:SetText("|cff888888Theme and background colors apply immediately to your secondary workspace.|r")
+    themeNote:SetPoint("TOPLEFT", 12, -122)
+    themeNote:SetText("|cff888888Colors & opacity apply live to your secondary screen canvas backdrop.|r")
 
     -- ========================================================================
     -- BOTTOM ACTION BAR (Shared across tabs)

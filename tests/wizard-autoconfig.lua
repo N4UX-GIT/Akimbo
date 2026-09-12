@@ -75,7 +75,7 @@ function CreateFrame(kind, name, parent, template)
     function f:SetBackdropBorderColor() end
     function f:SetThumbTexture() end
     function f:CreateTexture()
-        local t = { SetAllPoints = function() end, SetColorTexture = function() end, SetSize = function() end }
+        local t = { SetAllPoints = function() end, SetColorTexture = function() end, SetTexture = function() end, SetVertexColor = function() end, SetSize = function() end, SetPoint = function() end }
         return t
     end
     function f:CreateFontString(layer, sublayer, template)

@@ -47,7 +47,9 @@ function Canvas:UpdateLayout()
     end
 
     -- Apply clean, dark backdrop theme to the workspace
-    Akimbo.Themes:ApplyBackdrop(rootCanvas, Akimbo.db.theme or "OBSIDIAN", Akimbo.db.canvasAlpha or 0.95)
+    if Akimbo.Themes and Akimbo.Themes.ApplyCanvasTheme then
+        Akimbo.Themes:ApplyCanvasTheme(rootCanvas)
+    end
 
     -- Enable free dragging for standard Blizzard frames so the player can move them anywhere on the workspace
     self:EnableFreeDragging()

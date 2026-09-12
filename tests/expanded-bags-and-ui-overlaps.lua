@@ -135,7 +135,10 @@ local function makeMockFrame(name, w, h)
         return {
             SetAllPoints = function() end,
             SetColorTexture = function() end,
+            SetTexture = function() end,
+            SetVertexColor = function() end,
             SetSize = function() end,
+            SetPoint = function() end,
         }
     end
     return f
