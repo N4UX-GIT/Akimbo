@@ -41,31 +41,76 @@ function Options:DetectTopology()
         isSpanned = false,
         recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT",
         recommendedDeckRatio = 0.36,
+        recommendedPosition = "RIGHT",
+        recommendedAR = "16_9",
         description = "Single Display",
     }
 
-    if physW >= 3500 and physH >= 2000 and ar < 2.0 then
+    if physW >= 2800 and physH >= 1800 and ar < 2.0 and ar > 1.3 then
         info.isSpanned = true
         info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
         info.recommendedDeckRatio = 0.36
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "16_9"
         info.description = string.format("Mixed Portrait + Landscape (%dx%d)", physW, physH)
     elseif ar >= 3.0 then
         info.isSpanned = true
         info.recommendedPreset = "LANDSCAPE_DUAL"
         info.recommendedDeckRatio = 0.50
+        info.recommendedPosition = "LEFT"
+        info.recommendedAR = "16_9"
         info.description = string.format("Dual Landscape Side-by-Side (%dx%d)", physW, physH)
     elseif ar >= 2.0 then
         info.isSpanned = true
         info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
         info.recommendedDeckRatio = 0.36
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "21_9"
         info.description = string.format("Ultrawide Spanned (%dx%d)", physW, physH)
     else
         info.isSpanned = false
         info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
         info.recommendedDeckRatio = 0.36
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "16_9"
         info.description = string.format("Windowed (%dx%d)", physW, physH)
     end
 
+    return info
+end
+
+function Options:AutoConfigure(silent)
+    local info = Options:DetectTopology()
+    if not Akimbo.db then return info end
+
+    Akimbo.db.enabled = true
+    Akimbo.db.layoutPreset = info.recommendedPreset
+    Akimbo.db.deckWidthRatio = info.recommendedDeckRatio
+    Akimbo.db.primaryPosition = info.recommendedPosition or "RIGHT"
+    Akimbo.db.aspectRatioMode = info.recommendedAR or "16_9"
+    Akimbo.db.hudScale = 0.70
+    Akimbo.db.firstRunComplete = true
+
+    if Akimbo.ApplyFullLayout then
+        Akimbo:ApplyFullLayout()
+    end
+
+    if not silent then
+        Options:ShowSeamGuide(info.recommendedDeckRatio)
+        if C_Timer and C_Timer.After then
+            C_Timer.After(4.0, function()
+                Options:HideSeamGuide()
+            end)
+        end
+        if Akimbo.Print then
+            Akimbo:Print("|cff00ff00[Akimbo] 1-Click Auto-Configuration applied:|r %s", info.description)
+            Akimbo:Print("Preset: |cffffd100%s|r | Seam: |cffffd100%.1f%%|r | Viewport: |cffffd100%s|r",
+                info.recommendedPreset, info.recommendedDeckRatio * 100, info.recommendedAR or "16_9")
+        end
+        if configFrame and configFrame.IsShown and configFrame:IsShown() then
+            Options:RefreshPanel()
+        end
+    end
     return info
 end
 
@@ -111,6 +156,10 @@ function Options:HideSeamGuide()
     if seamGuideLine then
         seamGuideLine:Hide()
     end
+end
+
+function Options:IsSeamGuideShown()
+    return (seamGuideLine and seamGuideLine.IsShown and seamGuideLine:IsShown()) or false
 end
 
 -- ============================================================================
@@ -283,10 +332,22 @@ function Options:CreateFloatingPanel()
         Options:HideSeamGuide()
     end)
 
+    -- Auto-Setup Wizard Button
+    local autoWizardBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
+    autoWizardBtn:SetSize(155, 20)
+    autoWizardBtn:SetPoint("TOPRIGHT", -18, -35)
+    autoWizardBtn:SetText("⚡ Auto-Setup Wizard")
+    autoWizardBtn:SetScript("OnClick", function()
+        if Akimbo.Wizard and Akimbo.Wizard.Open then
+            Akimbo.Wizard:Open()
+        end
+    end)
+    configFrame.autoWizardBtn = autoWizardBtn
+
     -- Status & Topology Detection Banner
     local banner = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     banner:SetPoint("TOPLEFT", 18, -40)
-    banner:SetPoint("TOPRIGHT", -18, -40)
+    banner:SetPoint("TOPRIGHT", autoWizardBtn, "TOPLEFT", -8, 0)
     banner:SetJustifyH("LEFT")
     configFrame.banner = banner
 
@@ -431,6 +492,15 @@ function Options:CreateFloatingPanel()
         end
     )
     rDual:SetPoint("TOPLEFT", 12, -74)
+
+    local autoDetectBtn = CreateFrame("Button", nil, card1_1, "UIPanelButtonTemplate")
+    autoDetectBtn:SetSize(200, 22)
+    autoDetectBtn:SetPoint("TOPLEFT", 360, -74)
+    autoDetectBtn:SetText("⚡ 1-Click Auto-Configure")
+    autoDetectBtn:SetScript("OnClick", function()
+        Options:AutoConfigure()
+    end)
+    card1_1.autoDetectBtn = autoDetectBtn
 
 
     local card1_2 = CreateCard(tab1, "3D Game Viewport Geometry & Bezel Seam", -118, 120)
@@ -815,6 +885,7 @@ function Options:CreateFloatingPanel()
 
         local curSeam = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
         seamSlider:SetValue(curSeam)
+        if seamSlider.UpdateText then seamSlider:UpdateText() end
 
         enableCheck:SetChecked((Akimbo.db and Akimbo.db.enabled) or false)
         laserCheck:SetChecked((seamGuideLine and seamGuideLine:IsShown()) or false)

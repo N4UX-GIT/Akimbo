@@ -119,7 +119,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
         Akimbo:Print("v%s loaded! Type |cffffcc00/akimbo|r to configure.", Akimbo.version)
         if not Akimbo.db.firstRunComplete then
             C_Timer.After(1.5, function()
-                Akimbo:Print("First time using Akimbo? Type |cff00ff00/akimbo|r for setup and calibration.")
+                Akimbo:Print("First time using Akimbo? Type |cff00ff00/akimbo wizard|r for 1-click auto-setup & calibration.")
             end)
         end
 
@@ -288,7 +288,9 @@ SlashCmdList["AKIMBO"] = function(msg)
         Akimbo.db.debugMode = not Akimbo.db.debugMode
         Akimbo:Print("Debug mode %s.", Akimbo.db.debugMode and "|cff00ff00On|r" or "|cffff3333Off|r")
     elseif cmd == "wizard" or cmd == "setup" or cmd == "calibrate" then
-        if Akimbo.Options and Akimbo.Options.Open then
+        if Akimbo.Wizard and Akimbo.Wizard.Open then
+            Akimbo.Wizard:Open()
+        elseif Akimbo.Options and Akimbo.Options.Open then
             Akimbo.Options:Open(true)
         end
     elseif msg == "settings" or msg == "options" or msg == "config" then
@@ -305,7 +307,7 @@ SlashCmdList["AKIMBO"] = function(msg)
         if Akimbo.Options and Akimbo.Options.Open then
             Akimbo.Options:Open()
         else
-            Akimbo:Print("Status: %s. Type |cffffcc00/akimbo|r to configure.", 
+            Akimbo:Print("Status: %s. Type |cffffcc00/akimbo|r for options, or |cff00ff00/akimbo wizard|r for auto-setup.", 
                 Akimbo.db.enabled and "|cff00ff00Enabled|r" or "|cffff3333Disabled|r")
         end
     end
