@@ -266,36 +266,11 @@ function Options:CreateFloatingPanel()
     )
     seamCheck:SetPoint("TOPLEFT", modLabel, "BOTTOMLEFT", 0, -6)
 
-    local mapCheck = CreateNativeCheckbox(configFrame, "Independent, resizable World Map on Deck",
-        function() return Akimbo.db.dockMap end,
-        function(val) Akimbo.db.dockMap = val end
-    )
-    mapCheck:SetPoint("TOPLEFT", seamCheck, "BOTTOMLEFT", 0, -4)
-
-    local mapMoveCheck = CreateNativeCheckbox(configFrame, "Keep World Map open while running / walking",
-        function() return Akimbo.db.preventMapCloseOnMove end,
-        function(val) Akimbo.db.preventMapCloseOnMove = val end
-    )
-    mapMoveCheck:SetPoint("TOPLEFT", mapCheck, "BOTTOMLEFT", 20, -2)
-
-    local bagCheck = CreateNativeCheckbox(configFrame, "Open Inventory Bags on Command Deck",
-        function() return Akimbo.db.dockBags end,
-        function(val) Akimbo.db.dockBags = val end
-    )
-    bagCheck:SetPoint("TOPLEFT", mapMoveCheck, "BOTTOMLEFT", -20, -4)
-
-    local charCheck = CreateNativeCheckbox(configFrame, "Open Character Sheet on Command Deck",
-        function() return Akimbo.db.dockCharacter end,
-        function(val) Akimbo.db.dockCharacter = val end
-    )
-    charCheck:SetPoint("TOPLEFT", bagCheck, "BOTTOMLEFT", 0, -4)
-
-    -- Force Dual Screen Checkbox
     local forceCheck = CreateNativeCheckbox(configFrame, "Force Dual Mode (Preview on single display)",
         function() return Akimbo.db.forceDualOnSingle or false end,
         function(val) Akimbo.db.forceDualOnSingle = val end
     )
-    forceCheck:SetPoint("TOPLEFT", charCheck, "BOTTOMLEFT", 0, -4)
+    forceCheck:SetPoint("TOPLEFT", seamCheck, "BOTTOMLEFT", 0, -6)
 
     -- Action Buttons (Bottom)
     local setupBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")

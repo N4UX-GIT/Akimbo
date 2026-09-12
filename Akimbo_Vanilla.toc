@@ -18,7 +18,3 @@ UI\Themes.lua
 UI\Options.lua
 UI\Wizard.lua
 
-# Docking Modules
-Modules\MapDock.lua
-Modules\BagDock.lua
-Modules\CharacterDock.lua

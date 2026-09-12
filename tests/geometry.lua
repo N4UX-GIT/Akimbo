@@ -63,12 +63,6 @@ for _,scale in ipairs({0.56,0.8,1,1.2}) do
     local p=MainMenuBar.points.BOTTOM
     local factor=MainMenuBar:GetEffectiveScale()*ph/768
     near(p[3]*factor,2720); near(p[4]*factor,6)
-    near(MainMenuBar:GetEffectiveScale(),MicroMenu:GetEffectiveScale())
-    near(MainMenuBar:GetEffectiveScale(),BagsBar:GetEffectiveScale())
-    assert(MicroMenu.points.BOTTOMRIGHT[1]==CharacterBag3Slot)
-    assert(MicroMenu.points.BOTTOMRIGHT[2]=="BOTTOMLEFT")
-    assert(MicroMenu.points.BOTTOMRIGHT[3]<0)
-    assert(BagsBar.points.BOTTOMRIGHT[1]==MainMenuBar)
     near(MainMenuBar:GetEffectiveScale(),ActionButton1:GetEffectiveScale())
     -- Native child scales inherit UIParent without per-frame overrides.
     near(MainMenuBar:GetEffectiveScale(),uiScale)

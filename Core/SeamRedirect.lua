@@ -5,12 +5,18 @@ Akimbo.SeamRedirect = HUD
 local aligning, pending = false, false
 local hooks = {}
 local desiredFrames = {}
+local function HasCustomActionBarAddon()
+    if C_AddOns and C_AddOns.IsAddOnLoaded then
+        return C_AddOns.IsAddOnLoaded("Bartender4") or C_AddOns.IsAddOnLoaded("Dominos")
+    elseif IsAddOnLoaded then
+        return IsAddOnLoaded("Bartender4") or IsAddOnLoaded("Dominos")
+    end
+    return false
+end
+
 local actionNames = {"MainMenuBar", "MainActionBar", "StatusTrackingBarManager", "MainMenuExpBar",
     "MultiBarBottomLeft", "MultiBarBottomRight", "MultiBarLeft", "MultiBarRight",
-    "StanceBar", "ShapeshiftBarFrame", "StanceBarFrame", "PetActionBar", "PetActionBarFrame",
-    "MicroMenuContainer", "MicroMenu", "BagsBar", "MicroButtonAndBagsBar",
-    "MainMenuBarBackpackButton", "CharacterBag0Slot", "CharacterBag1Slot",
-    "CharacterBag2Slot", "CharacterBag3Slot"}
+    "StanceBar", "ShapeshiftBarFrame", "StanceBarFrame", "PetActionBar", "PetActionBarFrame"}
 local function Remember(frame)
     desiredFrames[frame] = desiredFrames[frame] or {}
     return desiredFrames[frame]
@@ -42,6 +48,8 @@ local function ScreenPoint(frame, point, x, y)
 end
 
 local function Anchor(frame, point, m, x, y)
+    if not frame then return end
+    if frame.IsUserPlaced and frame:IsUserPlaced() then return end
     local px = point:find("LEFT") and m.gameLeft or point:find("RIGHT") and m.gameRight
         or (m.gameLeft + m.gameRight) / 2
     local py = point:find("TOP") and m.gameTop or point:find("BOTTOM") and m.gameBottom
@@ -81,9 +89,14 @@ function HUD:AlignChatFrame(m)
         end
     end
     Prepare(chat, m)
+    if chat.IsUserPlaced and chat:IsUserPlaced() then return end
     if chat ~= ChatFrame1 and not hooks[chat] then
         hooks[chat] = true
-        hooksecurefunc(chat, "SetPoint", function() HUD:RequestLayout() end)
+        hooksecurefunc(chat, "SetPoint", function()
+            if not (chat.IsUserPlaced and chat:IsUserPlaced()) then
+                HUD:RequestLayout()
+            end
+        end)
     end
     if Akimbo.db.chatPosition == "DECK" and Akimbo.canvas then
         local x = Akimbo.db.primaryPosition == "LEFT" and m.gameRight + m.bezel or 0
@@ -106,42 +119,44 @@ function HUD:AlignHUDFrames(m)
     aligning = true
     local ok, err = pcall(function()
         m = m or Akimbo.Viewport:GetMetrics()
-        local main = MainMenuBar or MainActionBar
-        Prepare(main, m)
-        if main then Anchor(main, "BOTTOM", m, 0, 0) end
-        if MainActionBar and MainActionBar ~= main then
-            Prepare(MainActionBar, m)
-            Points(MainActionBar, {"BOTTOMLEFT", main, "BOTTOMLEFT", 8, 4})
-        end
-
-        local xp = StatusTrackingBarManager or MainMenuExpBar
-        Prepare(xp, m)
-        if xp and main then
-            Points(xp, {"BOTTOM", main, "TOP", 0, -2})
-        end
-        -- Preserve Blizzard's visibility rules (XP at max level, pet, stance, etc.).
-        local bottomLeft, bottomRight = MultiBarBottomLeft, MultiBarBottomRight
-        Prepare(bottomLeft, m)
-        Prepare(bottomRight, m)
-        if bottomLeft and main then
-            Points(bottomLeft, {"BOTTOMLEFT", main, "TOPLEFT", 0, 8})
-        end
-        if bottomRight and main then
-            Points(bottomRight, {"BOTTOMLEFT", main, "TOPLEFT", 515, 8})
-        end
-        local barTop = bottomLeft and bottomLeft:IsShown() and bottomLeft or main
-        for _, name in ipairs({"StanceBar", "ShapeshiftBarFrame", "StanceBarFrame",
-            "PetActionBar", "PetActionBarFrame"}) do
-            local frame = _G[name]
-            Prepare(frame, m)
-            if frame and barTop then
-                Points(frame, {"BOTTOMLEFT", barTop, "TOPLEFT", 30, 5})
+        if not HasCustomActionBarAddon() then
+            local main = MainMenuBar or MainActionBar
+            Prepare(main, m)
+            if main then Anchor(main, "BOTTOM", m, 0, 0) end
+            if MainActionBar and MainActionBar ~= main then
+                Prepare(MainActionBar, m)
+                Points(MainActionBar, {"BOTTOMLEFT", main, "BOTTOMLEFT", 8, 4})
             end
+
+            local xp = StatusTrackingBarManager or MainMenuExpBar
+            Prepare(xp, m)
+            if xp and main then
+                Points(xp, {"BOTTOM", main, "TOP", 0, -2})
+            end
+            -- Preserve Blizzard's visibility rules (XP at max level, pet, stance, etc.).
+            local bottomLeft, bottomRight = MultiBarBottomLeft, MultiBarBottomRight
+            Prepare(bottomLeft, m)
+            Prepare(bottomRight, m)
+            if bottomLeft and main then
+                Points(bottomLeft, {"BOTTOMLEFT", main, "TOPLEFT", 0, 8})
+            end
+            if bottomRight and main then
+                Points(bottomRight, {"BOTTOMLEFT", main, "TOPLEFT", 515, 8})
+            end
+            local barTop = bottomLeft and bottomLeft:IsShown() and bottomLeft or main
+            for _, name in ipairs({"StanceBar", "ShapeshiftBarFrame", "StanceBarFrame",
+                "PetActionBar", "PetActionBarFrame"}) do
+                local frame = _G[name]
+                Prepare(frame, m)
+                if frame and barTop then
+                    Points(frame, {"BOTTOMLEFT", barTop, "TOPLEFT", 30, 5})
+                end
+            end
+            Prepare(MultiBarRight, m)
+            if MultiBarRight then Anchor(MultiBarRight, "RIGHT", m, -4, 0) end
+            Prepare(MultiBarLeft, m)
+            if MultiBarLeft then Anchor(MultiBarLeft, "RIGHT", m, -48, 0) end
         end
-        Prepare(MultiBarRight, m)
-        if MultiBarRight then Anchor(MultiBarRight, "RIGHT", m, -4, 0) end
-        Prepare(MultiBarLeft, m)
-        if MultiBarLeft then Anchor(MultiBarLeft, "RIGHT", m, -48, 0) end
 
         for _, item in ipairs({
             {"MinimapCluster", "TOPRIGHT", 0, 0},
@@ -156,36 +171,7 @@ function HUD:AlignHUDFrames(m)
             Prepare(frame, m)
             if frame then Anchor(frame, item[2], m, item[3], item[4]) end
         end
-        -- Classic uses a separate MicroMenuContainer. Give menu and bags distinct
-        -- slots in the right half of the artwork rather than sharing a screen anchor.
-        local leftmostBag
-        if main and BagsBar then
-            BagsBar:SetFrameLevel(main:GetFrameLevel()+5)
-            Points(BagsBar, {"BOTTOMRIGHT", main, "BOTTOMRIGHT", -8, 4})
-            local previous
-            for _,name in ipairs({"MainMenuBarBackpackButton", "CharacterBag0Slot",
-                "CharacterBag1Slot", "CharacterBag2Slot", "CharacterBag3Slot"}) do
-                local button=_G[name]
-                if button then
-                    button:SetFrameLevel(BagsBar:GetFrameLevel()+1)
-                    if previous then
-                        Points(button,{"BOTTOMRIGHT",previous,"BOTTOMLEFT",-4,0})
-                    else
-                        Points(button,{"BOTTOMRIGHT",main,"BOTTOMRIGHT",-8,4})
-                    end
-                    previous=button
-                end
-            end
-            leftmostBag=previous
-        end
-        if main and MicroMenu then
-            MicroMenu:SetFrameLevel(main:GetFrameLevel()+6)
-            if leftmostBag then
-                Points(MicroMenu, {"BOTTOMRIGHT", leftmostBag, "BOTTOMLEFT", -12, 0})
-            else
-                Points(MicroMenu, {"BOTTOMRIGHT", main, "BOTTOMRIGHT", -208, 4})
-            end
-        end
+
         self:AlignChatFrame(m)
         if Akimbo.db.seamRedirect then
             for _, item in ipairs({{"UIErrorsFrame", -60}, {"RaidWarningFrame", -100}}) do
@@ -205,6 +191,8 @@ end
 -- force visibility/action state. The guard prevents our setters from re-entering.
 function HUD:RepairFrame(frame)
     if aligning or not Akimbo.db or not Akimbo.db.enabled then return end
+    if frame.IsUserPlaced and frame:IsUserPlaced() then return end
+    if HasCustomActionBarAddon() then return end
     local desired = desiredFrames[frame]
     if not desired then return end
     if InCombatLockdown() then self:RequestLayout(); return end
@@ -221,21 +209,23 @@ function HUD:IsManagedFrame(frame)
 end
 
 function HUD:HookFrames()
-    if not self.managerHooked and UIParent_ManageFramePositions then
-        self.managerHooked = true
-        hooksecurefunc("UIParent_ManageFramePositions", function()
-            for _, name in ipairs(actionNames) do
-                local frame = _G[name]
-                if frame then HUD:RepairFrame(frame) end
+    if not HasCustomActionBarAddon() then
+        if not self.managerHooked and UIParent_ManageFramePositions then
+            self.managerHooked = true
+            hooksecurefunc("UIParent_ManageFramePositions", function()
+                for _, name in ipairs(actionNames) do
+                    local frame = _G[name]
+                    if frame then HUD:RepairFrame(frame) end
+                end
+                HUD:RequestLayout()
+            end)
+        end
+        for _, name in ipairs(actionNames) do
+            local frame = _G[name]
+            if frame and not hooks[frame] then
+                hooks[frame] = true
+                hooksecurefunc(frame, "SetPoint", function() HUD:RepairFrame(frame) end)
             end
-            HUD:RequestLayout()
-        end)
-    end
-    for _, name in ipairs(actionNames) do
-        local frame = _G[name]
-        if frame and not hooks[frame] then
-            hooks[frame] = true
-            hooksecurefunc(frame, "SetPoint", function() HUD:RepairFrame(frame) end)
         end
     end
     for _, name in ipairs({"PlayerFrame", "TargetFrame", "MinimapCluster", "ChatFrame1",
@@ -243,7 +233,11 @@ function HUD:HookFrames()
         local frame = _G[name]
         if frame and not hooks[frame] then
             hooks[frame] = true
-            hooksecurefunc(frame, "SetPoint", function() HUD:RequestLayout() end)
+            hooksecurefunc(frame, "SetPoint", function()
+                if not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                    HUD:RequestLayout()
+                end
+            end)
         end
     end
     for i = 1, 4 do

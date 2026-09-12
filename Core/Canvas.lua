@@ -17,10 +17,6 @@ function Canvas:CreateFrames()
     rootCanvas = CreateFrame("Frame", "AkimboCanvasFrame", UIParent, "BackdropTemplate")
     rootCanvas:SetFrameStrata("BACKGROUND")
     rootCanvas:SetFrameLevel(1)
-
-    -- Subtle, clean top banner for the workspace
-    rootCanvas.header = Akimbo.Themes:CreateBayHeader(rootCanvas, "AKIMBO SECONDARY WORKSPACE")
-
     Akimbo.canvas = rootCanvas
 end
 
@@ -80,10 +76,6 @@ local function MakePanelDraggable(frame, dragHandle)
         frame:StopMovingOrSizing()
         pcall(function() frame:SetUserPlaced(true) end)
         frame._akimboDragging = false
-        if Akimbo.Panels then
-            Akimbo.Panels:SavePosition(frame)
-            Akimbo.Panels:Place(frame)
-        end
     end)
 
     frame._akimboMovable = true
