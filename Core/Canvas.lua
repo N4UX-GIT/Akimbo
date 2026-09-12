@@ -377,6 +377,14 @@ OnPanelDragStop = function(frame)
             DemodalizePanel(frame)
         end
 
+        if string.match(name, "^ContainerFrame") then
+            if not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
+                if Akimbo.HUD and Akimbo.HUD.LayoutBags then
+                    Akimbo.HUD:LayoutBags()
+                end
+            end
+        end
+
         if Akimbo.db.persistentWorkspacePanels ~= false then
             UnregisterSpecialFrame(name)
         end
@@ -408,8 +416,10 @@ OnPanelDragStop = function(frame)
     end
 end
 
-RestoreWorkspacePosition = function(frame)
-    if not frame or not Akimbo.db or not Akimbo.db.enabled then return end
+RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
+    local frame = (selfOrFrame == Canvas and maybeFrame) or maybeFrame or selfOrFrame
+    if not frame or type(frame) ~= "table" or not frame.GetName then return end
+    if not Akimbo.db or not Akimbo.db.enabled then return end
     local name = frame:GetName()
     if not name then return end
 

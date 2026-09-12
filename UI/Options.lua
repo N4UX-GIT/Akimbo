@@ -6,6 +6,8 @@
 
 local _, Akimbo = ...
 
+local tinsert = table.insert
+
 local Options = {}
 Akimbo.Options = Options
 
@@ -496,7 +498,7 @@ function Options:CreateFloatingPanel()
     -- ========================================================================
     -- TAB 2: WORKSPACE & WORLD MAP
     -- ========================================================================
-    local card2_1 = CreateCard(tab2, "World Map Scaling & Navigation", 0, 114)
+    local card2_1 = CreateCard(tab2, "World Map Scaling & Navigation", 0, 146)
 
     local mapScaleSlider = CreateNativeSlider(card2_1, "Workspace Map Scale (% of Native Size)", 0.50, 2.50, 0.05,
         function()
@@ -518,7 +520,7 @@ function Options:CreateFloatingPanel()
         end,
         "%.0f%%"
     )
-    mapScaleSlider:SetPoint("TOPLEFT", 12, -28)
+    mapScaleSlider:SetPoint("TOPLEFT", 12, -44)
     mapScaleSlider:SetWidth(240)
 
     local autoFitBtn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
@@ -563,7 +565,7 @@ function Options:CreateFloatingPanel()
     p250Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.50) end)
 
     local mapTip = card2_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    mapTip:SetPoint("TOPLEFT", 12, -58)
+    mapTip:SetPoint("TOPLEFT", 12, -74)
     mapTip:SetText("|cffffd100Map Zoom Tip:|r Hold |cffffffffCtrl + Mousewheel|r over the World Map to scale it in real-time!")
 
     local mapMoveCheck = CreateNativeCheckbox(card2_1, "Keep World Map open while running / walking",
@@ -575,10 +577,10 @@ function Options:CreateFloatingPanel()
             end
         end
     )
-    mapMoveCheck:SetPoint("TOPLEFT", 10, -78)
+    mapMoveCheck:SetPoint("TOPLEFT", 10, -96)
 
     local mapDesc = card2_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    mapDesc:SetPoint("TOPLEFT", 320, -84)
+    mapDesc:SetPoint("TOPLEFT", 32, -122)
     local hasLMap = C_AddOns and C_AddOns.IsAddOnLoaded and C_AddOns.IsAddOnLoaded("Leatrix_Maps") or (IsAddOnLoaded and IsAddOnLoaded("Leatrix_Maps"))
     if hasLMap then
         mapDesc:SetText("|cff00ff00Leatrix Maps detected:|r Compatible with Leatrix.")
@@ -587,16 +589,16 @@ function Options:CreateFloatingPanel()
     end
 
 
-    local card2_2 = CreateCard(tab2, "Workspace Window Management & Persistence", -122, 176)
+    local card2_2 = CreateCard(tab2, "Workspace Window Management & Persistence", -154, 184)
 
     local panelCheck = CreateNativeCheckbox(card2_2, "Keep panels placed on workspace open independently",
         function() return Akimbo.db and Akimbo.db.independentWorkspacePanels end,
         function(val) Akimbo.db.independentWorkspacePanels = val end
     )
-    panelCheck:SetPoint("TOPLEFT", 10, -24)
+    panelCheck:SetPoint("TOPLEFT", 10, -26)
 
     local panelDesc = card2_2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    panelDesc:SetPoint("TOPLEFT", 32, -46)
+    panelDesc:SetPoint("TOPLEFT", 32, -48)
     panelDesc:SetText("|cff888888Allows opening bags, character pane, spellbook & map simultaneously.|r")
 
     local escapeCheck = CreateNativeCheckbox(card2_2, "Keep workspace panels open when pressing Escape",
@@ -608,10 +610,10 @@ function Options:CreateFloatingPanel()
             end
         end
     )
-    escapeCheck:SetPoint("TOPLEFT", 10, -66)
+    escapeCheck:SetPoint("TOPLEFT", 10, -68)
 
     local escapeDesc = card2_2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    escapeDesc:SetPoint("TOPLEFT", 32, -88)
+    escapeDesc:SetPoint("TOPLEFT", 32, -90)
     escapeDesc:SetText("|cff888888Escape clears targets or opens Game Menu without closing workspace elements.|r")
 
     local seamCheck = CreateNativeCheckbox(card2_2, "Reroute popups & dialogs away from center bezel",
@@ -624,39 +626,39 @@ function Options:CreateFloatingPanel()
         function() return (Akimbo.db and Akimbo.db.forceDualOnSingle) or false end,
         function(val) Akimbo.db.forceDualOnSingle = val end
     )
-    forceCheck:SetPoint("TOPLEFT", 10, -138)
+    forceCheck:SetPoint("TOPLEFT", 10, -136)
 
     local compatDesc = card2_2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    compatDesc:SetPoint("TOPLEFT", 12, -162)
+    compatDesc:SetPoint("TOPLEFT", 12, -160)
     card2_2.compatDesc = compatDesc
 
 
-    local card2_3 = CreateCard(tab2, "Bezel Compensation & Window Spanning", -312, 92)
+    local card2_3 = CreateCard(tab2, "Bezel Compensation & Window Spanning", -346, 98)
 
     local bezelSlider = CreateNativeSlider(card2_3, "Bezel Compensation Gap", 0, 100, 2,
         function() return (Akimbo.db and Akimbo.db.bezelGap) or 0 end,
         function(val) Akimbo.db.bezelGap = val end,
         "%d px"
     )
-    bezelSlider:SetPoint("TOPLEFT", 12, -28)
+    bezelSlider:SetPoint("TOPLEFT", 12, -44)
     bezelSlider:SetWidth(270)
 
     local guideLinkBtn = CreateFrame("Button", nil, card2_3, "UIPanelButtonTemplate")
     guideLinkBtn:SetSize(220, 24)
-    guideLinkBtn:SetPoint("TOPLEFT", 330, -36)
+    guideLinkBtn:SetPoint("TOPLEFT", 330, -38)
     guideLinkBtn:SetText("View Window Spanning Guide")
     guideLinkBtn:SetScript("OnClick", function() Options:ShowSetupGuide() end)
 
     local bezelNote = card2_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    bezelNote:SetPoint("TOPLEFT", 12, -66)
+    bezelNote:SetPoint("TOPLEFT", 12, -74)
     bezelNote:SetText("|cff888888Compensates for physical display monitor edges to align frames continuously.|r")
 
     -- ========================================================================
     -- TAB 3: THEMES & COLOR CUSTOMIZATION
     -- ========================================================================
-    local card3_1 = CreateCard(tab3, "Visual Theme Preset", 0, 94)
+    local card3_1 = CreateCard(tab3, "Visual Theme Preset", 0, 114)
 
-    local rClassic = CreateNativeRadioButton(card3_1, "Classic Warcraft (Authentic WoW Dialog & Gold Trim)",
+    local rClassic = CreateNativeRadioButton(card3_1, "Classic Warcraft",
         function() return (Akimbo.db and Akimbo.db.theme == "CLASSIC") end,
         function()
             Akimbo.db.theme = "CLASSIC"
@@ -666,7 +668,11 @@ function Options:CreateFloatingPanel()
     )
     rClassic:SetPoint("TOPLEFT", 12, -26)
 
-    local rSlate = CreateNativeRadioButton(card3_1, "Blizzard Slate (Dark Charcoal & Pewter Trim)",
+    local subClassic = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    subClassic:SetPoint("TOPLEFT", 34, -46)
+    subClassic:SetText("|cff888888Authentic WoW dialog & gold trim|r")
+
+    local rSlate = CreateNativeRadioButton(card3_1, "Blizzard Slate",
         function() return (Akimbo.db and Akimbo.db.theme == "BLIZZARD_SLATE") end,
         function()
             Akimbo.db.theme = "BLIZZARD_SLATE"
@@ -674,18 +680,26 @@ function Options:CreateFloatingPanel()
             Akimbo:UpdateTheme()
         end
     )
-    rSlate:SetPoint("TOPLEFT", 330, -26)
+    rSlate:SetPoint("TOPLEFT", 320, -26)
 
-    local rObsidian = CreateNativeRadioButton(card3_1, "Obsidian Dark (Minimalist Slate)",
+    local subSlate = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    subSlate:SetPoint("TOPLEFT", 342, -46)
+    subSlate:SetText("|cff888888Charcoal dialog & pewter trim|r")
+
+    local rObsidian = CreateNativeRadioButton(card3_1, "Obsidian Dark",
         function() return (Akimbo.db and Akimbo.db.theme == "OBSIDIAN") end,
         function()
             Akimbo.db.theme = "OBSIDIAN"
             Akimbo:UpdateTheme()
         end
     )
-    rObsidian:SetPoint("TOPLEFT", 12, -54)
+    rObsidian:SetPoint("TOPLEFT", 12, -68)
 
-    local rPitchBlack = CreateNativeRadioButton(card3_1, "Pitch Black (OLED Pure Black)",
+    local subObsidian = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    subObsidian:SetPoint("TOPLEFT", 34, -88)
+    subObsidian:SetText("|cff888888Dark neutral slate workspace|r")
+
+    local rPitchBlack = CreateNativeRadioButton(card3_1, "Pitch Black",
         function() return (Akimbo.db and Akimbo.db.theme == "PITCH_BLACK") end,
         function()
             Akimbo.db.theme = "PITCH_BLACK"
@@ -693,10 +707,14 @@ function Options:CreateFloatingPanel()
             Akimbo:UpdateTheme()
         end
     )
-    rPitchBlack:SetPoint("TOPLEFT", 330, -54)
+    rPitchBlack:SetPoint("TOPLEFT", 320, -68)
+
+    local subPitchBlack = card3_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    subPitchBlack:SetPoint("TOPLEFT", 342, -88)
+    subPitchBlack:SetText("|cff888888True OLED pure black canvas|r")
 
 
-    local card3_2 = CreateCard(tab3, "Dialog Header & Border Trim Palette", -102, 76)
+    local card3_2 = CreateCard(tab3, "Dialog Header & Border Trim Palette", -122, 72)
 
     local trimButtons = {
         { "GOLD", "Blizzard Gold", 1.0, 0.82, 0.0 },
@@ -725,7 +743,7 @@ function Options:CreateFloatingPanel()
     end
 
 
-    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -186, 178)
+    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -202, 142)
 
     local canvasButtons = {
         { "CHARCOAL", "Charcoal Slate", 0.07, 0.08, 0.09 },
@@ -760,11 +778,11 @@ function Options:CreateFloatingPanel()
         end,
         "%.0f%%"
     )
-    alphaSlider:SetPoint("TOPLEFT", 12, -74)
+    alphaSlider:SetPoint("TOPLEFT", 12, -78)
     alphaSlider:SetWidth(320)
 
     local themeNote = card3_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    themeNote:SetPoint("TOPLEFT", 12, -122)
+    themeNote:SetPoint("TOPLEFT", 12, -114)
     themeNote:SetText("|cff888888Theme and background colors apply immediately to your secondary workspace.|r")
 
     -- ========================================================================

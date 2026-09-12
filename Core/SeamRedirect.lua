@@ -216,7 +216,7 @@ function HUD:AlignHUDFrames(m)
                     local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
                     if isWorkspace then
                         if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                            Akimbo.Canvas:RestoreWorkspacePosition(frame)
+                            Akimbo.Canvas.RestoreWorkspacePosition(frame)
                         end
                     elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
                         Anchor(frame, item[2], m, item[3], item[4], false)
@@ -399,27 +399,117 @@ function HUD:HookFrames()
         if HasCustomBagAddon() or isArrangingBags or InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
         isArrangingBags = true
 
-        local m = Akimbo.Viewport:GetMetrics()
-        local right = m.gameRight - 16
-        local bottom = m.gameBottom + 32
-        local bagSpacing = 4
+        local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+        if not m then
+            isArrangingBags = false
+            return
+        end
 
-        local bagIndex = 0
-        for i = 1, (NUM_CONTAINER_FRAMES or 13) do
-            local frame = _G["ContainerFrame" .. i]
-            if frame and frame:IsShown() then
-                local name = frame:GetName()
-                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-                if not pos then
-                    frame:SetUserPlaced(false)
-                    frame:ClearAllPoints()
-                    local w = frame:GetWidth() or 192
-                    local factor = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
-                    local x = (right - (w + bagSpacing) * bagIndex) * factor
-                    local y = bottom * factor
-                    frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", x, y)
-                    if frame.SetAlpha then frame:SetAlpha(1) end
-                    bagIndex = bagIndex + 1
+        local isPortraitDeck = Akimbo.db.primaryPosition ~= "LEFT"
+        local deckMinX = isPortraitDeck and 12 or (m.gameRight + 12)
+        local deckMaxX = isPortraitDeck and (m.deckWidth - 12) or (m.screenWidth - 12)
+        local deckMinY = 12
+        local screenHeight = m.screenHeight or (UIParent.GetHeight and UIParent:GetHeight()) or 1080
+        local deckMaxY = math.max(deckMinY, screenHeight - 30)
+
+        -- Determine if bags are stationed on the workspace
+        local bpPos = Akimbo.db.savedWorkspacePositions and (
+            Akimbo.db.savedWorkspacePositions["ContainerFrame1"] or 
+            Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+        )
+        local bagsOnWorkspace = false
+        if bpPos and bpPos.x and bpPos.y then
+            bagsOnWorkspace = true
+        else
+            for i = 1, (NUM_CONTAINER_FRAMES or 13) do
+                local f = _G["ContainerFrame" .. i]
+                local fname = f and f:GetName()
+                if fname and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[fname] then
+                    bagsOnWorkspace = true
+                    bpPos = Akimbo.db.savedWorkspacePositions[fname]
+                    break
+                end
+            end
+        end
+
+        local bagSpacing = 4
+        local defaultBagWidth = 192
+        local defaultBagHeight = 250
+
+        if bagsOnWorkspace and bpPos then
+            -- Layout on workspace: dock unpositioned bags relative to the backpack on the workspace
+            local expandRight = (bpPos.x + (defaultBagWidth + bagSpacing) * 3 <= deckMaxX)
+            local currentY = bpPos.y
+            local rowBagCount = 0
+
+            for i = 1, (NUM_CONTAINER_FRAMES or 13) do
+                local frame = _G["ContainerFrame" .. i]
+                if frame and frame:IsShown() then
+                    local name = frame:GetName()
+                    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                    if pos and pos.x and pos.y then
+                        if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
+                            Akimbo.Canvas.RestoreWorkspacePosition(frame)
+                        end
+                    else
+                        local w = frame:GetWidth() or defaultBagWidth
+                        local h = frame:GetHeight() or defaultBagHeight
+                        local targetX, targetY
+
+                        if expandRight then
+                            targetX = bpPos.x + (w + bagSpacing) * (rowBagCount + 1)
+                            targetY = currentY
+                            if targetX + w > deckMaxX then
+                                currentY = math.min(deckMaxY - h, currentY + h + bagSpacing)
+                                rowBagCount = 0
+                                targetX = bpPos.x + (w + bagSpacing) * (rowBagCount + 1)
+                                targetY = currentY
+                            end
+                        else
+                            targetX = bpPos.x - (w + bagSpacing) * (rowBagCount + 1)
+                            targetY = currentY
+                            if targetX < deckMinX then
+                                currentY = math.min(deckMaxY - h, currentY + h + bagSpacing)
+                                rowBagCount = 0
+                                targetX = bpPos.x - (w + bagSpacing) * (rowBagCount + 1)
+                                targetY = currentY
+                            end
+                        end
+
+                        targetX = math.max(deckMinX, math.min(targetX, deckMaxX - w))
+                        targetY = math.max(deckMinY, math.min(targetY, deckMaxY - h))
+
+                        frame:SetUserPlaced(true)
+                        frame:ClearAllPoints()
+                        local factor = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+                        frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", targetX * factor, targetY * factor)
+                        if frame.SetAlpha then frame:SetAlpha(1) end
+                        rowBagCount = rowBagCount + 1
+                    end
+                end
+            end
+        else
+            -- Standard game view bag layout (bottom right of gaming screen)
+            local right = m.gameRight - 16
+            local bottom = m.gameBottom + 32
+            local bagIndex = 0
+
+            for i = 1, (NUM_CONTAINER_FRAMES or 13) do
+                local frame = _G["ContainerFrame" .. i]
+                if frame and frame:IsShown() then
+                    local name = frame:GetName()
+                    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                    if not pos then
+                        frame:SetUserPlaced(false)
+                        frame:ClearAllPoints()
+                        local w = frame:GetWidth() or defaultBagWidth
+                        local factor = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+                        local x = (right - (w + bagSpacing) * bagIndex) * factor
+                        local y = bottom * factor
+                        frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", x, y)
+                        if frame.SetAlpha then frame:SetAlpha(1) end
+                        bagIndex = bagIndex + 1
+                    end
                 end
             end
         end
@@ -427,6 +517,8 @@ function HUD:HookFrames()
         if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
             local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
             if not pos then
+                local right = m.gameRight - 16
+                local bottom = m.gameBottom + 32
                 ContainerFrameCombinedBags:SetUserPlaced(false)
                 ContainerFrameCombinedBags:ClearAllPoints()
                 local factor = UIParent:GetEffectiveScale() / ContainerFrameCombinedBags:GetEffectiveScale()
@@ -452,7 +544,7 @@ function HUD:HookFrames()
                     HUD:LayoutBags()
                 else
                     if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                        Akimbo.Canvas:RestoreWorkspacePosition(self)
+                        Akimbo.Canvas.RestoreWorkspacePosition(self)
                     end
                 end
             end)
@@ -468,7 +560,7 @@ function HUD:HookFrames()
                 HUD:LayoutBags()
             else
                 if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                    Akimbo.Canvas:RestoreWorkspacePosition(self)
+                    Akimbo.Canvas.RestoreWorkspacePosition(self)
                 end
             end
         end)

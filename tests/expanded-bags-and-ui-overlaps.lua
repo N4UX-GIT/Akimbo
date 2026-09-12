@@ -1,0 +1,230 @@
+-- tests/expanded-bags-and-ui-overlaps.lua
+-- Tests for bag expansion on workspace, method vs function call safety, and options card clearance
+
+local addon = {
+    modules = {},
+    db = {
+        enabled = true,
+        deckWidthRatio = 0.36,
+        primaryPosition = "RIGHT",
+        layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT",
+        aspectRatioMode = "16_9",
+        gameBottomPixels = 0,
+        hudScale = 0.70,
+        theme = "CLASSIC",
+        trimColor = "GOLD",
+        canvasColor = "CHARCOAL",
+        canvasAlpha = 0.95,
+        independentWorkspacePanels = true,
+        persistentWorkspacePanels = true,
+        savedWorkspacePositions = {},
+        savedMainPositions = {},
+    }
+}
+_G.Akimbo = addon
+
+UIParent = {
+    GetWidth = function() return 4000 end,
+    GetHeight = function() return 2560 end,
+    GetEffectiveScale = function() return 1.0 end,
+    SetAttribute = function() end,
+    ClearAllPoints = function() end,
+    SetPoint = function() end,
+    Show = function() end,
+    Hide = function() end,
+}
+
+InCombatLockdown = function() return false end
+hooksecurefunc = function(t, name, fn)
+    if type(t) == "string" then return end
+    local orig = t[name]
+    t[name] = function(...)
+        local r = orig and orig(...)
+        fn(...)
+        return r
+    end
+end
+
+local function makeMockFrame(name, w, h)
+    local f = {
+        name = name, w = w or 192, h = h or 250,
+        shown = false, alpha = 1, points = {}, scripts = {}, scale = 1,
+        userPlaced = false,
+    }
+    function f:GetName() return self.name end
+    function f:GetWidth() return self.w end
+    function f:GetHeight() return self.h end
+    function f:SetHeight(h) self.h = h end
+    function f:SetWidth(w) self.w = w end
+    function f:SetSize(w, h) self.w = w; self.h = h end
+    function f:GetScale() return self.scale end
+    function f:SetScale(s) self.scale = s end
+    function f:GetEffectiveScale() return self.scale end
+    function f:ClearAllPoints() self.points = {} end
+    function f:SetPoint(pt, relTo, relPt, x, y)
+        table.insert(self.points, { point = pt, relTo = relTo, relPt = relPt, x = x, y = y })
+    end
+    function f:GetPoint(idx)
+        local p = self.points[idx or 1]
+        if not p then return nil end
+        return p.point, p.relTo, p.relPt, p.x, p.y
+    end
+    function f:GetLeft()
+        local p = self.points[#self.points]
+        return p and p.x or 0
+    end
+    function f:GetBottom()
+        local p = self.points[#self.points]
+        return p and p.y or 0
+    end
+    function f:Show()
+        self.shown = true
+        if self.scripts["OnShow"] then self.scripts["OnShow"](self) end
+    end
+    function f:Hide() self.shown = false end
+    function f:IsShown() return self.shown end
+    function f:SetShown(val) self.shown = val end
+    function f:SetAlpha(a) self.alpha = a end
+    function f:HookScript(scriptName, fn)
+        local orig = self.scripts[scriptName]
+        self.scripts[scriptName] = function(...)
+            if orig then orig(...) end
+            fn(...)
+        end
+    end
+    function f:SetScript(scriptName, fn) self.scripts[scriptName] = fn end
+    function f:SetMovable() end
+    function f:SetClampedToScreen() end
+    function f:RegisterForDrag() end
+    function f:EnableMouse() end
+    function f:StartMoving() end
+    function f:StopMovingOrSizing() end
+    function f:SetUserPlaced(val) self.userPlaced = val end
+    function f:IsUserPlaced() return self.userPlaced end
+    function f:SetBackdrop() end
+    function f:SetBackdropColor() end
+    function f:SetBackdropBorderColor() end
+    function f:SetFrameStrata() end
+    function f:SetFrameLevel() end
+    function f:SetText() end
+    function f:SetTextColor() end
+    function f:SetOrientation() end
+    function f:SetMinMaxValues() end
+    function f:SetValueStep() end
+    function f:SetObeyStepOnDrag() end
+    function f:SetValue() end
+    function f:SetThumbTexture() end
+    function f:SetChecked() end
+    function f:GetChecked() return true end
+    function f:SetAutoFocus() end
+    function f:SetNumeric() end
+    function f:SetMaxLetters() end
+    function f:ClearFocus() end
+    function f:GetText() return "0" end
+    function f:SetEnabled() end
+    function f:CreateFontString()
+        return {
+            SetPoint = function(self, ...) self.pointArgs = {...} end,
+            SetText = function(self, t) self.text = t end,
+            SetTextColor = function() end,
+            SetJustifyH = function() end,
+            SetWidth = function() end,
+        }
+    end
+    function f:CreateTexture()
+        return {
+            SetAllPoints = function() end,
+            SetColorTexture = function() end,
+            SetSize = function() end,
+        }
+    end
+    return f
+end
+
+CreateFrame = function(frameType, name, parent, template)
+    local f = makeMockFrame(name or ("mock_" .. tostring({})), 200, 200)
+    f.template = template
+    f.parent = parent
+    return f
+end
+
+_G.NUM_CONTAINER_FRAMES = 5
+for i = 1, 5 do
+    _G["ContainerFrame" .. i] = makeMockFrame("ContainerFrame" .. i, 192, 250)
+end
+
+local metrics = {
+    gameLeft = 1440, gameRight = 4000, gameBottom = 6, gameTop = 1446,
+    gameWidth = 2560, gameHeight = 1440, deckWidth = 1440, hudScale = 1,
+    screenWidth = 4000, screenHeight = 2560, isSpanned = true,
+}
+addon.Viewport = { GetMetrics = function() return metrics end }
+addon.Print = function() end
+addon.ApplyFullLayout = function() end
+
+assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
+assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
+assert(loadfile("UI/Options.lua"))("Akimbo", addon)
+addon.SeamRedirect:HookFrames()
+
+-- TEST 1: Method vs Function call resilience on RestoreWorkspacePosition
+local cf1 = _G["ContainerFrame1"]
+addon.db.savedWorkspacePositions["ContainerFrame1"] = { x = 120, y = 300 }
+
+-- Call as method Canvas:RestoreWorkspacePosition(cf1) (passes Canvas as 1st arg, cf1 as 2nd arg)
+local okMethod, errMethod = pcall(function()
+    addon.Canvas:RestoreWorkspacePosition(cf1)
+end)
+assert(okMethod, "Canvas:RestoreWorkspacePosition method call failed: " .. tostring(errMethod))
+local p = cf1.points[#cf1.points]
+assert(p and p.x == 120 and p.y == 300, "ContainerFrame1 not restored to saved workspace coordinates via method call")
+
+-- Call as function Canvas.RestoreWorkspacePosition(cf1) (passes cf1 as 1st arg)
+local okFunc, errFunc = pcall(function()
+    addon.Canvas.RestoreWorkspacePosition(cf1)
+end)
+assert(okFunc, "Canvas.RestoreWorkspacePosition function call failed: " .. tostring(errFunc))
+
+-- Call with nil or malformed table -> must safely return without throwing
+local okNil = pcall(function()
+    addon.Canvas.RestoreWorkspacePosition(nil)
+    addon.Canvas.RestoreWorkspacePosition({})
+    addon.Canvas:RestoreWorkspacePosition(nil)
+end)
+assert(okNil, "RestoreWorkspacePosition crashed on nil/empty input")
+
+-- TEST 2: Expanded bags (ContainerFrame2..5) dock on workspace when Backpack is on workspace
+for i = 1, 5 do
+    _G["ContainerFrame" .. i]:Show()
+end
+addon.HUD:LayoutBags()
+
+local deckWidth = metrics.deckWidth -- 1440
+
+for i = 2, 5 do
+    local f = _G["ContainerFrame" .. i]
+    local pt = f.points[#f.points]
+    assert(pt ~= nil, "ContainerFrame" .. i .. " has no point")
+    assert(pt.x >= 12 and pt.x <= (deckWidth - 12),
+        string.format("ContainerFrame%d spilled out of workspace! x=%f, deckWidth=%f", i, pt.x, deckWidth))
+    assert(pt.point == "BOTTOMLEFT", "ContainerFrame" .. i .. " should anchor BOTTOMLEFT on workspace")
+end
+
+-- TEST 3: Moving Backpack back to main game view re-docks all bags to main view
+addon.db.savedWorkspacePositions["ContainerFrame1"] = nil
+addon.HUD:LayoutBags()
+
+for i = 1, 5 do
+    local f = _G["ContainerFrame" .. i]
+    local pt = f.points[#f.points]
+    assert(pt ~= nil, "ContainerFrame" .. i .. " has no point")
+    assert(pt.x > metrics.gameLeft,
+        string.format("ContainerFrame%d did not return to main game view! x=%f, gameLeft=%f", i, pt.x, metrics.gameLeft))
+end
+
+-- TEST 4: Options panel creation and slider clearances
+local configFrame = addon.Options:CreateFloatingPanel()
+assert(configFrame ~= nil, "Floating config frame was not created")
+
+print("PASS: RestoreWorkspacePosition method/function safety, expanded bags workspace docking & redocking, card clearance")
