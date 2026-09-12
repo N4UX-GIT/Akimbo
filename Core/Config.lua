@@ -31,6 +31,7 @@ local defaultSettings = {
     seamRedirect = true,            -- Redirect popups and errors away from center bezel
     preventMapCloseOnMove = true,   -- Keep WorldMap open while running/walking
     independentWorkspacePanels = true, -- Panels placed on the secondary workspace stay open independently
+    persistentWorkspacePanels = true,  -- Keep workspace panels and maps open when pressing Escape
     savedWorkspacePositions = {},   -- Persisted coordinates for frames placed on the secondary workspace
     savedMainPositions = {},        -- Persisted coordinates for movable frames on the main screen
 }

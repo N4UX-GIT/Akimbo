@@ -540,21 +540,36 @@ function Options:CreateFloatingPanel()
     panelDesc:SetPoint("TOPLEFT", 32, -178)
     panelDesc:SetText("|cff888888Allows opening bags, character pane, spellbook & map simultaneously.|r")
 
+    local escapeCheck = CreateNativeCheckbox(tab2, "Keep workspace panels open when pressing Escape",
+        function() return Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false end,
+        function(val)
+            Akimbo.db.persistentWorkspacePanels = val
+            if Akimbo.Canvas and Akimbo.Canvas.UpdatePersistenceBehavior then
+                Akimbo.Canvas:UpdatePersistenceBehavior()
+            end
+        end
+    )
+    escapeCheck:SetPoint("TOPLEFT", 4, -200)
+
+    local escapeDesc = tab2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    escapeDesc:SetPoint("TOPLEFT", 32, -224)
+    escapeDesc:SetText("|cff888888Escape clears targets or opens Game Menu without closing workspace elements.|r")
+
     local seamCheck = CreateNativeCheckbox(tab2, "Reroute popups & dialogs away from center bezel",
         function() return Akimbo.db and Akimbo.db.seamRedirect end,
         function(val) Akimbo.db.seamRedirect = val end
     )
-    seamCheck:SetPoint("TOPLEFT", 4, -200)
+    seamCheck:SetPoint("TOPLEFT", 4, -248)
 
     local forceCheck = CreateNativeCheckbox(tab2, "Force Dual Mode (Preview on single display)",
         function() return (Akimbo.db and Akimbo.db.forceDualOnSingle) or false end,
         function(val) Akimbo.db.forceDualOnSingle = val end
     )
-    forceCheck:SetPoint("TOPLEFT", 4, -226)
+    forceCheck:SetPoint("TOPLEFT", 4, -274)
 
     -- Bezel Gap Section
     local bezelHeader = tab2:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    bezelHeader:SetPoint("TOPLEFT", 4, -260)
+    bezelHeader:SetPoint("TOPLEFT", 4, -308)
     bezelHeader:SetText("Bezel Gap & Setup Guide:")
 
     local bezelSlider = CreateNativeSlider(tab2, "Bezel Compensation Gap", 0, 100, 2,
@@ -562,12 +577,12 @@ function Options:CreateFloatingPanel()
         function(val) Akimbo.db.bezelGap = val end,
         "%d px"
     )
-    bezelSlider:SetPoint("TOPLEFT", 8, -284)
+    bezelSlider:SetPoint("TOPLEFT", 8, -332)
     bezelSlider:SetWidth(270)
 
     local guideLinkBtn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
     guideLinkBtn:SetSize(220, 24)
-    guideLinkBtn:SetPoint("TOPLEFT", 330, -284)
+    guideLinkBtn:SetPoint("TOPLEFT", 330, -332)
     guideLinkBtn:SetText("View Window Spanning Guide")
     guideLinkBtn:SetScript("OnClick", function() Options:ShowSetupGuide() end)
 
@@ -736,6 +751,7 @@ function Options:CreateFloatingPanel()
         seamCheck:SetChecked((Akimbo.db and Akimbo.db.seamRedirect) or false)
         mapMoveCheck:SetChecked((Akimbo.db and Akimbo.db.preventMapCloseOnMove) or false)
         panelCheck:SetChecked((Akimbo.db and Akimbo.db.independentWorkspacePanels) or false)
+        escapeCheck:SetChecked((Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) or false)
         forceCheck:SetChecked((Akimbo.db and Akimbo.db.forceDualOnSingle) or false)
 
         local curTheme = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"

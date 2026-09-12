@@ -74,6 +74,23 @@ end
 
 local DemodalizePanel, RemodalizePanel, OnPanelDragStop, RestoreWorkspacePosition, IsFrameOnWorkspace
 
+local function RegisterSpecialFrame(name)
+    if not name or not UISpecialFrames then return end
+    for _, n in ipairs(UISpecialFrames) do
+        if n == name then return end
+    end
+    table.insert(UISpecialFrames, name)
+end
+
+local function UnregisterSpecialFrame(name)
+    if not name or not UISpecialFrames then return end
+    for i = #UISpecialFrames, 1, -1 do
+        if UISpecialFrames[i] == name then
+            table.remove(UISpecialFrames, i)
+        end
+    end
+end
+
 function Canvas:UpdateMapMovementBehavior()
     local map = WorldMapFrame
     if not map then return end
@@ -83,6 +100,31 @@ function Canvas:UpdateMapMovementBehavior()
         pcall(function() map:UnregisterEvent("PLAYER_STARTED_MOVING") end)
     else
         pcall(function() map:RegisterEvent("PLAYER_STARTED_MOVING") end)
+    end
+end
+
+function Canvas:UpdatePersistenceBehavior()
+    if not Akimbo.db then return end
+    local shouldPersist = (Akimbo.db.persistentWorkspacePanels ~= false)
+    if WorldMapFrame then
+        local isWs = (Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(WorldMapFrame)
+        if isWs and shouldPersist then
+            UnregisterSpecialFrame("WorldMapFrame")
+        else
+            RegisterSpecialFrame("WorldMapFrame")
+        end
+    end
+    if Akimbo.db.savedWorkspacePositions then
+        for name, _ in pairs(Akimbo.db.savedWorkspacePositions) do
+            local frame = _G[name]
+            if frame then
+                if shouldPersist then
+                    UnregisterSpecialFrame(name)
+                else
+                    RegisterSpecialFrame(name)
+                end
+            end
+        end
     end
 end
 
@@ -171,7 +213,8 @@ function Canvas:ConfigureWorldMap()
 
     -- If map is on the workspace, apply preferred or auto-fit scale
     local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]
-    if pos or IsFrameOnWorkspace(map) then
+    local isWorkspaceMap = pos or IsFrameOnWorkspace(map)
+    if isWorkspaceMap then
         local userScale = Akimbo.db.workspaceMapScale
         local fitScale
         if userScale and userScale ~= "AUTO" and tonumber(userScale) and tonumber(userScale) > 0 then
@@ -183,6 +226,9 @@ function Canvas:ConfigureWorldMap()
             fitScale = math.min(1.0, availableWidth / baseWidth)
         end
         map:SetScale(fitScale)
+        if Akimbo.db.persistentWorkspacePanels ~= false then
+            UnregisterSpecialFrame("WorldMapFrame")
+        end
     else
         local userMainScale = Akimbo.db.mainMapScale
         if userMainScale and tonumber(userMainScale) and tonumber(userMainScale) > 0 then
@@ -190,6 +236,19 @@ function Canvas:ConfigureWorldMap()
         else
             map:SetScale(1.0)
         end
+        RegisterSpecialFrame("WorldMapFrame")
+    end
+
+    if not map._akimboPersistenceHooked and map.HookScript then
+        map._akimboPersistenceHooked = true
+        map:HookScript("OnShow", function(self)
+            local isWs = (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(self)
+            if isWs and (Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) then
+                UnregisterSpecialFrame("WorldMapFrame")
+            else
+                RegisterSpecialFrame("WorldMapFrame")
+            end
+        end)
     end
 end
 
@@ -213,22 +272,6 @@ end
 
 local originalAreas = {}
 
-local function RegisterSpecialFrame(name)
-    if not name or not UISpecialFrames then return end
-    for _, n in ipairs(UISpecialFrames) do
-        if n == name then return end
-    end
-    table.insert(UISpecialFrames, name)
-end
-
-local function UnregisterSpecialFrame(name)
-    if not name or not UISpecialFrames then return end
-    for i = #UISpecialFrames, 1, -1 do
-        if UISpecialFrames[i] == name then
-            table.remove(UISpecialFrames, i)
-        end
-    end
-end
 
 DemodalizePanel = function(frame)
     if not frame then return end
@@ -243,7 +286,12 @@ DemodalizePanel = function(frame)
     if SetUIPanelAttribute then
         pcall(function() SetUIPanelAttribute(frame, "area", nil) end)
     end
-    RegisterSpecialFrame(name)
+    local isWs = (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]) or IsFrameOnWorkspace(frame)
+    if isWs and (Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) then
+        UnregisterSpecialFrame(name)
+    else
+        RegisterSpecialFrame(name)
+    end
 end
 
 RemodalizePanel = function(frame)
@@ -322,6 +370,10 @@ OnPanelDragStop = function(frame)
             end
             DemodalizePanel(frame)
         end
+
+        if Akimbo.db.persistentWorkspacePanels ~= false then
+            UnregisterSpecialFrame(name)
+        end
     else
         Akimbo.db.savedWorkspacePositions[name] = nil
         if frame == WorldMapFrame then
@@ -333,8 +385,10 @@ OnPanelDragStop = function(frame)
             local xInParent = (frame:GetLeft() or 0) * scaleFactor
             local yInParent = (frame:GetBottom() or 0) * scaleFactor
             Akimbo.db.savedMainPositions[name] = { x = xInParent, y = yInParent }
+            RegisterSpecialFrame(name)
         else
             RemodalizePanel(frame)
+            RegisterSpecialFrame(name)
         end
     end
 end
@@ -376,6 +430,9 @@ RestoreWorkspacePosition = function(frame)
         local factor = parentScale / frameScale
         frame:ClearAllPoints()
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
+        if Akimbo.db.persistentWorkspacePanels ~= false then
+            UnregisterSpecialFrame(name)
+        end
         return
     end
 
@@ -383,6 +440,7 @@ RestoreWorkspacePosition = function(frame)
     if frame == WorldMapFrame then
         frame:SetScale(1.0)
         DemodalizePanel(frame)
+        RegisterSpecialFrame("WorldMapFrame")
         local mPos = Akimbo.db.savedMainPositions and Akimbo.db.savedMainPositions["WorldMapFrame"]
         local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
         local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
@@ -538,6 +596,7 @@ function Canvas:EnableFreeDragging()
     end
 
     self:ConfigureWorldMap()
+    self:UpdatePersistenceBehavior()
 end
 
 function Akimbo:InitializeCanvas()
@@ -549,9 +608,11 @@ function Akimbo:InitializeCanvas()
     loader:SetScript("OnEvent", function()
         Canvas:EnableFreeDragging()
         Canvas:UpdateMapMovementBehavior()
+        Canvas:UpdatePersistenceBehavior()
         Canvas:ConfigureWorldMap()
     end)
     Canvas:UpdateMapMovementBehavior()
+    Canvas:UpdatePersistenceBehavior()
     Canvas:ConfigureWorldMap()
 
     if not Canvas.showUIPanelHooked and ShowUIPanel then

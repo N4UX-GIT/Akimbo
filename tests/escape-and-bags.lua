@@ -253,7 +253,7 @@ local function inSpecial(name)
     end
     return false
 end
-assert(inSpecial("CharacterFrame"), "CharacterFrame must be registered in UISpecialFrames")
+assert(not inSpecial("CharacterFrame"), "CharacterFrame on workspace must NOT be in UISpecialFrames")
 assert(inSpecial("AddonList"), "AddonList must be registered in UISpecialFrames")
 
 -- TEST 2: Pressing Escape on clean state opens Game Menu centered on gaming monitor
@@ -289,21 +289,17 @@ assert(cp[1] == "BOTTOMLEFT" and cp[4] == 100 and cp[5] == 200, "CharacterFrame 
 -- Verify elevated drag handle exists for CharacterFrame and panels
 assert(CharacterFrame._akimboHandle ~= nil, "CharacterFrame must have an elevated title drag handle")
 
--- TEST 5: Pressing Escape while CharacterFrame is open closes CharacterFrame
-ToggleGameMenu()
-assert(not CharacterFrame:IsShown(), "CharacterFrame must be closed by Escape")
-assert(not GameMenuFrame:IsShown(), "GameMenuFrame must not show on the same Escape press that closes CharacterFrame")
-
--- TEST 6: Pressing Escape AGAIN (after CharacterFrame was closed) opens GameMenuFrame
+-- TEST 5: Pressing Escape while CharacterFrame is on workspace DOES NOT close CharacterFrame
 ToggleGameMenu()
 flushTimers()
-assert(GameMenuFrame:IsShown(), "GameMenuFrame must show on subsequent Escape press!")
-local p2 = GameMenuFrame.points[#GameMenuFrame.points]
-assert(math.abs(p2[4] - expectedCX) < 0.01, "GameMenuFrame must be centered on gaming monitor")
+assert(CharacterFrame:IsShown(), "CharacterFrame on workspace must remain open when Escape is pressed!")
+assert(GameMenuFrame:IsShown(), "GameMenuFrame must open on gaming monitor without closing workspace panels")
 
--- Close GameMenuFrame
+-- TEST 6: Pressing Escape AGAIN closes GameMenuFrame, workspace CharacterFrame remains open
 ToggleGameMenu()
-assert(not GameMenuFrame:IsShown())
+assert(not GameMenuFrame:IsShown(), "GameMenuFrame must close on subsequent Escape press")
+assert(CharacterFrame:IsShown(), "CharacterFrame must still remain open on workspace!")
+CharacterFrame:Hide()
 
 -- TEST 7: Bag opening flicker prevention
 ContainerFrame1:Show()
@@ -315,11 +311,18 @@ assert(bp[4] == metrics.gameRight - 16, "ContainerFrame1 x must be anchored to g
 -- TEST 8: UIPanel LEFT_OFFSET must be set to m.gameLeft so unmanaged panels open on the gaming monitor
 assert(UIParent:GetAttribute("LEFT_OFFSET") == metrics.gameLeft, "UIParent LEFT_OFFSET must match gameLeft")
 
--- TEST 9: WorldMapFrame auto-fit to workspace width
+-- TEST 9: WorldMapFrame auto-fit to workspace width & persistence on Escape
 WorldMapFrame:Show()
+assert(not inSpecial("WorldMapFrame"), "WorldMapFrame on workspace must NOT be in UISpecialFrames")
 assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame scale must fit workspace")
 local mapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
 assert(mapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
+
+-- Pressing Escape while map is on workspace does NOT close map
+ToggleGameMenu()
+flushTimers()
+assert(WorldMapFrame:IsShown(), "WorldMapFrame on workspace must remain open when Escape is pressed!")
+ToggleGameMenu() -- close GameMenuFrame
 
 -- TEST 10: Dragging WorldMapFrame out onto the main gaming monitor
 WorldMapFrame.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 1800, 500 } }
@@ -330,10 +333,13 @@ assert(addon.db.savedWorkspacePositions["WorldMapFrame"] == nil, "WorldMapFrame 
 assert(WorldMapFrame:GetScale() == 1, "WorldMapFrame scale must reset to 1.0 on gaming monitor")
 assert(addon.db.savedMainPositions["WorldMapFrame"] ~= nil, "WorldMapFrame position on gaming monitor must be saved in savedMainPositions")
 assert(addon.db.savedMainPositions["WorldMapFrame"].x == 1800, "Saved main x must match 1800")
+assert(inSpecial("WorldMapFrame"), "WorldMapFrame on gaming monitor MUST be registered in UISpecialFrames")
 
--- TEST 11: Closing and reopening WorldMapFrame on gaming monitor
-WorldMapFrame:Hide()
-assert(not WorldMapFrame:IsShown(), "WorldMapFrame must be hidden")
+-- On gaming monitor, pressing Escape DOES close WorldMapFrame
+ToggleGameMenu()
+assert(not WorldMapFrame:IsShown(), "WorldMapFrame on gaming monitor must close when Escape is pressed")
+
+-- TEST 11: Reopening WorldMapFrame on gaming monitor
 WorldMapFrame.points = {}
 WorldMapFrame:Show()
 assert(WorldMapFrame:IsShown(), "WorldMapFrame must reopen reliably on gaming monitor")
@@ -351,5 +357,11 @@ assert(addon.db.savedMainPositions["WorldMapFrame"] == nil, "WorldMapFrame main 
 assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame must scale down to fit workspace width")
 local deckMapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
 assert(deckMapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
+assert(not inSpecial("WorldMapFrame"), "WorldMapFrame on workspace must NOT be in UISpecialFrames")
 
-print("PASS: escape menu centering, AddonList, gaming monitor panel offsets, universal handles, map fitting, drag out/in reopen, bag flicker")
+-- Escape on workspace does not close WorldMapFrame
+ToggleGameMenu()
+flushTimers()
+assert(WorldMapFrame:IsShown(), "WorldMapFrame on workspace must remain open through Escape")
+
+print("PASS: escape menu centering, AddonList, gaming monitor panel offsets, universal handles, map fitting, drag out/in reopen, bag flicker, workspace escape persistence")
