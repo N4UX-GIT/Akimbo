@@ -913,7 +913,7 @@ function Options:CreateFloatingPanel()
     subPitchBlack:SetText("|cff888888True OLED pure black canvas|r")
 
 
-    local card3_2 = CreateCard(tab3, "Dialog Header & Border Trim Palette", -132, 78)
+    local card3_2 = CreateCard(tab3, "Dialog Header & Border Trim Palette", -122, 94)
 
     local trimButtons = {
         { "GOLD", "Gold", 1.00, 0.82, 0.00 },
@@ -924,18 +924,19 @@ function Options:CreateFloatingPanel()
         { "EMERALD", "Emerald", 0.22, 0.82, 0.35 },
     }
     local trimBtnFrames = {}
-    local prevTrimBtn = nil
-    for _, t in ipairs(trimButtons) do
+    local customTrimBtn
+    for i, t in ipairs(trimButtons) do
         local btn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
-        btn:SetSize(86, 24)
-        if not prevTrimBtn then
-            btn:SetPoint("TOPLEFT", 12, -32)
-        else
-            btn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 6, 0)
-        end
+        btn:SetSize(155, 24)
+        local row = (i <= 4) and 1 or 2
+        local col = (i <= 4) and (i - 1) or (i - 5)
+        local x = 12 + col * (155 + 8)
+        local y = (row == 1) and -30 or -58
+        btn:SetPoint("TOPLEFT", x, y)
         local trimKey = t[1]
         btn.trimKey = trimKey
         btn.trimData = t
+        btn:SetText(t[2])
         btn:SetScript("OnClick", function()
             Akimbo.db.trimColor = trimKey
             Akimbo:UpdateTheme()
@@ -945,13 +946,12 @@ function Options:CreateFloatingPanel()
             Akimbo:SetTooltip(btn, t[2] .. " Accent", "Applies " .. t[2] .. " highlight tint to dialog borders, slider handles, and UI frames.")
         end
         tinsert(trimBtnFrames, btn)
-        prevTrimBtn = btn
     end
 
-    local customTrimBtn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
-    customTrimBtn:SetSize(110, 24)
-    customTrimBtn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 8, 0)
-    customTrimBtn:SetText("Custom...")
+    customTrimBtn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
+    customTrimBtn:SetSize(155, 24)
+    customTrimBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
+    customTrimBtn:SetText("Custom Accent...")
     customTrimBtn:SetScript("OnClick", function()
         local cur = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
         Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, 1.0, false, function(r, g, b)
@@ -969,25 +969,39 @@ function Options:CreateFloatingPanel()
         local curTrim = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
         for _, btn in ipairs(trimBtnFrames) do
             local t = btn.trimData
-            if btn.trimKey == curTrim then
-                btn:SetText(string.format("|cff%02x%02x%02x[%s]|r", t[3]*255, t[4]*255, t[5]*255, t[2]))
+            local isSelected = (btn.trimKey == curTrim)
+            btn:SetText(t[2])
+            btn:SetEnabled(not isSelected)
+            if isSelected then
+                if btn.LockHighlight then btn:LockHighlight() end
+                local fs = btn.GetFontString and btn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.95, 0.60, 1.0) end
             else
-                btn:SetText(string.format("|cff%02x%02x%02x%s|r", t[3]*255*0.70, t[4]*255*0.70, t[5]*255*0.70, t[2]))
+                if btn.UnlockHighlight then btn:UnlockHighlight() end
+                local fs = btn.GetFontString and btn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(t[3], t[4], t[5], 1.0) end
             end
         end
         if customTrimBtn then
+            local isCustom = (curTrim == "CUSTOM")
             local c = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
-            if curTrim == "CUSTOM" then
-                customTrimBtn:SetText(string.format("|cff%02x%02x%02x[Custom]|r", c.r*255, c.g*255, c.b*255))
+            if isCustom then
+                customTrimBtn:SetText(string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
+                if customTrimBtn.LockHighlight then customTrimBtn:LockHighlight() end
+                local fs = customTrimBtn.GetFontString and customTrimBtn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(0.2, 1.0, 0.4, 1.0) end
             else
-                customTrimBtn:SetText(string.format("|cff%02x%02x%02xCustom...|r", c.r*255*0.75, c.g*255*0.75, c.b*255*0.75))
+                customTrimBtn:SetText("Custom Accent...")
+                if customTrimBtn.UnlockHighlight then customTrimBtn:UnlockHighlight() end
+                local fs = customTrimBtn.GetFontString and customTrimBtn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.82, 0.0, 1.0) end
             end
         end
     end
     Options:UpdateTrimHighlights()
 
 
-    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -224, 160)
+    local card3_3 = CreateCard(tab3, "Workspace Canvas Background (Secondary Monitor)", -224, 174)
 
     local canvasButtons = {
         { "CLASSIC_STONE", "Classic Stone" },
@@ -998,18 +1012,19 @@ function Options:CreateFloatingPanel()
         { "PURE_BLACK",    "Pitch Black" },
     }
     local canvasBtnFrames = {}
-    local prevCanvasBtn = nil
-    for _, c in ipairs(canvasButtons) do
+    local customCanvasBtn
+    for i, c in ipairs(canvasButtons) do
         local btn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
-        btn:SetSize(86, 24)
-        if not prevCanvasBtn then
-            btn:SetPoint("TOPLEFT", 12, -32)
-        else
-            btn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 6, 0)
-        end
+        btn:SetSize(155, 24)
+        local row = (i <= 4) and 1 or 2
+        local col = (i <= 4) and (i - 1) or (i - 5)
+        local x = 12 + col * (155 + 8)
+        local y = (row == 1) and -30 or -58
+        btn:SetPoint("TOPLEFT", x, y)
         local canvasKey = c[1]
         btn.canvasKey = canvasKey
         btn.canvasTitle = c[2]
+        btn:SetText(c[2])
         btn:SetScript("OnClick", function()
             Akimbo.db.canvasColor = canvasKey
             Akimbo:UpdateTheme()
@@ -1019,15 +1034,14 @@ function Options:CreateFloatingPanel()
             Akimbo:SetTooltip(btn, c[2] .. " Tone", "Sets the secondary monitor workspace background tone to " .. c[2] .. ".")
         end
         tinsert(canvasBtnFrames, btn)
-        prevCanvasBtn = btn
     end
 
     local alphaSlider -- forward declaration for OpenCustomCanvasPicker
 
-    local customCanvasBtn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
-    customCanvasBtn:SetSize(110, 24)
-    customCanvasBtn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 8, 0)
-    customCanvasBtn:SetText("Custom...")
+    customCanvasBtn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
+    customCanvasBtn:SetSize(155, 24)
+    customCanvasBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
+    customCanvasBtn:SetText("Custom Color...")
     local function OpenCustomCanvasPicker()
         local cur = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
         local curA = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
@@ -1053,8 +1067,8 @@ function Options:CreateFloatingPanel()
 
     -- Live Workspace Canvas Swatch Preview (Interactive click-to-pick)
     local swatchCard = CreateFrame("Frame", nil, card3_3, "BackdropTemplate")
-    swatchCard:SetSize(280, 40)
-    swatchCard:SetPoint("TOPLEFT", 380, -70)
+    swatchCard:SetSize(310, 40)
+    swatchCard:SetPoint("TOPLEFT", 350, -88)
     if swatchCard.EnableMouse then swatchCard:EnableMouse(true) end
     swatchCard:SetScript("OnMouseDown", OpenCustomCanvasPicker)
     if Akimbo.SetTooltip then
@@ -1069,18 +1083,32 @@ function Options:CreateFloatingPanel()
         local curColor = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
         local curAlpha = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
         for _, btn in ipairs(canvasBtnFrames) do
-            if btn.canvasKey == curColor then
-                btn:SetText(string.format("|cff00ff00[%s]|r", btn.canvasTitle))
+            local isSelected = (btn.canvasKey == curColor)
+            btn:SetText(btn.canvasTitle)
+            btn:SetEnabled(not isSelected)
+            if isSelected then
+                if btn.LockHighlight then btn:LockHighlight() end
+                local fs = btn.GetFontString and btn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.95, 0.60, 1.0) end
             else
-                btn:SetText(btn.canvasTitle)
+                if btn.UnlockHighlight then btn:UnlockHighlight() end
+                local fs = btn.GetFontString and btn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.82, 0.0, 1.0) end
             end
         end
         if customCanvasBtn then
-            if curColor == "CUSTOM" then
-                local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
-                customCanvasBtn:SetText(string.format("|cff00ff00[#%02x%02x%02x]|r", c.r*255, c.g*255, c.b*255))
+            local isCustom = (curColor == "CUSTOM")
+            local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+            if isCustom then
+                customCanvasBtn:SetText(string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
+                if customCanvasBtn.LockHighlight then customCanvasBtn:LockHighlight() end
+                local fs = customCanvasBtn.GetFontString and customCanvasBtn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(0.2, 1.0, 0.4, 1.0) end
             else
-                customCanvasBtn:SetText("Custom...")
+                customCanvasBtn:SetText("Custom Color...")
+                if customCanvasBtn.UnlockHighlight then customCanvasBtn:UnlockHighlight() end
+                local fs = customCanvasBtn.GetFontString and customCanvasBtn:GetFontString()
+                if fs and fs.SetTextColor then fs:SetTextColor(1.0, 0.82, 0.0, 1.0) end
             end
         end
 
@@ -1089,7 +1117,7 @@ function Options:CreateFloatingPanel()
             local pName
             if curColor == "CUSTOM" then
                 local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
-                pName = string.format("Custom (#%02x%02x%02x)", c.r*255, c.g*255, c.b*255)
+                pName = string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5))
             else
                 local pals = Akimbo.Themes:GetCanvasPalettes()
                 pName = pals and pals[curColor] and pals[curColor].name or curColor
@@ -1110,11 +1138,11 @@ function Options:CreateFloatingPanel()
         "%.0f%%",
         L["SLIDER_CANVAS_OPACITY_TIP_TITLE"], L["SLIDER_CANVAS_OPACITY_TIP_DESC"]
     )
-    alphaSlider:SetPoint("TOPLEFT", 12, -76)
-    alphaSlider:SetWidth(350)
+    alphaSlider:SetPoint("TOPLEFT", 12, -92)
+    alphaSlider:SetWidth(320)
 
     local themeNote = card3_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    themeNote:SetPoint("TOPLEFT", 12, -122)
+    themeNote:SetPoint("TOPLEFT", 12, -144)
     themeNote:SetText("|cff888888Colors & opacity apply live to your secondary screen canvas backdrop. Click preview swatch or Custom for color wheel.|r")
 
     -- ========================================================================
