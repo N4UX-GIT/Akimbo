@@ -390,26 +390,26 @@ function Options:CreateFloatingPanel()
 
     -- Section 2: 3D Viewport Aspect Ratio
     local arLabel = tab1:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    arLabel:SetPoint("TOPLEFT", rDual, "BOTTOMLEFT", -4, -14)
+    arLabel:SetPoint("TOPLEFT", 4, -104)
     arLabel:SetText("3D Game Viewport Aspect Ratio:")
 
     local r169 = CreateNativeRadioButton(tab1, "16:9 Standard",
         function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "16_9") end,
         function() Akimbo.db.aspectRatioMode = "16_9" end
     )
-    r169:SetPoint("TOPLEFT", arLabel, "BOTTOMLEFT", 4, -6)
+    r169:SetPoint("TOPLEFT", 8, -126)
 
     local r219 = CreateNativeRadioButton(tab1, "21:9 Ultrawide",
         function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "21_9") end,
         function() Akimbo.db.aspectRatioMode = "21_9" end
     )
-    r219:SetPoint("TOPLEFT", 190, -148)
+    r219:SetPoint("TOPLEFT", 180, -126)
 
     local rFill = CreateNativeRadioButton(tab1, "Fit Window Height (Fill)",
         function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "FILL") end,
         function() Akimbo.db.aspectRatioMode = "FILL" end
     )
-    rFill:SetPoint("TOPLEFT", 360, -148)
+    rFill:SetPoint("TOPLEFT", 340, -126)
 
     -- Section 3: Bezel Seam Calibration Slider
     local seamSlider = CreateNativeSlider(tab1, "Bezel Seam Width (% of Window)", 0.15, 0.80, 0.005,
@@ -421,7 +421,7 @@ function Options:CreateFloatingPanel()
         end,
         "%.1f%%"
     )
-    seamSlider:SetPoint("TOPLEFT", 4, -196)
+    seamSlider:SetPoint("TOPLEFT", 4, -178)
     seamSlider:SetWidth(330)
 
     local p36Btn = CreateFrame("Button", nil, tab1, "UIPanelButtonTemplate")
@@ -444,14 +444,14 @@ function Options:CreateFloatingPanel()
 
     -- Section 4: Bottom Offset & UI Scale Row
     local bottomControl = Options:CreateBottomControl(tab1)
-    bottomControl:SetPoint("TOPLEFT", 4, -244)
+    bottomControl:SetPoint("TOPLEFT", 4, -232)
 
     local hudSlider = CreateNativeSlider(tab1, "Global UI Size (% of Game View)", 0.25, 1.25, 0.01,
         function() return (Akimbo.db and Akimbo.db.hudScale) or 0.70 end,
         function(val) Akimbo.db.hudScale = val end,
         "%.0f%%"
     )
-    hudSlider:SetPoint("TOPLEFT", 330, -244)
+    hudSlider:SetPoint("TOPLEFT", 330, -252)
     hudSlider:SetWidth(270)
 
     -- ========================================================================
@@ -461,10 +461,17 @@ function Options:CreateFloatingPanel()
     mapTitle:SetPoint("TOPLEFT", 4, 0)
     mapTitle:SetText("World Map Scaling & Navigation:")
 
-    local mapScaleSlider = CreateNativeSlider(tab2, "Workspace Map Scale (% of Native Size)", 0.50, 1.50, 0.05,
+    local mapScaleSlider = CreateNativeSlider(tab2, "Workspace Map Scale (% of Native Size)", 0.50, 2.50, 0.05,
         function()
             local s = Akimbo.db and Akimbo.db.workspaceMapScale
-            return (tonumber(s) and tonumber(s)) or 0.85
+            if s == "AUTO" then
+                local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+                local baseWidth = (WorldMapFrame and WorldMapFrame:GetWidth()) or 610
+                if baseWidth <= 0 then baseWidth = 610 end
+                local availableWidth = (m and m.deckWidth and (m.deckWidth - 24)) or 610
+                return math.max(0.50, math.min(2.50, math.floor((availableWidth / baseWidth) * 100 + 0.5) / 100))
+            end
+            return (tonumber(s) and tonumber(s)) or 1.00
         end,
         function(val)
             Akimbo.db.workspaceMapScale = val
@@ -475,31 +482,48 @@ function Options:CreateFloatingPanel()
         "%.0f%%"
     )
     mapScaleSlider:SetPoint("TOPLEFT", 8, -26)
-    mapScaleSlider:SetWidth(300)
+    mapScaleSlider:SetWidth(240)
 
     local autoFitBtn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
-    autoFitBtn:SetSize(72, 22)
-    autoFitBtn:SetPoint("LEFT", mapScaleSlider, "RIGHT", 14, 0)
+    autoFitBtn:SetSize(68, 22)
+    autoFitBtn:SetPoint("LEFT", mapScaleSlider, "RIGHT", 10, 0)
     autoFitBtn:SetText("Auto-Fit")
     autoFitBtn:SetScript("OnClick", function()
         Akimbo.db.workspaceMapScale = "AUTO"
         if Akimbo.Canvas and Akimbo.Canvas.ConfigureWorldMap then
             Akimbo.Canvas:ConfigureWorldMap()
         end
-        mapScaleSlider:SetValue(0.85)
+        local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+        local baseWidth = (WorldMapFrame and WorldMapFrame:GetWidth()) or 610
+        if baseWidth <= 0 then baseWidth = 610 end
+        local availableWidth = (m and m.deckWidth and (m.deckWidth - 24)) or 610
+        local computedScale = math.max(0.50, math.min(2.50, math.floor((availableWidth / baseWidth) * 100 + 0.5) / 100))
+        mapScaleSlider:SetValue(computedScale)
     end)
 
     local p100Btn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
-    p100Btn:SetSize(54, 22)
-    p100Btn:SetPoint("LEFT", autoFitBtn, "RIGHT", 6, 0)
+    p100Btn:SetSize(46, 22)
+    p100Btn:SetPoint("LEFT", autoFitBtn, "RIGHT", 4, 0)
     p100Btn:SetText("100%")
     p100Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.00) end)
 
-    local p125Btn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
-    p125Btn:SetSize(54, 22)
-    p125Btn:SetPoint("LEFT", p100Btn, "RIGHT", 6, 0)
-    p125Btn:SetText("125%")
-    p125Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.25) end)
+    local p150Btn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
+    p150Btn:SetSize(46, 22)
+    p150Btn:SetPoint("LEFT", p100Btn, "RIGHT", 4, 0)
+    p150Btn:SetText("150%")
+    p150Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.50) end)
+
+    local p200Btn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
+    p200Btn:SetSize(46, 22)
+    p200Btn:SetPoint("LEFT", p150Btn, "RIGHT", 4, 0)
+    p200Btn:SetText("200%")
+    p200Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.00) end)
+
+    local p250Btn = CreateFrame("Button", nil, tab2, "UIPanelButtonTemplate")
+    p250Btn:SetSize(46, 22)
+    p250Btn:SetPoint("LEFT", p200Btn, "RIGHT", 4, 0)
+    p250Btn:SetText("250%")
+    p250Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.50) end)
 
     local mapTip = tab2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     mapTip:SetPoint("TOPLEFT", 8, -54)

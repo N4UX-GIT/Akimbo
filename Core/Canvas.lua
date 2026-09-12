@@ -179,9 +179,9 @@ function Canvas:ConfigureWorldMap()
         local current = map:GetScale() or 1.0
         local newScale
         if delta > 0 then
-            newScale = math.min(1.6, current + 0.05)
+            newScale = math.min(3.00, current + 0.05)
         else
-            newScale = math.max(0.4, current - 0.05)
+            newScale = math.max(0.40, current - 0.05)
         end
         newScale = math.floor(newScale * 100 + 0.5) / 100
 
@@ -223,7 +223,7 @@ function Canvas:ConfigureWorldMap()
             local baseWidth = map:GetWidth() or 610
             if baseWidth <= 0 then baseWidth = 610 end
             local availableWidth = m.deckWidth - 24
-            fitScale = math.min(1.0, availableWidth / baseWidth)
+            fitScale = math.max(0.50, math.min(3.00, availableWidth / baseWidth))
         end
         map:SetScale(fitScale)
         if Akimbo.db.persistentWorkspacePanels ~= false then

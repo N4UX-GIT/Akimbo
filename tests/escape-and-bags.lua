@@ -314,9 +314,9 @@ assert(UIParent:GetAttribute("LEFT_OFFSET") == metrics.gameLeft, "UIParent LEFT_
 -- TEST 9: WorldMapFrame auto-fit to workspace width & persistence on Escape
 WorldMapFrame:Show()
 assert(not inSpecial("WorldMapFrame"), "WorldMapFrame on workspace must NOT be in UISpecialFrames")
-assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame scale must fit workspace")
 local mapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
 assert(mapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
+assert(mapWidth >= metrics.deckWidth - 25, "WorldMapFrame Auto-Fit must fill workspace width")
 
 -- Pressing Escape while map is on workspace does NOT close map
 ToggleGameMenu()
@@ -354,9 +354,9 @@ if WorldMapTitleButton and WorldMapTitleButton.scripts["OnDragStop"] then
 end
 assert(addon.db.savedWorkspacePositions["WorldMapFrame"] ~= nil, "WorldMapFrame must be saved to workspace positions when dragged to workspace")
 assert(addon.db.savedMainPositions["WorldMapFrame"] == nil, "WorldMapFrame main position must be cleared when on workspace")
-assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame must scale down to fit workspace width")
 local deckMapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
 assert(deckMapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
+assert(deckMapWidth >= metrics.deckWidth - 25, "WorldMapFrame must scale up to fill workspace width")
 assert(not inSpecial("WorldMapFrame"), "WorldMapFrame on workspace must NOT be in UISpecialFrames")
 
 -- Escape on workspace does not close WorldMapFrame
