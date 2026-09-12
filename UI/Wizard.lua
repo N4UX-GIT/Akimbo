@@ -328,11 +328,17 @@ function Wizard:CreateFrame()
     seamSlider:SetThumbTexture(thumb)
     seamSlider.thumb = thumb
 
+    seamSlider.SetValueDirect = function(self, val)
+        self._isDirect = true
+        self:SetValue(val)
+        self._isDirect = nil
+    end
+
     local function CommitSeamEditBox()
         local txt = seamEditBox:GetText()
         local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.15, 0.80, 0.005, "%.1f%%")
         if parsed then
-            seamSlider:SetValue(parsed)
+            seamSlider:SetValueDirect(parsed)
         else
             local cur = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
             seamEditBox:SetText(string.format("%.1f%%", cur * 100))
@@ -378,51 +384,63 @@ function Wizard:CreateFrame()
     end)
 
     seamSlider:SetScript("OnMouseUp", function(self, button)
-        if self.isDragging then
-            self.isDragging = false
-            self._debounceTimer = nil
+        self.isDragging = false
+        if self._pendingApply then
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
     end)
 
-    seamSlider:SetScript("OnValueChanged", function(self, val)
+    seamSlider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.floor((val / 0.005) + 0.5) * 0.005
         Akimbo.db.deckWidthRatio = val
         seamValText:SetText(string.format("Seam: %.1f%%", val * 100))
         if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
             seamEditBox:SetText(string.format("%.1f%%", val * 100))
         end
-        if Akimbo.Options and Akimbo.Options.ShowSeamGuide then
+        if Akimbo.Options and Akimbo.Options.ShowSeamGuide and Akimbo.Options:IsSeamGuideShown() then
             Akimbo.Options:ShowSeamGuide(val)
         end
-        if self.isDragging then
-            if not self._debounceTimer then
-                self._debounceTimer = true
-                if C_Timer and C_Timer.After then
-                    C_Timer.After(0.15, function()
-                        self._debounceTimer = nil
+        f:UpdateLaserButton()
+
+        if self._isDirect then
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
+            Akimbo:ApplyFullLayout()
+            return
+        end
+
+        local isMouseDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) or (self.isDragging == true) or (userInput == true)
+        if isMouseDown then
+            self._pendingApply = true
+            self:SetScript("OnUpdate", function(s)
+                local stillDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton"))
+                if not stillDown then
+                    s.isDragging = false
+                    if s._pendingApply then
+                        s._pendingApply = false
+                        s:SetScript("OnUpdate", nil)
                         Akimbo:ApplyFullLayout()
-                    end)
-                else
-                    self._debounceTimer = nil
-                    Akimbo:ApplyFullLayout()
+                    end
                 end
-            end
+            end)
         else
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
-        f:UpdateLaserButton()
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(seamSlider, L["SLIDER_SEAM_WIDTH_TIP_TITLE"], L["SLIDER_SEAM_WIDTH_TIP_DESC"]) end
 
     btnMinus:SetScript("OnClick", function()
         local current = seamSlider:GetValue() or 0.36
-        seamSlider:SetValue(math.max(0.15, current - 0.01))
+        seamSlider:SetValueDirect(math.max(0.15, current - 0.01))
     end)
 
     btnPlus:SetScript("OnClick", function()
         local current = seamSlider:GetValue() or 0.36
-        seamSlider:SetValue(math.min(0.80, current + 0.01))
+        seamSlider:SetValueDirect(math.min(0.80, current + 0.01))
     end)
 
     btnLaser:SetScript("OnClick", function()
@@ -531,11 +549,17 @@ function Wizard:CreateFrame()
     scaleSlider:SetThumbTexture(scaleThumb)
     scaleSlider.thumb = scaleThumb
 
+    scaleSlider.SetValueDirect = function(self, val)
+        self._isDirect = true
+        self:SetValue(val)
+        self._isDirect = nil
+    end
+
     local function CommitScaleEditBox()
         local txt = scaleEditBox:GetText()
         local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.25, 1.25, 0.01, "%.0f%%")
         if parsed then
-            scaleSlider:SetValue(parsed)
+            scaleSlider:SetValueDirect(parsed)
         else
             local cur = (Akimbo.db and Akimbo.db.hudScale) or 0.70
             scaleEditBox:SetText(string.format("%.0f%%", cur * 100))
@@ -575,7 +599,7 @@ function Wizard:CreateFrame()
     btnScaleReset:SetPoint("LEFT", btnScalePlus, "RIGHT", 12, 0)
     btnScaleReset:SetText("Reset (70%)")
     btnScaleReset:SetScript("OnClick", function()
-        scaleSlider:SetValue(0.70)
+        scaleSlider:SetValueDirect(0.70)
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, "Reset UI Scale", "Resets the Global UI Scale to the recommended standard default of 70%.") end
 
@@ -584,34 +608,46 @@ function Wizard:CreateFrame()
     end)
 
     scaleSlider:SetScript("OnMouseUp", function(self, button)
-        if self.isDragging then
-            self.isDragging = false
-            self._debounceTimer = nil
+        self.isDragging = false
+        if self._pendingApply then
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
     end)
 
-    scaleSlider:SetScript("OnValueChanged", function(self, val)
+    scaleSlider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.floor((val / 0.01) + 0.5) * 0.01
         Akimbo.db.hudScale = val
         scaleValText:SetText(string.format("Scale: %.0f%%", val * 100))
         if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
             scaleEditBox:SetText(string.format("%.0f%%", val * 100))
         end
-        if self.isDragging then
-            if not self._debounceTimer then
-                self._debounceTimer = true
-                if C_Timer and C_Timer.After then
-                    C_Timer.After(0.15, function()
-                        self._debounceTimer = nil
+
+        if self._isDirect then
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
+            Akimbo:ApplyFullLayout()
+            return
+        end
+
+        local isMouseDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) or (self.isDragging == true) or (userInput == true)
+        if isMouseDown then
+            self._pendingApply = true
+            self:SetScript("OnUpdate", function(s)
+                local stillDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton"))
+                if not stillDown then
+                    s.isDragging = false
+                    if s._pendingApply then
+                        s._pendingApply = false
+                        s:SetScript("OnUpdate", nil)
                         Akimbo:ApplyFullLayout()
-                    end)
-                else
-                    self._debounceTimer = nil
-                    Akimbo:ApplyFullLayout()
+                    end
                 end
-            end
+            end)
         else
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
     end)
@@ -619,12 +655,12 @@ function Wizard:CreateFrame()
 
     btnScaleMinus:SetScript("OnClick", function()
         local current = scaleSlider:GetValue() or 0.70
-        scaleSlider:SetValue(math.max(0.25, current - 0.01))
+        scaleSlider:SetValueDirect(math.max(0.25, current - 0.01))
     end)
 
     btnScalePlus:SetScript("OnClick", function()
         local current = scaleSlider:GetValue() or 0.70
-        scaleSlider:SetValue(math.min(1.25, current + 0.01))
+        scaleSlider:SetValueDirect(math.min(1.25, current + 0.01))
     end)
 
     -- Quick Scale Preset Buttons
@@ -632,28 +668,28 @@ function Wizard:CreateFrame()
     btnHud56:SetSize(145, 24)
     btnHud56:SetPoint("TOPLEFT", 14, -98)
     btnHud56:SetText(L["WIZARD_PRESET_SCALE_56"])
-    btnHud56:SetScript("OnClick", function() scaleSlider:SetValue(0.56) end)
+    btnHud56:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.56) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud56, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
 
     local btnHud65 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud65:SetSize(145, 24)
     btnHud65:SetPoint("LEFT", btnHud56, "RIGHT", 9, 0)
     btnHud65:SetText(L["WIZARD_PRESET_SCALE_65"])
-    btnHud65:SetScript("OnClick", function() scaleSlider:SetValue(0.65) end)
+    btnHud65:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.65) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud65, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
 
     local btnHud70 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud70:SetSize(145, 24)
     btnHud70:SetPoint("LEFT", btnHud65, "RIGHT", 9, 0)
     btnHud70:SetText(L["WIZARD_PRESET_SCALE_70"])
-    btnHud70:SetScript("OnClick", function() scaleSlider:SetValue(0.70) end)
+    btnHud70:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.70) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud70, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
 
     local btnHud100 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud100:SetSize(145, 24)
     btnHud100:SetPoint("LEFT", btnHud70, "RIGHT", 9, 0)
     btnHud100:SetText(L["WIZARD_PRESET_SCALE_100"])
-    btnHud100:SetScript("OnClick", function() scaleSlider:SetValue(1.00) end)
+    btnHud100:SetScript("OnClick", function() scaleSlider:SetValueDirect(1.00) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud100, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     -- ========================================================================

@@ -121,6 +121,7 @@ function Themes:ApplyCanvasTheme(canvasFrame)
     local currentThemeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(currentThemeKey)
     local isClassic = (currentThemeKey == "CLASSIC")
+    local isPureBlackTheme = (currentThemeKey == "PITCH_BLACK")
 
     local colorKey = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
     local alpha = (Akimbo.db and Akimbo.db.canvasAlpha)
@@ -128,11 +129,14 @@ function Themes:ApplyCanvasTheme(canvasFrame)
 
     local r, g, b
     local bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
-    local isPureBlack = (colorKey == "PURE_BLACK")
+    local isPureBlackBg = (colorKey == "PURE_BLACK") or isPureBlackTheme
 
-    if colorKey == "CUSTOM" and Akimbo.db and Akimbo.db.customCanvasColor then
+    if not isPureBlackTheme and colorKey == "CUSTOM" and Akimbo.db and Akimbo.db.customCanvasColor then
         local c = Akimbo.db.customCanvasColor
         r, g, b = c.r or 0.22, c.g or 0.42, c.b or 0.64
+    elseif isPureBlackBg then
+        r, g, b = 0.0, 0.0, 0.0
+        bgFile = "Interface\\Buttons\\WHITE8X8"
     else
         local c = CANVAS_PALETTES[colorKey] or CANVAS_PALETTES.CHARCOAL
         r, g, b = c.r, c.g, c.b
@@ -148,7 +152,7 @@ function Themes:ApplyCanvasTheme(canvasFrame)
     local edgeSize = theme.edgeSize or 32
     local insets = theme.insets or { left = 11, right = 12, top = 12, bottom = 11 }
 
-    if isPureBlack then
+    if isPureBlackTheme then
         edgeFile = "Interface\\Buttons\\WHITE8X8"
         edgeSize = 1
         insets = { left = 0, right = 0, top = 0, bottom = 0 }
@@ -158,7 +162,7 @@ function Themes:ApplyCanvasTheme(canvasFrame)
         canvasFrame:SetBackdrop({
             bgFile = bgFile,
             edgeFile = edgeFile,
-            tile = not isPureBlack,
+            tile = not isPureBlackBg,
             tileSize = 64,
             edgeSize = edgeSize,
             insets = insets,
@@ -180,7 +184,7 @@ function Themes:ApplyCanvasTheme(canvasFrame)
 
     -- Resolve border trim color according to theme and trimColor setting
     local br = theme.borderColor or { 1.0, 1.0, 1.0, 1.0 }
-    if isPureBlack then
+    if isPureBlackTheme then
         br = { 0.18, 0.18, 0.18, 1.0 }
     elseif Akimbo.db and Akimbo.db.trimColor then
         if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then

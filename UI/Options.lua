@@ -342,11 +342,25 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     }
     slider.valueText = valueText
 
+    local function ApplyLayoutCleanly(s)
+        if s._pendingApply then
+            s._pendingApply = false
+            s:SetScript("OnUpdate", nil)
+            Akimbo:ApplyFullLayout()
+        end
+    end
+
+    slider.SetValueDirect = function(self, val)
+        self._isDirect = true
+        self:SetValue(val)
+        self._isDirect = nil
+    end
+
     local function CommitEditBox()
         local txt = editBox:GetText()
         local parsed = ParseSliderInput(txt, minVal, maxVal, step, formatStr)
         if parsed then
-            slider:SetValue(parsed)
+            slider:SetValueDirect(parsed)
         else
             editBox:SetText(FormatValue(slider:GetValue() or getVal()))
         end
@@ -383,7 +397,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         local newVal = math.max(minVal, cur - stepAmount)
         newVal = math.floor(((newVal - minVal) / step) + 0.5) * step + minVal
         newVal = math.floor(newVal * 10000 + 0.5) / 10000
-        slider:SetValue(newVal)
+        slider:SetValueDirect(newVal)
     end)
 
     btnPlus:SetScript("OnClick", function()
@@ -393,7 +407,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         local newVal = math.min(maxVal, cur + stepAmount)
         newVal = math.floor(((newVal - minVal) / step) + 0.5) * step + minVal
         newVal = math.floor(newVal * 10000 + 0.5) / 10000
-        slider:SetValue(newVal)
+        slider:SetValueDirect(newVal)
     end)
 
     slider:SetScript("OnMouseDown", function(self, button)
@@ -403,14 +417,13 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end)
 
     slider:SetScript("OnMouseUp", function(self, button)
-        if self.isDragging then
-            self.isDragging = false
-            self._debounceTimer = nil
-            Akimbo:ApplyFullLayout()
+        self.isDragging = false
+        if self._pendingApply then
+            ApplyLayoutCleanly(self)
         end
     end)
 
-    slider:SetScript("OnValueChanged", function(self, val)
+    slider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.max(minVal, math.min(maxVal, val))
         val = math.floor(((val - minVal) / step) + 0.5) * step + minVal
         val = math.floor(val * 10000 + 0.5) / 10000
@@ -419,20 +432,29 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
             editBox:SetText(formatted)
         end
         setVal(val)
-        if self.isDragging then
-            if not self._debounceTimer then
-                self._debounceTimer = true
-                if C_Timer and C_Timer.After then
-                    C_Timer.After(0.15, function()
-                        self._debounceTimer = nil
-                        Akimbo:ApplyFullLayout()
-                    end)
-                else
-                    self._debounceTimer = nil
-                    Akimbo:ApplyFullLayout()
+
+        -- Direct programmatic adjustment ([-], [+], editBox, or preset buttons)
+        if self._isDirect then
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
+            Akimbo:ApplyFullLayout()
+            return
+        end
+
+        -- Check if user is actively holding down the mouse button (dragging the slider)
+        local isMouseDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) or (self.isDragging == true) or (userInput == true)
+        if isMouseDown then
+            self._pendingApply = true
+            self:SetScript("OnUpdate", function(s)
+                local stillDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton"))
+                if not stillDown then
+                    s.isDragging = false
+                    ApplyLayoutCleanly(s)
                 end
-            end
+            end)
         else
+            self._pendingApply = false
+            self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
     end)
@@ -839,35 +861,35 @@ function Options:CreateFloatingPanel()
     p56Btn:SetSize(56, 22)
     p56Btn:SetPoint("TOPLEFT", 360, -74)
     p56Btn:SetText("56%")
-    p56Btn:SetScript("OnClick", function() hudSlider:SetValue(0.56) end)
+    p56Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.56) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"] or "56% UI Scale", L["WIZARD_PRESET_SCALE_56_TIP_DESC"] or "Ultra-compact UI scale fit.") end
 
     local p65Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p65Btn:SetSize(56, 22)
     p65Btn:SetPoint("LEFT", p56Btn, "RIGHT", 5, 0)
     p65Btn:SetText("65%")
-    p65Btn:SetScript("OnClick", function() hudSlider:SetValue(0.65) end)
+    p65Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.65) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"] or "65% UI Scale", L["WIZARD_PRESET_SCALE_65_TIP_DESC"] or "Balanced compact UI scale.") end
 
     local p70Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p70Btn:SetSize(56, 22)
     p70Btn:SetPoint("LEFT", p65Btn, "RIGHT", 5, 0)
     p70Btn:SetText("70%")
-    p70Btn:SetScript("OnClick", function() hudSlider:SetValue(0.70) end)
+    p70Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.70) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"] or "70% UI Scale (Default)", L["WIZARD_PRESET_SCALE_70_TIP_DESC"] or "Recommended standard UI scale.") end
 
     local p85Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p85Btn:SetSize(56, 22)
     p85Btn:SetPoint("LEFT", p70Btn, "RIGHT", 5, 0)
     p85Btn:SetText("85%")
-    p85Btn:SetScript("OnClick", function() hudSlider:SetValue(0.85) end)
+    p85Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.85) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"] or "85% UI Scale", L["WIZARD_PRESET_SCALE_85_TIP_DESC"] or "Enlarged comfortable UI scale.") end
 
     local p100Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p100Btn:SetSize(56, 22)
     p100Btn:SetPoint("LEFT", p85Btn, "RIGHT", 5, 0)
     p100Btn:SetText("100%")
-    p100Btn:SetScript("OnClick", function() hudSlider:SetValue(1.00) end)
+    p100Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(1.00) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, "100% UI Scale", "Native 1:1 Blizzard UI scale.") end
 
     local hudNote = card1_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -1057,6 +1079,7 @@ function Options:CreateFloatingPanel()
         function()
             Akimbo.db.theme = "CLASSIC"
             Akimbo.db.trimColor = "GOLD"
+            Akimbo.db.canvasColor = "CLASSIC_STONE"
             Akimbo:UpdateTheme()
         end,
         L["THEME_CLASSIC_TIP_TITLE"], L["THEME_CLASSIC_TIP_DESC"]
@@ -1072,6 +1095,7 @@ function Options:CreateFloatingPanel()
         function()
             Akimbo.db.theme = "BLIZZARD_SLATE"
             Akimbo.db.trimColor = "SILVER"
+            Akimbo.db.canvasColor = "CHARCOAL"
             Akimbo:UpdateTheme()
         end,
         L["THEME_SLATE_TIP_TITLE"], L["THEME_SLATE_TIP_DESC"]
@@ -1102,6 +1126,8 @@ function Options:CreateFloatingPanel()
         function() return (Akimbo.db and Akimbo.db.theme == "OBSIDIAN") end,
         function()
             Akimbo.db.theme = "OBSIDIAN"
+            Akimbo.db.trimColor = "BRONZE"
+            Akimbo.db.canvasColor = "CHARCOAL"
             Akimbo:UpdateTheme()
         end,
         L["THEME_OBSIDIAN_TIP_TITLE"], L["THEME_OBSIDIAN_TIP_DESC"]
