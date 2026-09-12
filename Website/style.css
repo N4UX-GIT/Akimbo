@@ -1,43 +1,44 @@
 /* ==============================================================================
-   Akimbo Official Website Stylesheet
-   Modern Obsidian Dark Mode with Cyan Accents & Dual-Monitor Visualizer
+   Akimbo Official Website - Authentic World of Warcraft UI Theme
+   Handcrafted to match Blizzard UI dialogs, gold filigree trim, and stone panels
    ============================================================================== */
 
-:root {
-    --bg-base: #07090e;
-    --bg-surface: #0e121a;
-    --bg-card: #141924;
-    --bg-card-hover: #1b2230;
-    --border: #222938;
-    --border-hover: #364156;
-    
-    --primary: #00ccff;
-    --primary-hover: #33d6ff;
-    --primary-glow: rgba(0, 204, 255, 0.25);
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
-    --tinker-gold: #f59e0b;
-    --tinker-brass: #d97706;
-    --tinker-copper: #b45309;
-    --tinker-amber: #fbbf24;
-    --goggle-cyan: #00d2ff;
-    --goggle-glow: rgba(0, 210, 255, 0.35);
-    --brass-glow: rgba(245, 158, 11, 0.25);
-    --border-brass: rgba(217, 119, 6, 0.4);
+:root {
+    /* Blizzard UI Authentic Palette */
+    --wow-gold: #ffd100;
+    --wow-gold-bright: #ffea75;
+    --wow-gold-dark: #b8860b;
+    --wow-gold-border: #876828;
+    --wow-gold-trim: #c49a3c;
     
-    --success: #00e676;
-    --warning: #ffd54f;
-    --danger: #ff5252;
+    --wow-stone-darkest: #090a0d;
+    --wow-stone-base: #0f1217;
+    --wow-stone-card: #151821;
+    --wow-stone-hover: #1c212d;
+    --wow-stone-border: #2c3242;
+
+    --wow-red-light: #9c2a26;
+    --wow-red-mid: #681715;
+    --wow-red-dark: #3b0a08;
     
-    --text-main: #f0f4f8;
-    --text-muted: #8c9ba5;
-    --text-sub: #5c6978;
-    
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --wow-parchment: #dfc598;
+    --wow-parchment-muted: #9e917d;
+    --wow-text-main: #f0e6d2;
+    --wow-text-muted: #a6a092;
+    --wow-text-sub: #726c60;
+
+    --wow-cyan-glow: #00d2ff;
+    --wow-cyan-border: #0284c7;
+
+    --font-warcraft: 'Cinzel', 'Georgia', serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', Consolas, monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
 }
 
 * {
@@ -47,197 +48,173 @@
 }
 
 body {
-    background-color: var(--bg-base);
-    color: var(--text-main);
-    font-family: var(--font-sans);
+    background-color: var(--wow-stone-darkest);
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(196, 154, 60, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 20% 40%, rgba(0, 210, 255, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(139, 35, 32, 0.04) 0%, transparent 50%);
+    color: var(--wow-text-main);
+    font-family: var(--font-body);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
 }
 
 /* ============================================================================
-   Typography & Base Styles
+   Typography
    ============================================================================ */
-h1, h2, h3, h4 {
-    color: var(--text-main);
+h1, h2, h3, h4, h5, .warcraft-font {
+    font-family: var(--font-warcraft);
+    color: var(--wow-gold);
     font-weight: 700;
-    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 12px rgba(0, 0, 0, 0.7);
 }
 
 p {
-    color: var(--text-muted);
+    color: var(--wow-text-muted);
 }
 
 a {
-    color: var(--primary);
+    color: var(--wow-gold);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 a:hover {
-    color: var(--primary-hover);
+    color: var(--wow-gold-bright);
+    text-shadow: 0 0 8px rgba(255, 209, 0, 0.4);
 }
 
 code {
     font-family: var(--font-mono);
-    background: rgba(0, 204, 255, 0.1);
-    color: var(--primary);
+    background: rgba(15, 18, 23, 0.85);
+    border: 1px solid var(--wow-gold-border);
+    color: var(--wow-gold-bright);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
-    font-size: 0.9em;
-}
-
-.gradient-text {
-    background: linear-gradient(135deg, #00ccff 0%, #00ffaa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.gradient-text-tinker {
-    background: linear-gradient(135deg, #00d2ff 0%, #fbbf24 60%, #f59e0b 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.gradient-text-gold {
-    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 0.88em;
 }
 
 /* ============================================================================
-   Buttons & Badges
+   Authentic Blizzard UI Buttons (UIPanelButtonTemplate)
    ============================================================================ */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    font-weight: 600;
-    border-radius: var(--radius-md);
-    padding: 10px 20px;
+    gap: 10px;
+    font-family: var(--font-warcraft);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid transparent;
+    text-shadow: 0 1px 2px #000;
+    position: relative;
+    user-select: none;
 }
 
-.btn-primary {
-    background: var(--primary);
-    color: #050b14;
-    box-shadow: 0 4px 16px var(--primary-glow);
+.btn-wow-red {
+    background: linear-gradient(180deg, #9c2a26 0%, #681715 50%, #3b0a08 100%);
+    border: 1px solid var(--wow-gold-trim);
+    color: var(--wow-gold);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-.btn-primary:hover {
-    background: var(--primary-hover);
-    color: #050b14;
+.btn-wow-red:hover {
+    background: linear-gradient(180deg, #b8322e 0%, #7d1c1a 50%, #4a0d0b 100%);
+    border-color: var(--wow-gold-bright);
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 16px rgba(255, 209, 0, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 204, 255, 0.4);
 }
 
-.btn-secondary {
-    background: var(--bg-card);
-    color: var(--text-main);
-    border-color: var(--border);
+.btn-wow-stone {
+    background: linear-gradient(180deg, #282f3d 0%, #181c24 50%, #0e1117 100%);
+    border: 1px solid var(--wow-gold-border);
+    color: var(--wow-text-main);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.btn-secondary:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-    color: var(--primary);
+.btn-wow-stone:hover {
+    background: linear-gradient(180deg, #343c4d 0%, #202530 50%, #131720 100%);
+    border-color: var(--wow-gold);
+    color: var(--wow-gold-bright);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 12px rgba(212, 175, 55, 0.3);
     transform: translateY(-2px);
 }
 
 .btn-sm {
-    padding: 6px 14px;
+    padding: 6px 16px;
     font-size: 0.85rem;
 }
 
 .btn-lg {
-    padding: 14px 28px;
-    font-size: 1rem;
-}
-
-.badge {
-    background: rgba(0, 204, 255, 0.12);
-    color: var(--primary);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    border: 1px solid rgba(0, 204, 255, 0.3);
-}
-
-.tag {
-    display: inline-block;
-    color: var(--primary);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    padding: 14px 32px;
+    font-size: 1.05rem;
 }
 
 /* ============================================================================
-   Navbar
+   Navigation Bar (Blizzard Header Style)
    ============================================================================ */
 .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(10, 12, 16, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
+    background: rgba(13, 16, 22, 0.95);
+    border-bottom: 2px solid var(--wow-gold-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
 }
 
 .nav-container {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 14px 24px;
+    padding: 12px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.logo {
+.brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
-.nav-logo-img {
-    width: 38px;
-    height: 38px;
+.brand-medallion {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: 2px solid var(--tinker-brass);
-    box-shadow: 0 0 14px rgba(0, 204, 255, 0.4);
+    border: 2px solid var(--wow-gold-trim);
+    box-shadow: 0 0 10px rgba(255, 209, 0, 0.35), inset 0 0 8px rgba(0, 0, 0, 0.8);
     object-fit: cover;
-    background: #05070a;
+    background: #000;
 }
 
-.logo-text-group {
+.brand-text {
     display: flex;
     flex-direction: column;
 }
 
-.logo-accent {
-    font-size: 1.25rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    color: var(--text-main);
+.brand-title {
+    font-family: var(--font-warcraft);
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--wow-gold);
     line-height: 1.1;
 }
 
-.logo-sub {
-    font-size: 0.62rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--tinker-gold);
-}
-
-.badge-tinker {
-    background: rgba(245, 158, 11, 0.14);
-    color: var(--tinker-amber);
-    border: 1px solid rgba(245, 158, 11, 0.4);
+.brand-subtitle {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--wow-parchment-muted);
+    text-transform: uppercase;
 }
 
 .nav-links {
@@ -246,935 +223,519 @@ code {
 }
 
 .nav-links a {
-    color: var(--text-muted);
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-family: var(--font-warcraft);
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--wow-parchment);
 }
 
 .nav-links a:hover {
-    color: var(--text-main);
+    color: var(--wow-gold);
 }
 
 /* ============================================================================
    Hero Section
    ============================================================================ */
 .hero {
-    padding: 70px 24px 60px;
-    background: radial-gradient(circle at 50% 10%, rgba(0, 204, 255, 0.10) 0%, rgba(245, 158, 11, 0.04) 40%, transparent 70%);
+    padding: 60px 24px 50px;
 }
 
 .hero-container {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
 }
 
-.hero-grid {
-    display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 48px;
-    align-items: center;
-    margin-bottom: 50px;
-    text-align: left;
+.hero-header {
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto 40px;
 }
 
 .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245, 158, 11, 0.10);
-    border: 1px solid rgba(245, 158, 11, 0.35);
-    padding: 6px 14px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--wow-gold-border);
+    padding: 5px 16px;
     border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--tinker-amber);
-    margin-bottom: 20px;
+    font-family: var(--font-warcraft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--wow-gold);
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .hero-title {
-    font-size: 2.9rem;
-    letter-spacing: -0.03em;
-    line-height: 1.18;
-    margin-bottom: 18px;
+    font-size: 3.1rem;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    color: var(--wow-gold);
+}
+
+.hero-title .title-accent {
+    color: var(--wow-gold-bright);
+    display: block;
 }
 
 .hero-subtitle {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-    color: var(--text-muted);
+    font-size: 1.15rem;
+    color: var(--wow-text-main);
     line-height: 1.6;
+    margin-bottom: 28px;
 }
 
 .hero-actions {
     display: flex;
+    justify-content: center;
     gap: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
 }
 
-.hero-trust-bar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.trust-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border);
-    padding: 5px 12px;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-}
-
-.trust-item:hover {
-    border-color: rgba(0, 204, 255, 0.4);
-    color: var(--text-main);
-}
-
-/* Master Tinker Mascot Card */
-.hero-mascot {
+.hero-stats-bar {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    color: var(--wow-parchment-muted);
 }
 
-.tinker-card {
-    position: relative;
-    background: linear-gradient(145deg, rgba(20, 25, 36, 0.95), rgba(10, 14, 22, 0.98));
-    border: 1px solid rgba(245, 158, 11, 0.4);
+.hero-stats-bar span {
+    color: var(--wow-gold);
+    font-weight: 600;
+}
+
+/* ============================================================================
+   Blizzard In-Game Battlestation Showcase
+   ============================================================================ */
+.showcase-section {
+    margin-top: 40px;
+}
+
+.showcase-frame {
+    background: var(--wow-stone-card);
+    border: 2px solid var(--wow-gold-border);
     border-radius: var(--radius-lg);
-    padding: 22px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 204, 255, 0.2);
-    max-width: 440px;
-    width: 100%;
-    backdrop-filter: blur(16px);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: 
+        0 16px 40px rgba(0, 0, 0, 0.9), 
+        0 0 24px rgba(212, 175, 55, 0.15),
+        inset 0 0 16px rgba(0, 0, 0, 0.8);
+    padding: 16px;
+    position: relative;
 }
 
-.tinker-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(245, 158, 11, 0.7);
-    box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 204, 255, 0.35);
+.showcase-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.15) 0%, rgba(15, 18, 23, 0.8) 100%);
+    border: 1px solid var(--wow-gold-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    margin-bottom: 14px;
 }
 
-.tinker-avatar-frame {
+.showcase-header-title {
+    font-family: var(--font-warcraft);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--wow-gold);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.showcase-header-tag {
+    font-size: 0.78rem;
+    color: var(--wow-parchment-muted);
+    font-weight: 600;
+}
+
+.showcase-img-container {
     position: relative;
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: #05070a;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--wow-stone-border);
+    background: #000;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9);
 }
 
-.tinker-avatar {
+.showcase-img {
     width: 100%;
     height: auto;
     display: block;
+}
+
+/* Dual Display Overlay Badges */
+.showcase-annotations {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.annotation-card {
+    background: rgba(15, 18, 23, 0.9);
+    border: 1px solid var(--wow-gold-border);
     border-radius: var(--radius-md);
-    transition: transform 0.4s ease;
+    padding: 16px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
-.tinker-card:hover .tinker-avatar {
-    transform: scale(1.02);
+.annotation-card.left-screen {
+    border-left: 4px solid var(--wow-gold);
 }
 
-.lens-tag {
-    position: absolute;
-    background: rgba(7, 10, 16, 0.92);
-    border-radius: var(--radius-sm);
-    padding: 6px 10px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-    pointer-events: none;
-    transition: all 0.3s ease;
+.annotation-card.right-screen {
+    border-left: 4px solid var(--wow-cyan-glow);
 }
 
-.tag-left {
-    top: 50%;
-    left: 8px;
-    border: 1px solid rgba(0, 204, 255, 0.7);
-    box-shadow: 0 0 14px rgba(0, 204, 255, 0.3);
+.annotation-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
 }
 
-.tag-right {
-    top: 50%;
-    right: 8px;
-    border: 1px solid rgba(245, 158, 11, 0.7);
-    box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+.annotation-title {
+    font-family: var(--font-warcraft);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--wow-gold);
 }
 
-.lens-tag-badge {
-    display: block;
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+.annotation-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 4px;
     text-transform: uppercase;
 }
 
-.tag-left .lens-tag-badge {
-    color: var(--goggle-cyan);
+.badge-portrait {
+    background: rgba(255, 209, 0, 0.15);
+    color: var(--wow-gold);
+    border: 1px solid var(--wow-gold-border);
 }
 
-.tag-right .lens-tag-badge {
-    color: var(--tinker-gold);
+.badge-landscape {
+    background: rgba(0, 210, 255, 0.15);
+    color: var(--wow-cyan-glow);
+    border: 1px solid var(--wow-cyan-border);
 }
 
-.lens-tag-text {
-    display: block;
-    font-size: 0.74rem;
-    font-weight: 600;
-    color: #f0f4f8;
-    white-space: nowrap;
-}
-
-.tinker-card-caption {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 14px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    text-align: center;
-}
-
-.trust-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 20px;
-    transition: all 0.2s ease;
-}
-
-.trust-item:hover {
-    border-color: rgba(0, 204, 255, 0.4);
-    color: var(--text-main);
-    background: rgba(0, 204, 255, 0.04);
-}
-
-.trust-icon {
-    width: 15px;
-    height: 15px;
-    color: var(--success);
-    flex-shrink: 0;
+.annotation-desc {
+    font-size: 0.92rem;
+    color: var(--wow-text-main);
+    line-height: 1.5;
 }
 
 /* ============================================================================
-   Dual Monitor Setup Visual Preview
+   Features Grid (Blizzard Grimoire / Dialog Frame Style)
    ============================================================================ */
-.monitor-setup-preview {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 20px;
-    perspective: 1000px;
+.section {
+    padding: 70px 24px;
 }
 
-.monitor {
-    background: #0f1218;
-    border: 3px solid #2d3545;
-    border-radius: 8px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 204, 255, 0.05);
-    overflow: hidden;
-    position: relative;
-}
-
-.monitor-bezel {
-    background: #181d26;
-    color: var(--text-sub);
-    font-size: 0.7rem;
-    font-family: var(--font-mono);
-    padding: 4px;
-    text-align: center;
-    border-top: 1px solid var(--border);
-}
-
-.screen-header {
-    background: #151922;
-    color: var(--primary);
-    font-size: 0.68rem;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    padding: 4px 8px;
-    border-bottom: 1px solid var(--border);
-    letter-spacing: 0.05em;
-}
-
-/* Vertical Monitor */
-.monitor-vertical {
-    width: 220px;
-    height: 380px;
-}
-
-.monitor-vertical .monitor-screen {
-    height: calc(100% - 24px);
-    display: flex;
-    flex-direction: column;
-    background: #0d1016;
-}
-
-.mock-map {
-    height: 55%;
-    background: radial-gradient(circle, #2a2015 0%, #15120c 100%);
-    border-bottom: 2px solid #3d3020;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-}
-
-.map-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #e5a742;
-}
-
-.map-status {
-    font-size: 0.65rem;
-    color: var(--success);
-    margin-top: 4px;
-}
-
-.mock-panels {
-    height: 45%;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.mock-panel {
-    background: #151922;
-    border: 1px solid #232a38;
-    border-radius: 4px;
-    padding: 6px;
-    font-size: 0.65rem;
-    color: var(--text-muted);
-}
-
-/* Landscape Monitor */
-.monitor-landscape {
-    width: 520px;
-    height: 300px;
-}
-
-.monitor-landscape .monitor-screen {
-    height: calc(100% - 24px);
-    background: linear-gradient(180deg, #101926 0%, #080c14 100%);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-.game-view-content {
-    flex: 1;
-    position: relative;
-    padding: 10px;
-}
-
-.unit-frames {
-    display: flex;
-    gap: 8px;
-}
-
-.player-box, .target-box {
-    background: rgba(20, 26, 36, 0.8);
-    border: 1px solid #334055;
-    padding: 4px 8px;
-    font-size: 0.65rem;
-    border-radius: 4px;
-    color: var(--text-main);
-}
-
-.minimap-box {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid #caa24d;
-    background: #1a2230;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.55rem;
-    color: #caa24d;
-}
-
-.action-bars-box {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 65%;
-    text-align: center;
-}
-
-.xp-bar {
-    background: #4a287a;
-    border: 1px solid #7c3aed;
-    font-size: 0.55rem;
-    color: #ddd;
-    border-radius: 2px;
-    padding: 1px 0;
-    margin-bottom: 2px;
-}
-
-.action-buttons {
-    background: #151a24;
-    border: 1px solid #283244;
-    padding: 4px;
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    border-radius: 4px;
-}
-
-/* ============================================================================
-   Features Grid
-   ============================================================================ */
 .section-container {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 80px 24px;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 45px;
 }
 
 .section-title {
-    font-size: 2.2rem;
-    text-align: center;
+    font-size: 2.3rem;
     margin-bottom: 12px;
 }
 
 .section-subtitle {
-    text-align: center;
     font-size: 1.05rem;
-    color: var(--text-muted);
-    max-width: 600px;
-    margin: 0 auto 50px;
-}
-
-.grid {
-    display: grid;
-    gap: 24px;
+    max-width: 700px;
+    margin: 0 auto;
+    color: var(--wow-parchment-muted);
 }
 
 .grid-3 {
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-}
-
-.card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 30px;
-    transition: all 0.25s ease;
-}
-
-.card:hover {
-    background: var(--bg-card);
-    border-color: var(--border-hover);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-}
-
-.card-icon {
-    font-size: 2rem;
-    margin-bottom: 16px;
-}
-
-.card-title {
-    font-size: 1.25rem;
-    margin-bottom: 10px;
-}
-
-.card-desc {
-    font-size: 0.95rem;
-    line-height: 1.6;
-}
-
-/* ============================================================================
-   Safety & Anti-Cheat Compliance Section
-   ============================================================================ */
-.safety-section {
-    background: #0d1017;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-}
-
-.section-header-center {
-    text-align: center;
-    margin-bottom: 48px;
-}
-
-.grid-4 {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-}
-
-.safety-pillars {
-    margin-bottom: 50px;
-}
-
-.safety-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 26px 22px;
-    position: relative;
-    transition: all 0.25s ease;
-}
-
-.safety-card:hover {
-    background: var(--bg-card);
-    border-color: rgba(0, 230, 118, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
-}
-
-.safety-card-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-}
-
-.safety-card-icon.green {
-    background: rgba(0, 230, 118, 0.1);
-    color: var(--success);
-    border: 1px solid rgba(0, 230, 118, 0.25);
-}
-
-.safety-card-icon svg {
-    width: 22px;
-    height: 22px;
-}
-
-.safety-card h4 {
-    font-size: 1.15rem;
-    margin-bottom: 10px;
-}
-
-.safety-card p {
-    font-size: 0.9rem;
-    line-height: 1.55;
-    color: var(--text-muted);
-}
-
-/* Side-by-Side Comparison Container */
-.comparison-container {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 36px 30px;
-    margin-bottom: 40px;
-}
-
-.comparison-title {
-    font-size: 1.35rem;
-    text-align: center;
-    margin-bottom: 28px;
-}
-
-.comparison-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
-
-.comparison-card {
-    border-radius: var(--radius-md);
-    padding: 24px;
-    border: 1px solid var(--border);
-}
-
-.danger-card {
-    background: rgba(255, 82, 82, 0.04);
-    border-color: rgba(255, 82, 82, 0.25);
-}
-
-.safe-card {
-    background: rgba(0, 230, 118, 0.04);
-    border-color: rgba(0, 230, 118, 0.3);
-    box-shadow: 0 0 24px rgba(0, 230, 118, 0.06);
-}
-
-.comparison-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-}
-
-.danger-card .comparison-header {
-    border-bottom-color: rgba(255, 82, 82, 0.2);
-}
-
-.safe-card .comparison-header {
-    border-bottom-color: rgba(0, 230, 118, 0.2);
-}
-
-.comparison-header h4 {
-    font-size: 1.05rem;
-}
-
-.status-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.status-indicator.red {
-    background: var(--danger);
-    box-shadow: 0 0 8px var(--danger);
-}
-
-.status-indicator.green {
-    background: var(--success);
-    box-shadow: 0 0 8px var(--success);
-}
-
-.comparison-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.comparison-list li {
-    font-size: 0.92rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    line-height: 1.45;
-    color: var(--text-muted);
-}
-
-.icon-bad {
-    color: var(--danger);
-    font-weight: 800;
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-.icon-good {
-    color: var(--success);
-    font-weight: 800;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-/* Safety Callout Box */
-.safety-callout {
-    background: rgba(0, 204, 255, 0.04);
-    border: 1px solid rgba(0, 204, 255, 0.25);
-    border-radius: var(--radius-md);
-    padding: 24px;
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-}
-
-.callout-icon {
-    font-size: 1.8rem;
-    line-height: 1;
-}
-
-.callout-body h4 {
-    font-size: 1.15rem;
-    color: var(--primary);
-    margin-bottom: 8px;
-}
-
-.callout-body p {
-    font-size: 0.92rem;
-    margin-bottom: 12px;
-    line-height: 1.6;
-}
-
-.callout-alt {
-    margin-top: 14px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(0, 204, 255, 0.15);
-    font-size: 0.9rem;
-    color: var(--text-main);
-    line-height: 1.5;
-}
-
-.callout-alt strong {
-    color: var(--primary);
-}
-
-/* ============================================================================
-   Companion Section
-   ============================================================================ */
-.companion-section {
-    background: var(--bg-surface);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-}
-
-.companion-box {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 50px;
-    align-items: center;
-}
-
-.companion-content h2 {
-    font-size: 2.2rem;
-    margin-bottom: 16px;
-}
-
-.companion-content p {
-    font-size: 1.05rem;
-    margin-bottom: 24px;
-}
-
-.feature-checklist {
-    list-style: none;
-    margin-bottom: 30px;
-}
-
-.feature-checklist li {
-    position: relative;
-    padding-left: 26px;
-    margin-bottom: 12px;
-    font-size: 0.95rem;
-    color: var(--text-muted);
-}
-
-.feature-checklist li::before {
-    content: "✓";
-    position: absolute;
-    left: 0;
-    color: var(--primary);
-    font-weight: 700;
-}
-
-.companion-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.version-label {
-    font-size: 0.8rem;
-    color: var(--text-sub);
-}
-
-/* Tray Card Preview */
-.tray-card {
-    background: #141720;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
-}
-
-.tray-header {
-    background: #1c212c;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border);
-}
-
-.dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.dot.green { background: var(--success); box-shadow: 0 0 8px var(--success); }
-
-.tray-body {
-    padding: 16px;
-}
-
-.status-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    font-size: 0.85rem;
-}
-
-.status-row:last-child {
-    border-bottom: none;
-}
-
-.status-row .label { color: var(--text-muted); }
-.status-row .val { font-weight: 600; }
-.status-row .val.green { color: var(--success); }
-.status-row .val.cyan { color: var(--primary); }
-
-/* ============================================================================
-   Steps Grid
-   ============================================================================ */
-.steps-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
 }
 
-.step-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 30px;
+.wow-card {
+    background: linear-gradient(145deg, var(--wow-stone-card) 0%, var(--wow-stone-base) 100%);
+    border: 1px solid var(--wow-gold-border);
+    border-radius: var(--radius-md);
+    padding: 28px 24px;
     position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.25s ease;
 }
 
-.step-num {
-    width: 36px;
-    height: 36px;
-    background: rgba(0, 204, 255, 0.12);
-    border: 1px solid var(--primary);
-    color: var(--primary);
+.wow-card:hover {
+    border-color: var(--wow-gold);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 16px rgba(212, 175, 55, 0.2);
+}
+
+.wow-card-icon {
+    font-size: 2rem;
+    margin-bottom: 14px;
+    display: inline-block;
+}
+
+.wow-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+    color: var(--wow-gold);
+}
+
+.wow-card-desc {
+    font-size: 0.95rem;
+    color: var(--wow-text-main);
+    line-height: 1.55;
+}
+
+/* ============================================================================
+   The Master Tinker Spotlight
+   ============================================================================ */
+.tinker-spotlight {
+    background: linear-gradient(145deg, rgba(21, 24, 33, 0.9) 0%, rgba(15, 18, 23, 0.95) 100%);
+    border: 2px solid var(--wow-gold-border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: center;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    margin: 50px 0;
+}
+
+.tinker-portrait-box {
+    text-align: center;
+}
+
+.tinker-portrait-img {
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 3px solid var(--wow-gold);
+    box-shadow: 0 0 24px rgba(255, 209, 0, 0.4), inset 0 0 16px rgba(0, 0, 0, 0.9);
+    object-fit: cover;
+    background: #000;
+}
+
+.tinker-portrait-caption {
+    font-family: var(--font-warcraft);
+    font-size: 0.85rem;
+    color: var(--wow-gold-bright);
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+.tinker-info h3 {
+    font-size: 1.85rem;
+    margin-bottom: 12px;
+}
+
+.tinker-info p {
+    font-size: 1.05rem;
+    color: var(--wow-text-main);
+    line-height: 1.65;
+    margin-bottom: 18px;
+}
+
+.tinker-quote {
+    background: rgba(10, 12, 16, 0.8);
+    border-left: 3px solid var(--wow-gold);
+    padding: 12px 18px;
+    font-style: italic;
+    color: var(--wow-parchment);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* ============================================================================
+   Steps Walkthrough (Quest Log Style)
+   ============================================================================ */
+.steps-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.quest-step-card {
+    background: var(--wow-stone-card);
+    border: 1px solid var(--wow-gold-border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+.step-seal {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--wow-red-light) 0%, var(--wow-red-mid) 100%);
+    border: 2px solid var(--wow-gold);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    margin-bottom: 16px;
+    font-family: var(--font-warcraft);
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--wow-gold-bright);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    margin-bottom: 14px;
 }
 
-.step-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+.quest-step-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: var(--wow-gold);
+}
+
+.quest-step-card p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--wow-text-main);
 }
 
 /* ============================================================================
-   FAQ Grid
+   FAQ Section
    ============================================================================ */
 .faq-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-.faq-item {
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
+.faq-card {
+    background: var(--wow-stone-card);
+    border: 1px solid var(--wow-stone-border);
     border-radius: var(--radius-md);
-    padding: 24px;
+    padding: 22px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.faq-item h4 {
+.faq-card:hover {
+    border-color: var(--wow-gold-border);
+}
+
+.faq-card h4 {
     font-size: 1.1rem;
-    margin-bottom: 10px;
-    color: var(--text-main);
+    margin-bottom: 8px;
+    color: var(--wow-gold);
 }
 
-.faq-item p {
-    font-size: 0.95rem;
+.faq-card p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--wow-text-main);
 }
 
 /* ============================================================================
    Footer
    ============================================================================ */
 .footer {
-    border-top: 1px solid var(--border);
-    padding: 30px 24px;
-    background: rgba(7, 9, 14, 0.95);
+    background: var(--wow-stone-darkest);
+    border-top: 2px solid var(--wow-gold-border);
+    padding: 36px 24px;
+    margin-top: 60px;
 }
 
 .footer-container {
-    max-width: 1200px;
+    max-width: 1240px;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-.footer-left {
+.footer-brand {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
 .footer-logo {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 1px solid var(--tinker-brass);
-    box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
-    object-fit: cover;
-    background: #05070a;
+    border: 2px solid var(--wow-gold-trim);
 }
 
-.footer-text {
+.footer-info {
     display: flex;
     flex-direction: column;
 }
 
-.footer-sub {
-    font-size: 0.76rem;
-    color: var(--text-sub);
+.footer-title {
+    font-family: var(--font-warcraft);
+    font-size: 1.1rem;
+    color: var(--wow-gold);
+    font-weight: 700;
 }
 
-.footer-right {
+.footer-subtitle {
+    font-size: 0.8rem;
+    color: var(--wow-parchment-muted);
+}
+
+.footer-nav {
     display: flex;
-    gap: 20px;
+    gap: 24px;
+}
+
+.footer-nav a {
+    font-family: var(--font-warcraft);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--wow-parchment);
 }
 
 /* ============================================================================
-   Responsive Design
+   Responsive Adjustments
    ============================================================================ */
 @media (max-width: 960px) {
-    .hero-grid {
+    .grid-3, .steps-container, .faq-grid {
+        grid-template-columns: 1fr;
+    }
+    .tinker-spotlight {
         grid-template-columns: 1fr;
         text-align: center;
-        gap: 40px;
     }
-    .hero-content {
-        display: flex;
+    .tinker-portrait-box {
+        margin: 0 auto;
+    }
+    .showcase-annotations {
+        grid-template-columns: 1fr;
+    }
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    .nav-links {
+        display: none;
+    }
+    .footer-container {
         flex-direction: column;
-        align-items: center;
+        text-align: center;
     }
-    .hero-actions { justify-content: center; }
-    .hero-trust-bar { justify-content: center; }
-    .hero-title { font-size: 2.2rem; }
-    .tinker-card { max-width: 380px; }
-    .footer-container { flex-direction: column; gap: 16px; text-align: center; }
-    .footer-left { flex-direction: column; }
-}
-
-@media (max-width: 600px) {
-    .hero-title { font-size: 1.85rem; }
-    .hero-trust-bar { flex-direction: column; gap: 8px; }
-    .monitor-setup-preview { flex-direction: column; align-items: center; }
-    .monitor-landscape { width: 100%; max-width: 480px; height: 260px; }
-    .companion-box { grid-template-columns: 1fr; }
-    .comparison-grid { grid-template-columns: 1fr; }
-    .safety-callout { flex-direction: column; }
-    .steps-grid { grid-template-columns: 1fr; }
-    .faq-grid { grid-template-columns: 1fr; }
-    .nav-links { display: none; }
+    .footer-brand {
+        flex-direction: column;
+    }
 }
