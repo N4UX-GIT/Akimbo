@@ -84,11 +84,11 @@ local COLOR_PALETTES = {
 
 -- Preset color options for the workspace background
 local CANVAS_PALETTES = {
-    CLASSIC_STONE= { name = "Classic Stone",    r = 0.28, g = 0.28, b = 0.32, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
-    TINKER_SLATE = { name = "Tinker Slate",     r = 0.12, g = 0.28, b = 0.44, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    CHARCOAL     = { name = "Charcoal Slate",   r = 0.16, g = 0.17, b = 0.20, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    WARM_NIGHT   = { name = "Warm Night",       r = 0.28, g = 0.18, b = 0.14, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.08, g = 0.15, b = 0.36, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CLASSIC_STONE= { name = "Classic Stone",    r = 0.72, g = 0.72, b = 0.75, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
+    TINKER_SLATE = { name = "Tinker Slate",     r = 0.22, g = 0.42, b = 0.64, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CHARCOAL     = { name = "Charcoal Slate",   r = 0.26, g = 0.27, b = 0.30, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    WARM_NIGHT   = { name = "Warm Night",       r = 0.40, g = 0.28, b = 0.22, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.15, g = 0.24, b = 0.48, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
     PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00, bg = "Interface\\Buttons\\WHITE8X8" },
 }
 
@@ -112,7 +112,15 @@ function Themes:ApplyCanvasTheme(canvasFrame)
     if not canvasFrame then
         canvasFrame = _G["AkimboCanvasFrame"] or Akimbo.canvas
     end
+    if not canvasFrame and Akimbo.Canvas and Akimbo.Canvas.CreateFrames then
+        Akimbo.Canvas:CreateFrames()
+        canvasFrame = _G["AkimboCanvasFrame"] or Akimbo.canvas
+    end
     if not canvasFrame then return end
+
+    local currentThemeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local theme = self:GetThemeInfo(currentThemeKey)
+    local isClassic = (currentThemeKey == "CLASSIC")
 
     local colorKey = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
     local alpha = (Akimbo.db and Akimbo.db.canvasAlpha)
@@ -120,35 +128,45 @@ function Themes:ApplyCanvasTheme(canvasFrame)
 
     local r, g, b
     local bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
-    local isPureBlack = false
+    local isPureBlack = (colorKey == "PURE_BLACK")
 
     if colorKey == "CUSTOM" and Akimbo.db and Akimbo.db.customCanvasColor then
         local c = Akimbo.db.customCanvasColor
-        r, g, b = c.r or 0.12, c.g or 0.22, c.b or 0.35
+        r, g, b = c.r or 0.22, c.g or 0.42, c.b or 0.64
     else
         local c = CANVAS_PALETTES[colorKey] or CANVAS_PALETTES.CHARCOAL
         r, g, b = c.r, c.g, c.b
         bgFile = c.bg or bgFile
-        isPureBlack = (colorKey == "PURE_BLACK")
     end
 
     if not canvasFrame.SetBackdrop then
         Mixin(canvasFrame, BackdropTemplateMixin)
     end
 
+    -- Apply active visual theme border styling directly to the workspace canvas
+    local edgeFile = theme.edgeFile or "Interface\\DialogFrame\\UI-DialogBox-Border"
+    local edgeSize = theme.edgeSize or 32
+    local insets = theme.insets or { left = 11, right = 12, top = 12, bottom = 11 }
+
+    if isPureBlack then
+        edgeFile = "Interface\\Buttons\\WHITE8X8"
+        edgeSize = 1
+        insets = { left = 0, right = 0, top = 0, bottom = 0 }
+    end
+
     if canvasFrame.SetBackdrop then
         canvasFrame:SetBackdrop({
             bgFile = bgFile,
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = edgeFile,
             tile = not isPureBlack,
             tileSize = 64,
-            edgeSize = 1,
-            insets = { left = 0, right = 0, top = 0, bottom = 0 },
+            edgeSize = edgeSize,
+            insets = insets,
         })
         canvasFrame:SetBackdropColor(r, g, b, alpha)
     end
 
-    -- Dedicated full-frame solid texture for guaranteed vivid visibility on real clients
+    -- Dedicated solid background texture for guaranteed vibrant visibility on real clients
     if not canvasFrame.bgTexture and canvasFrame.CreateTexture then
         canvasFrame.bgTexture = canvasFrame:CreateTexture(nil, "BACKGROUND", nil, -8)
         if canvasFrame.bgTexture.SetAllPoints then
@@ -160,17 +178,27 @@ function Themes:ApplyCanvasTheme(canvasFrame)
         if canvasFrame.bgTexture.Show then canvasFrame.bgTexture:Show() end
     end
 
-    local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
-    local pr, pg, pb
-    if trimKey == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
-        local p = Akimbo.db.customTrimColor
-        pr, pg, pb = p.r or 1.0, p.g or 0.82, p.b or 0.0
-    else
-        local p = COLOR_PALETTES[trimKey] or COLOR_PALETTES.GOLD
-        pr, pg, pb = p.r, p.g, p.b
+    -- Resolve border trim color according to theme and trimColor setting
+    local br = theme.borderColor or { 1.0, 1.0, 1.0, 1.0 }
+    if isPureBlack then
+        br = { 0.18, 0.18, 0.18, 1.0 }
+    elseif Akimbo.db and Akimbo.db.trimColor then
+        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
+            local c = Akimbo.db.customTrimColor
+            br = { c.r, c.g, c.b, c.a or 1.0 }
+        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
+            if isClassic and Akimbo.db.trimColor == "GOLD" then
+                -- Classic Blizzard gold on UI-DialogBox-Border is pre-rendered; keep untainted
+                br = { 1.0, 1.0, 1.0, 1.0 }
+            else
+                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                br = { c.r, c.g, c.b, c.a or 1.0 }
+            end
+        end
     end
+
     if canvasFrame.SetBackdropBorderColor then
-        canvasFrame:SetBackdropBorderColor(pr * 0.4, pg * 0.4, pb * 0.4, math.min(alpha, 0.7))
+        canvasFrame:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
     end
 end
 

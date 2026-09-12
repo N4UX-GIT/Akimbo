@@ -160,6 +160,32 @@ addon.Themes:ApplyCanvasTheme(mockCanvas)
 assert(mockCanvas.backdrop.tile == false, "Pure Black canvas must not tile")
 assert(mockCanvas.bgColor.r == 0 and mockCanvas.bgColor.g == 0 and mockCanvas.bgColor.b == 0, "Pure Black must be 0,0,0")
 
+-- Verify Active Theme Border applied to Workspace Canvas
+-- A. Classic Warcraft theme with Gold trim
+addon.db.theme = "CLASSIC"
+addon.db.trimColor = "GOLD"
+addon.db.canvasColor = "CLASSIC_STONE"
+addon.Themes:ApplyCanvasTheme(mockCanvas)
+assert(mockCanvas.backdrop.edgeFile == "Interface\\DialogFrame\\UI-DialogBox-Border", "Classic theme must apply UI-DialogBox-Border to workspace canvas")
+assert(mockCanvas.backdrop.edgeSize == 32, "Classic theme edgeSize must be 32")
+assert(mockCanvas.borderColor.r == 1.0 and mockCanvas.borderColor.g == 1.0 and mockCanvas.borderColor.b == 1.0, "Classic Gold trim must keep untainted 1,1,1 border color")
+
+-- B. Blizzard Slate theme with Silver trim
+addon.db.theme = "BLIZZARD_SLATE"
+addon.db.trimColor = "SILVER"
+addon.Themes:ApplyCanvasTheme(mockCanvas)
+assert(mockCanvas.backdrop.edgeFile == "Interface\\Tooltips\\UI-Tooltip-Border", "Blizzard Slate theme must apply UI-Tooltip-Border to workspace canvas")
+assert(mockCanvas.backdrop.edgeSize == 14, "Blizzard Slate edgeSize must be 14")
+local pals = addon.Themes:GetColorPalettes()
+assert(math.abs(mockCanvas.borderColor.r - pals.SILVER.r) < 0.01, "Blizzard Slate border color must match Silver trim")
+
+-- C. Gnomish Tinker theme with Brass trim
+addon.db.theme = "GNOMISH_TINKER"
+addon.db.trimColor = "TINKER_BRASS"
+addon.Themes:ApplyCanvasTheme(mockCanvas)
+assert(mockCanvas.backdrop.edgeFile == "Interface\\DialogFrame\\UI-DialogBox-Border", "Gnomish Tinker must use DialogBox-Border")
+assert(math.abs(mockCanvas.borderColor.r - pals.TINKER_BRASS.r) < 0.01, "Gnomish Tinker border color must match Tinker Brass trim")
+
 -- 2. Test BayHeader Padded Dimensions and Anchoring
 local mockParent = makeMockFrame("MockParent", 720, 650)
 local header = addon.Themes:CreateBayHeader(mockParent, "TEST PADDED HEADER")
