@@ -99,6 +99,54 @@ end
 
 local originalAreas = {}
 
+local function RegisterSpecialFrame(name)
+    if not name or not UISpecialFrames then return end
+    for _, n in ipairs(UISpecialFrames) do
+        if n == name then return end
+    end
+    table.insert(UISpecialFrames, name)
+end
+
+local function UnregisterSpecialFrame(name)
+    if not name or not UISpecialFrames then return end
+    for i = #UISpecialFrames, 1, -1 do
+        if UISpecialFrames[i] == name then
+            table.remove(UISpecialFrames, i)
+        end
+    end
+end
+
+local function DemodalizePanel(frame)
+    if not frame then return end
+    local name = frame:GetName()
+    if not name then return end
+    if UIPanelWindows and UIPanelWindows[name] then
+        if not originalAreas[name] then
+            originalAreas[name] = UIPanelWindows[name].area
+        end
+        UIPanelWindows[name].area = nil
+    end
+    if SetUIPanelAttribute then
+        pcall(function() SetUIPanelAttribute(frame, "area", nil) end)
+    end
+    RegisterSpecialFrame(name)
+end
+
+local function RemodalizePanel(frame)
+    if not frame then return end
+    local name = frame:GetName()
+    if not name then return end
+    UnregisterSpecialFrame(name)
+    if originalAreas[name] then
+        if UIPanelWindows and UIPanelWindows[name] then
+            UIPanelWindows[name].area = originalAreas[name]
+        end
+        if SetUIPanelAttribute then
+            pcall(function() SetUIPanelAttribute(frame, "area", originalAreas[name]) end)
+        end
+    end
+end
+
 local function OnPanelDragStop(frame)
     frame:StopMovingOrSizing()
     pcall(function() frame:SetUserPlaced(true) end)
@@ -114,19 +162,20 @@ local function OnPanelDragStop(frame)
         local x, y = frame:GetLeft(), frame:GetBottom()
         if x and y then
             Akimbo.db.savedWorkspacePositions[name] = { x = x, y = y }
-            if Akimbo.db.independentWorkspacePanels and SetUIPanelAttribute then
-                local currentArea = GetUIPanelAttribute and GetUIPanelAttribute(frame, "area")
-                if currentArea and not originalAreas[name] then
-                    originalAreas[name] = currentArea
+            if Akimbo.db.independentWorkspacePanels then
+                -- Evict from Blizzard UIPanel slot if currently occupying one
+                if GetUIPanel and (GetUIPanel("left") == frame or GetUIPanel("center") == frame or GetUIPanel("right") == frame or GetUIPanel("doublewide") == frame) then
+                    pcall(function() HideUIPanel(frame, 1) end)
+                    frame:ClearAllPoints()
+                    frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x, y)
+                    frame:Show()
                 end
-                SetUIPanelAttribute(frame, "area", nil)
+                DemodalizePanel(frame)
             end
         end
     else
         Akimbo.db.savedWorkspacePositions[name] = nil
-        if originalAreas[name] and SetUIPanelAttribute then
-            SetUIPanelAttribute(frame, "area", originalAreas[name])
-        end
+        RemodalizePanel(frame)
     end
 end
 
@@ -136,12 +185,8 @@ local function RestoreWorkspacePosition(frame)
     if not name then return end
     local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
     if pos and pos.x and pos.y then
-        if Akimbo.db.independentWorkspacePanels and SetUIPanelAttribute then
-            local currentArea = GetUIPanelAttribute and GetUIPanelAttribute(frame, "area")
-            if currentArea and not originalAreas[name] then
-                originalAreas[name] = currentArea
-            end
-            SetUIPanelAttribute(frame, "area", nil)
+        if Akimbo.db.independentWorkspacePanels then
+            DemodalizePanel(frame)
         end
         frame:ClearAllPoints()
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
@@ -217,6 +262,9 @@ function Canvas:EnableFreeDragging()
         if frame then
             frame:SetClampedToScreen(false)
             MakePanelDraggable(frame)
+            if Akimbo.db and Akimbo.db.independentWorkspacePanels and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name] then
+                DemodalizePanel(frame)
+            end
         end
     end
 end

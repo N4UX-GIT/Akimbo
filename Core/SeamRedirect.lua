@@ -247,6 +247,7 @@ function HUD:HookFrames()
         end
     end
     -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
+    -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
     local function CenterGameMenu()
         for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
             local frame = _G[name]
@@ -264,6 +265,7 @@ function HUD:HookFrames()
     if UIPanelWindows then
         for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
             if UIPanelWindows[name] then
+                UIPanelWindows[name].area = nil
                 UIPanelWindows[name].centerFrameSkipAnchoring = true
             end
         end
@@ -271,11 +273,17 @@ function HUD:HookFrames()
 
     for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
         local frame = _G[name]
-        if frame and not hooks[frame] then
-            hooks[frame] = true
-            frame:HookScript("OnShow", function(self)
-                C_Timer.After(0, CenterGameMenu)
-            end)
+        if frame then
+            if SetUIPanelAttribute then
+                pcall(function() SetUIPanelAttribute(frame, "area", nil) end)
+            end
+            if not hooks[frame] then
+                hooks[frame] = true
+                frame:HookScript("OnShow", function(self)
+                    CenterGameMenu()
+                    C_Timer.After(0, CenterGameMenu)
+                end)
+            end
         end
     end
 
@@ -283,12 +291,14 @@ function HUD:HookFrames()
         self.menuHooksInstalled = true
         if ToggleGameMenu then
             hooksecurefunc("ToggleGameMenu", function()
+                CenterGameMenu()
                 C_Timer.After(0, CenterGameMenu)
             end)
         end
         if ShowUIPanel then
             hooksecurefunc("ShowUIPanel", function(frame)
                 if frame == GameMenuFrame or frame == SettingsPanel then
+                    CenterGameMenu()
                     C_Timer.After(0, CenterGameMenu)
                 end
             end)
@@ -320,6 +330,7 @@ function HUD:HookFrames()
                     local x = (right - (w + bagSpacing) * bagIndex) * factor
                     local y = bottom * factor
                     frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", x, y)
+                    if frame.SetAlpha then frame:SetAlpha(1) end
                     bagIndex = bagIndex + 1
                 end
             end
@@ -332,48 +343,65 @@ function HUD:HookFrames()
                 ContainerFrameCombinedBags:ClearAllPoints()
                 local factor = UIParent:GetEffectiveScale() / ContainerFrameCombinedBags:GetEffectiveScale()
                 ContainerFrameCombinedBags:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right * factor, bottom * factor)
+                if ContainerFrameCombinedBags.SetAlpha then ContainerFrameCombinedBags:SetAlpha(1) end
             end
         end
 
         isArrangingBags = false
     end
 
+    -- Pre-hook bag OnShow to suppress flicker by setting alpha 0 before positioning
+    for i = 1, (NUM_CONTAINER_FRAMES or 13) do
+        local frame = _G["ContainerFrame" .. i]
+        if frame and not hooks[frame] then
+            hooks[frame] = true
+            frame:HookScript("OnShow", function(self)
+                local name = self:GetName()
+                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                if not pos then
+                    if self.SetAlpha then self:SetAlpha(0) end
+                    HUD:LayoutBags()
+                end
+            end)
+        end
+    end
+    if ContainerFrameCombinedBags and not hooks[ContainerFrameCombinedBags] then
+        hooks[ContainerFrameCombinedBags] = true
+        ContainerFrameCombinedBags:HookScript("OnShow", function(self)
+            local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+            if not pos then
+                if self.SetAlpha then self:SetAlpha(0) end
+                HUD:LayoutBags()
+            end
+        end)
+    end
+
     if not self.bagHooksInstalled then
         self.bagHooksInstalled = true
+        local function TriggerBagLayout()
+            HUD:LayoutBags()
+            C_Timer.After(0, function() HUD:LayoutBags() end)
+        end
         if ContainerFrame_GenerateFrame then
-            hooksecurefunc("ContainerFrame_GenerateFrame", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("ContainerFrame_GenerateFrame", TriggerBagLayout)
         end
         if ToggleBag then
-            hooksecurefunc("ToggleBag", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("ToggleBag", TriggerBagLayout)
         end
         if ToggleAllBags then
-            hooksecurefunc("ToggleAllBags", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("ToggleAllBags", TriggerBagLayout)
         end
         if OpenAllBags then
-            hooksecurefunc("OpenAllBags", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("OpenAllBags", TriggerBagLayout)
         end
         if OpenBag then
-            hooksecurefunc("OpenBag", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("OpenBag", TriggerBagLayout)
         end
         if CloseBag then
-            hooksecurefunc("CloseBag", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("CloseBag", TriggerBagLayout)
         end
         if CloseAllBags then
-            hooksecurefunc("CloseAllBags", function()
-                C_Timer.After(0, function() HUD:LayoutBags() end)
-            end)
+            hooksecurefunc("CloseAllBags", TriggerBagLayout)
         end
     end
     for i = 1, 4 do
