@@ -255,13 +255,21 @@ end
 IsFrameOnWorkspace = function(frame)
     if not frame then return false end
     local x = frame:GetLeft()
-    if not x then return false end
     local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
     if not m then return false end
+    if not x then
+        local numPoints = frame.GetNumPoints and frame:GetNumPoints() or 0
+        for i = 1, numPoints do
+            local _, relTo, _, px = frame:GetPoint(i)
+            if px then x = px; break end
+        end
+    end
+    if not x then return false end
     local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
     local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
     local scaleFactor = frameScale / parentScale
     local width = (frame:GetWidth() or 0) * scaleFactor
+    if width <= 0 then width = 192 * scaleFactor end
     local centerX = (x * scaleFactor) + (width / 2)
     if Akimbo.db.primaryPosition ~= "LEFT" then
         return centerX < m.deckWidth
@@ -310,21 +318,30 @@ RemodalizePanel = function(frame)
 end
 
 OnPanelDragStop = function(frame)
+    if not frame then return end
     if frame.StopMovingOrSizing then
         pcall(function() frame:StopMovingOrSizing() end)
     end
     pcall(function() frame:SetUserPlaced(true) end)
-    frame._akimboDragging = false
 
-    if not Akimbo.db or not Akimbo.db.enabled then return end
+    if not Akimbo.db or not Akimbo.db.enabled then
+        frame._akimboDragging = false
+        return
+    end
     local name = frame:GetName()
-    if not name then return end
+    if not name then
+        frame._akimboDragging = false
+        return
+    end
 
     Akimbo.db.savedWorkspacePositions = Akimbo.db.savedWorkspacePositions or {}
     Akimbo.db.savedMainPositions = Akimbo.db.savedMainPositions or {}
 
     local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
-    if not m then return end
+    if not m then
+        frame._akimboDragging = false
+        return
+    end
 
     local onDeck = IsFrameOnWorkspace(frame)
 
@@ -419,6 +436,8 @@ OnPanelDragStop = function(frame)
             RegisterSpecialFrame(name)
         end
     end
+
+    frame._akimboDragging = false
 end
 
 RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
@@ -565,19 +584,25 @@ local function MakePanelDraggable(frame)
     end)
 
     if frame == MinimapCluster then
-        if MinimapZoneTextButton and not MinimapZoneTextButton._akimboHooked then
-            MinimapZoneTextButton._akimboHooked = true
-            MinimapZoneTextButton:EnableMouse(true)
-            MinimapZoneTextButton:RegisterForDrag("LeftButton")
-            MinimapZoneTextButton:HookScript("OnDragStart", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled then return end
-                frame._akimboDragging = true
-                frame:StartMoving()
-            end)
-            MinimapZoneTextButton:HookScript("OnDragStop", function(self)
-                OnPanelDragStop(frame)
-            end)
+        local function HookMinimapDragHandle(handleFrame)
+            if handleFrame and not handleFrame._akimboHooked then
+                handleFrame._akimboHooked = true
+                handleFrame:EnableMouse(true)
+                handleFrame:RegisterForDrag("LeftButton")
+                handleFrame:HookScript("OnDragStart", function(self)
+                    if InCombatLockdown() or not Akimbo.db.enabled then return end
+                    frame._akimboDragging = true
+                    frame:StartMoving()
+                end)
+                handleFrame:HookScript("OnDragStop", function(self)
+                    OnPanelDragStop(frame)
+                end)
+            end
         end
+
+        HookMinimapDragHandle(MinimapZoneTextButton)
+        HookMinimapDragHandle(_G["MinimapBorderTop"])
+        HookMinimapDragHandle(MinimapCluster)
     end
 
     if frame == WorldMapFrame then

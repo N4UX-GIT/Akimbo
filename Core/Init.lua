@@ -99,8 +99,12 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
 
     elseif event == "PLAYER_LOGIN" then
         pcall(function()
-            if ContainerFrame1 then ContainerFrame1:SetUserPlaced(false) end
-            if ContainerFrameCombinedBags then ContainerFrameCombinedBags:SetUserPlaced(false) end
+            if ContainerFrame1 and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrame1"]) then
+                ContainerFrame1:SetUserPlaced(false)
+            end
+            if ContainerFrameCombinedBags and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]) then
+                ContainerFrameCombinedBags:SetUserPlaced(false)
+            end
             if PlayerFrame then PlayerFrame:SetUserPlaced(false) end
             if TargetFrame then TargetFrame:SetUserPlaced(false) end
             if MinimapCluster and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"]) then

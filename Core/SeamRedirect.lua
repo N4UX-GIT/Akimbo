@@ -211,6 +211,8 @@ function HUD:AlignHUDFrames(m)
             if frame then
                 if item[1] == "MinimapCluster" and HasCustomMinimapAddon() then
                     -- Yield completely to custom minimap addon (e.g. SexyMap, BasicMinimap, ElvUI)
+                elseif frame._akimboDragging then
+                    -- Frame is actively being dragged by the player; do not interrupt!
                 else
                     Prepare(frame, m)
                     local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
@@ -290,26 +292,17 @@ function HUD:HookFrames()
             end
         end
     end
-    for _, name in ipairs({"PlayerFrame", "TargetFrame", "MinimapCluster", "ChatFrame1",
+    for _, name in ipairs({"PlayerFrame", "TargetFrame", "ChatFrame1",
         "BuffFrame", "UIErrorsFrame", "RaidWarningFrame"}) do
         local frame = _G[name]
         if frame and not hooks[frame] then
-            if name ~= "MinimapCluster" or not HasCustomMinimapAddon() then
-                hooks[frame] = true
-                hooksecurefunc(frame, "SetPoint", function()
-                    if name == "MinimapCluster" and HasCustomMinimapAddon() then return end
-                    local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-                    if not isWs then
-                        if name == "MinimapCluster" then
-                            if not frame._akimboDragging then
-                                HUD:RequestLayout()
-                            end
-                        elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
-                            HUD:RequestLayout()
-                        end
-                    end
-                end)
-            end
+            hooks[frame] = true
+            hooksecurefunc(frame, "SetPoint", function()
+                local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                    HUD:RequestLayout()
+                end
+            end)
         end
     end
 
@@ -466,6 +459,7 @@ function HUD:HookFrames()
                         if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
                             Akimbo.Canvas.RestoreWorkspacePosition(frame)
                         end
+                        if frame.SetAlpha then frame:SetAlpha(1) end
                     else
                         local w = frame:GetWidth() or defaultBagWidth
                         local h = frame:GetHeight() or defaultBagHeight
@@ -545,6 +539,18 @@ function HUD:HookFrames()
         isArrangingBags = false
     end
 
+    -- Override UpdateContainerFrameAnchors to completely eliminate Blizzard's anchor family connection crashes
+    if _G.UpdateContainerFrameAnchors and not self.anchorsHooked then
+        self.anchorsHooked = true
+        local origUpdateContainerFrameAnchors = _G.UpdateContainerFrameAnchors
+        _G.UpdateContainerFrameAnchors = function(...)
+            if HasCustomBagAddon() or not Akimbo.db or not Akimbo.db.enabled then
+                return origUpdateContainerFrameAnchors(...)
+            end
+            HUD:LayoutBags()
+        end
+    end
+
     -- Pre-hook bag OnShow to suppress flicker by setting alpha 0 before positioning
     for i = 1, (NUM_CONTAINER_FRAMES or 13) do
         local frame = _G["ContainerFrame" .. i]
@@ -556,11 +562,14 @@ function HUD:HookFrames()
                 local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
                 if not pos then
                     if self.SetAlpha then self:SetAlpha(0) end
-                    HUD:LayoutBags()
-                else
-                    if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                        Akimbo.Canvas.RestoreWorkspacePosition(self)
-                    end
+                end
+                HUD:LayoutBags()
+                if C_Timer and C_Timer.After then
+                    C_Timer.After(0, function()
+                        if not HasCustomBagAddon() then
+                            HUD:LayoutBags()
+                        end
+                    end)
                 end
             end)
         end
@@ -572,11 +581,14 @@ function HUD:HookFrames()
             local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
             if not pos then
                 if self.SetAlpha then self:SetAlpha(0) end
-                HUD:LayoutBags()
-            else
-                if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                    Akimbo.Canvas.RestoreWorkspacePosition(self)
-                end
+            end
+            HUD:LayoutBags()
+            if C_Timer and C_Timer.After then
+                C_Timer.After(0, function()
+                    if not HasCustomBagAddon() then
+                        HUD:LayoutBags()
+                    end
+                end)
             end
         end)
     end
@@ -586,11 +598,13 @@ function HUD:HookFrames()
         local function TriggerBagLayout()
             if HasCustomBagAddon() then return end
             HUD:LayoutBags()
-            C_Timer.After(0, function()
-                if not HasCustomBagAddon() then
-                    HUD:LayoutBags()
-                end
-            end)
+            if C_Timer and C_Timer.After then
+                C_Timer.After(0, function()
+                    if not HasCustomBagAddon() then
+                        HUD:LayoutBags()
+                    end
+                end)
+            end
         end
         if ContainerFrame_GenerateFrame then
             hooksecurefunc("ContainerFrame_GenerateFrame", TriggerBagLayout)
