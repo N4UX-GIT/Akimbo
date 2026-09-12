@@ -210,20 +210,10 @@ function Canvas:EnableFreeDragging()
         "ClassTrainerFrame",
         "TradeSkillFrame",
         "CraftFrame",
-        "ContainerFrameCombinedBags",
     }
 
     for _, name in ipairs(frameNames) do
         local frame = _G[name]
-        if frame then
-            frame:SetClampedToScreen(false)
-            MakePanelDraggable(frame)
-        end
-    end
-
-    -- Add individual bag frames (ContainerFrame1..13)
-    for i = 1, (NUM_CONTAINER_FRAMES or 13) do
-        local frame = _G["ContainerFrame" .. i]
         if frame then
             frame:SetClampedToScreen(false)
             MakePanelDraggable(frame)

@@ -47,9 +47,9 @@ local function ScreenPoint(frame, point, x, y)
     Points(frame, {point, UIParent, "BOTTOMLEFT", x * factor, y * factor})
 end
 
-local function Anchor(frame, point, m, x, y)
+local function Anchor(frame, point, m, x, y, force)
     if not frame then return end
-    if frame.IsUserPlaced and frame:IsUserPlaced() then return end
+    if not force and frame.IsUserPlaced and frame:IsUserPlaced() then return end
     local px = point:find("LEFT") and m.gameLeft or point:find("RIGHT") and m.gameRight
         or (m.gameLeft + m.gameRight) / 2
     local py = point:find("TOP") and m.gameTop or point:find("BOTTOM") and m.gameBottom
@@ -169,7 +169,13 @@ function HUD:AlignHUDFrames(m)
         }) do
             local frame = _G[item[1]]
             Prepare(frame, m)
-            if frame then Anchor(frame, item[2], m, item[3], item[4]) end
+            if frame then
+                local force = (frame == PlayerFrame or frame == TargetFrame or frame == MinimapCluster)
+                if force then
+                    pcall(function() frame:SetUserPlaced(false) end)
+                end
+                Anchor(frame, item[2], m, item[3], item[4], force)
+            end
         end
 
         self:AlignChatFrame(m)
@@ -236,6 +242,36 @@ function HUD:HookFrames()
             hooksecurefunc(frame, "SetPoint", function()
                 if not (frame.IsUserPlaced and frame:IsUserPlaced()) then
                     HUD:RequestLayout()
+                end
+            end)
+        end
+    end
+    -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
+    for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+        local frame = _G[name]
+        if frame and not hooks[frame] then
+            hooks[frame] = true
+            frame:HookScript("OnShow", function(self)
+                if InCombatLockdown() or not Akimbo.db.enabled then return end
+                local m = Akimbo.Viewport:GetMetrics()
+                Prepare(self, m)
+                Anchor(self, "CENTER", m, 0, 0, true)
+            end)
+        end
+    end
+    -- Keep bags on regular monitor unless user explicitly dragged them to workspace
+    for _, name in ipairs({"ContainerFrame1", "ContainerFrameCombinedBags"}) do
+        local frame = _G[name]
+        if frame and not hooks[frame] then
+            hooks[frame] = true
+            frame:HookScript("OnShow", function(self)
+                if InCombatLockdown() or not Akimbo.db.enabled then return end
+                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                if not pos then
+                    pcall(function() self:SetUserPlaced(false) end)
+                    local m = Akimbo.Viewport:GetMetrics()
+                    Prepare(self, m)
+                    Anchor(self, "BOTTOMRIGHT", m, -16, 32, true)
                 end
             end)
         end

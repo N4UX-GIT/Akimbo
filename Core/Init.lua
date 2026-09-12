@@ -102,7 +102,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
         Akimbo:Print("v%s loaded! Type |cffffcc00/akimbo|r to configure.", Akimbo.version)
         if not Akimbo.db.firstRunComplete then
             C_Timer.After(1.5, function()
-                Akimbo:Print("First time using Akimbo? Type |cff00ff00/akimbo wizard|r for automatic calibration.")
+                Akimbo:Print("First time using Akimbo? Type |cff00ff00/akimbo|r for setup and calibration.")
             end)
         end
 
@@ -271,13 +271,13 @@ SlashCmdList["AKIMBO"] = function(msg)
         Akimbo.db.debugMode = not Akimbo.db.debugMode
         Akimbo:Print("Debug mode %s.", Akimbo.db.debugMode and "|cff00ff00On|r" or "|cffff3333Off|r")
     elseif cmd == "wizard" or cmd == "setup" or cmd == "calibrate" then
-        if Akimbo.Wizard and Akimbo.Wizard.Open then
-            Akimbo.Wizard:Open()
-        elseif Akimbo.OpenWizard then
-            Akimbo:OpenWizard()
+        if Akimbo.Options and Akimbo.Options.Open then
+            Akimbo.Options:Open(true)
         end
-    elseif msg == "settings" or msg == "options" then
-        Akimbo.Options:Open()
+    elseif msg == "settings" or msg == "options" or msg == "config" then
+        if Akimbo.Options and Akimbo.Options.Open then
+            Akimbo.Options:Open()
+        end
     elseif msg == "span" or msg == "guide" then
         if Akimbo.Options and Akimbo.Options.ShowSetupGuide then
             Akimbo.Options:ShowSetupGuide()
@@ -285,12 +285,10 @@ SlashCmdList["AKIMBO"] = function(msg)
             Akimbo:Print("Use the included Akimbo-Span.bat to stretch WoW across both monitors.")
         end
     else
-        if Akimbo.Wizard and Akimbo.Wizard.Open then
-            Akimbo.Wizard:Open()
-        elseif Akimbo.Options and Akimbo.Options.Open then
+        if Akimbo.Options and Akimbo.Options.Open then
             Akimbo.Options:Open()
         else
-            Akimbo:Print("Status: %s. Type |cffffcc00/akimbo wizard|r for setup.", 
+            Akimbo:Print("Status: %s. Type |cffffcc00/akimbo|r to configure.", 
                 Akimbo.db.enabled and "|cff00ff00Enabled|r" or "|cffff3333Disabled|r")
         end
     end

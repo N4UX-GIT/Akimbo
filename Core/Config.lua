@@ -57,6 +57,17 @@ function Akimbo:InitializeConfig()
     if not AkimboDB.chatPosition then
         AkimboDB.chatPosition = "GAME"
     end
+    -- Purge legacy panelPositions from earlier Astra docking modules
+    if AkimboDB.panelPositions then
+        AkimboDB.panelPositions = nil
+    end
+    if AkimboDB.savedWorkspacePositions then
+        for k in pairs(AkimboDB.savedWorkspacePositions) do
+            if k:match("^ContainerFrame") or k == "PlayerFrame" or k == "TargetFrame" then
+                AkimboDB.savedWorkspacePositions[k] = nil
+            end
+        end
+    end
     CopyDefaults(defaultSettings, AkimboDB)
     Akimbo.db = AkimboDB
 end
