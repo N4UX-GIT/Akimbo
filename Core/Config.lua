@@ -16,8 +16,10 @@ local defaultSettings = {
     gameBottomPixels = 0,          -- Primary monitor bottom inset within the spanned client
     bezelGap = 0,                   -- Pixels gap between monitors
     theme = "CLASSIC",              -- "CLASSIC", "BLIZZARD_SLATE", "OBSIDIAN", "PITCH_BLACK"
-    trimColor = "GOLD",             -- "GOLD", "SILVER", "BRONZE", "EMERALD", "CRIMSON"
-    canvasColor = "CHARCOAL",       -- "CHARCOAL", "WARM_NIGHT", "PURE_BLACK", "DEEP_BLUE"
+    trimColor = "GOLD",             -- "GOLD", "SILVER", "BRONZE", "EMERALD", "CRIMSON", "CUSTOM"
+    customTrimColor = { r = 1.0, g = 0.82, b = 0.0 }, -- User-selected custom accent
+    canvasColor = "CHARCOAL",       -- "CHARCOAL", "WARM_NIGHT", "PURE_BLACK", "DEEP_BLUE", "CUSTOM"
+    customCanvasColor = { r = 0.12, g = 0.22, b = 0.35 }, -- User-selected custom workspace background
     canvasAlpha = 0.95,             -- Alpha of the secondary monitor background
     workspaceMapScale = "AUTO",     -- "AUTO" (fits deck width) or number (0.50 to 1.50)
     mainMapScale = 1.0,             -- Map scale when placed on the main gaming monitor

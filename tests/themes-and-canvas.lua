@@ -196,4 +196,27 @@ for _, f in ipairs(frames) do
     end
 end
 
-print("PASS: Canvas themes, live opacity, padded header (36px), and themed slider handles verified!")
+-- 4. Test Custom Trim Color
+addon.db.trimColor = "CUSTOM"
+addon.db.customTrimColor = { r = 0.90, g = 0.10, b = 0.50 }
+addon.Options:UpdateCardThemes()
+for _, f in ipairs(frames) do
+    if f.thumb and f.thumb.vertexColor then
+        local vc = f.thumb.vertexColor
+        assert(math.abs(vc.r - 0.90) < 0.01 and math.abs(vc.g - 0.10) < 0.01 and math.abs(vc.b - 0.50) < 0.01,
+            "CUSTOM trim must tint slider thumbs to user-defined RGB")
+    end
+end
+
+-- 5. Test Custom Canvas Color
+addon.db.canvasColor = "CUSTOM"
+addon.db.customCanvasColor = { r = 0.35, g = 0.45, b = 0.55 }
+addon.db.canvasAlpha = 0.88
+addon.Themes:ApplyCanvasTheme(mockCanvas)
+assert(mockCanvas.bgColor ~= nil, "Custom canvas must have bgColor")
+assert(math.abs(mockCanvas.bgColor.r - 0.35) < 0.01, "Custom canvas r must match 0.35")
+assert(math.abs(mockCanvas.bgColor.g - 0.45) < 0.01, "Custom canvas g must match 0.45")
+assert(math.abs(mockCanvas.bgColor.b - 0.55) < 0.01, "Custom canvas b must match 0.55")
+assert(math.abs(mockCanvas.bgColor.a - 0.88) < 0.01, "Custom canvas alpha must match 0.88")
+
+print("PASS: Canvas themes, custom color pickers, live opacity, padded header (36px), and themed slider handles verified!")

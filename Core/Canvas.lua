@@ -17,6 +17,15 @@ function Canvas:CreateFrames()
     rootCanvas = CreateFrame("Frame", "AkimboCanvasFrame", UIParent, "BackdropTemplate")
     rootCanvas:SetFrameStrata("BACKGROUND")
     rootCanvas:SetFrameLevel(1)
+
+    -- Dedicated solid background texture for guaranteed vibrant color visibility
+    if not rootCanvas.bgTexture and rootCanvas.CreateTexture then
+        rootCanvas.bgTexture = rootCanvas:CreateTexture(nil, "BACKGROUND", nil, -8)
+        if rootCanvas.bgTexture.SetAllPoints then
+            rootCanvas.bgTexture:SetAllPoints(rootCanvas)
+        end
+    end
+
     Akimbo.canvas = rootCanvas
 end
 

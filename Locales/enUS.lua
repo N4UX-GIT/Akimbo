@@ -5,7 +5,7 @@
 
 local _, Akimbo = ...
 
-local L = setmetatable({}, {
+local L = Akimbo.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end

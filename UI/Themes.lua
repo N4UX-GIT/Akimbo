@@ -84,11 +84,11 @@ local COLOR_PALETTES = {
 
 -- Preset color options for the workspace background
 local CANVAS_PALETTES = {
-    CLASSIC_STONE= { name = "Classic Stone",    r = 0.65, g = 0.65, b = 0.68, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
-    TINKER_SLATE = { name = "Tinker Slate",     r = 0.12, g = 0.22, b = 0.35, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    CHARCOAL     = { name = "Charcoal Slate",   r = 0.22, g = 0.24, b = 0.28, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    WARM_NIGHT   = { name = "Warm Night",       r = 0.26, g = 0.20, b = 0.16, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.10, g = 0.14, b = 0.30, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CLASSIC_STONE= { name = "Classic Stone",    r = 0.28, g = 0.28, b = 0.32, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
+    TINKER_SLATE = { name = "Tinker Slate",     r = 0.12, g = 0.28, b = 0.44, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CHARCOAL     = { name = "Charcoal Slate",   r = 0.16, g = 0.17, b = 0.20, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    WARM_NIGHT   = { name = "Warm Night",       r = 0.28, g = 0.18, b = 0.14, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.08, g = 0.15, b = 0.36, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
     PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00, bg = "Interface\\Buttons\\WHITE8X8" },
 }
 
@@ -115,31 +115,63 @@ function Themes:ApplyCanvasTheme(canvasFrame)
     if not canvasFrame then return end
 
     local colorKey = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
-    local c = CANVAS_PALETTES[colorKey] or CANVAS_PALETTES.CHARCOAL
     local alpha = (Akimbo.db and Akimbo.db.canvasAlpha)
     if alpha == nil then alpha = 0.95 end
+
+    local r, g, b
+    local bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
+    local isPureBlack = false
+
+    if colorKey == "CUSTOM" and Akimbo.db and Akimbo.db.customCanvasColor then
+        local c = Akimbo.db.customCanvasColor
+        r, g, b = c.r or 0.12, c.g or 0.22, c.b or 0.35
+    else
+        local c = CANVAS_PALETTES[colorKey] or CANVAS_PALETTES.CHARCOAL
+        r, g, b = c.r, c.g, c.b
+        bgFile = c.bg or bgFile
+        isPureBlack = (colorKey == "PURE_BLACK")
+    end
 
     if not canvasFrame.SetBackdrop then
         Mixin(canvasFrame, BackdropTemplateMixin)
     end
 
-    local bgFile = c.bg or "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
-    local isPureBlack = (colorKey == "PURE_BLACK")
+    if canvasFrame.SetBackdrop then
+        canvasFrame:SetBackdrop({
+            bgFile = bgFile,
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            tile = not isPureBlack,
+            tileSize = 64,
+            edgeSize = 1,
+            insets = { left = 0, right = 0, top = 0, bottom = 0 },
+        })
+        canvasFrame:SetBackdropColor(r, g, b, alpha)
+    end
 
-    canvasFrame:SetBackdrop({
-        bgFile = bgFile,
-        edgeFile = "Interface\\Buttons\\WHITE8X8",
-        tile = not isPureBlack,
-        tileSize = 64,
-        edgeSize = 1,
-        insets = { left = 0, right = 0, top = 0, bottom = 0 },
-    })
-
-    canvasFrame:SetBackdropColor(c.r, c.g, c.b, alpha)
+    -- Dedicated full-frame solid texture for guaranteed vivid visibility on real clients
+    if not canvasFrame.bgTexture and canvasFrame.CreateTexture then
+        canvasFrame.bgTexture = canvasFrame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        if canvasFrame.bgTexture.SetAllPoints then
+            canvasFrame.bgTexture:SetAllPoints(canvasFrame)
+        end
+    end
+    if canvasFrame.bgTexture and canvasFrame.bgTexture.SetColorTexture then
+        canvasFrame.bgTexture:SetColorTexture(r, g, b, alpha)
+        if canvasFrame.bgTexture.Show then canvasFrame.bgTexture:Show() end
+    end
 
     local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
-    local p = COLOR_PALETTES[trimKey] or COLOR_PALETTES.GOLD
-    canvasFrame:SetBackdropBorderColor(p.r * 0.4, p.g * 0.4, p.b * 0.4, math.min(alpha, 0.7))
+    local pr, pg, pb
+    if trimKey == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
+        local p = Akimbo.db.customTrimColor
+        pr, pg, pb = p.r or 1.0, p.g or 0.82, p.b or 0.0
+    else
+        local p = COLOR_PALETTES[trimKey] or COLOR_PALETTES.GOLD
+        pr, pg, pb = p.r, p.g, p.b
+    end
+    if canvasFrame.SetBackdropBorderColor then
+        canvasFrame:SetBackdropBorderColor(pr * 0.4, pg * 0.4, pb * 0.4, math.min(alpha, 0.7))
+    end
 end
 
 function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
@@ -177,13 +209,18 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
 
     -- Window border color
     local br = theme.borderColor
-    if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
-        if isClassic and Akimbo.db.trimColor == "GOLD" then
-            -- Default Blizzard Gold on UI-DialogBox-Border is pre-rendered; keep untainted
-            br = { 1.0, 1.0, 1.0, 1.0 }
-        else
-            local c = COLOR_PALETTES[Akimbo.db.trimColor]
-            br = { c.r, c.g, c.b, c.a }
+    if Akimbo.db and Akimbo.db.trimColor then
+        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
+            local c = Akimbo.db.customTrimColor
+            br = { c.r, c.g, c.b, c.a or 1.0 }
+        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
+            if isClassic and Akimbo.db.trimColor == "GOLD" then
+                -- Default Blizzard Gold on UI-DialogBox-Border is pre-rendered; keep untainted
+                br = { 1.0, 1.0, 1.0, 1.0 }
+            else
+                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                br = { c.r, c.g, c.b, c.a }
+            end
         end
     end
     frame:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
@@ -206,18 +243,18 @@ function Themes:CreateBayHeader(parent, titleText, customHeight)
     })
 
     local icon = header:CreateTexture(nil, "OVERLAY")
-    local iconOffset = 12
+    local iconOffset = 14
     if icon and icon.SetTexture and icon.SetSize and icon.SetPoint then
-        icon:SetSize(22, 22)
+        icon:SetSize(24, 24)
         icon:SetPoint("LEFT", header, "LEFT", 10, 0)
         icon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
         header.icon = icon
-        iconOffset = 38
+        iconOffset = 40
     end
 
-    local title = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local title = header:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     title:SetPoint("LEFT", header, "LEFT", iconOffset, 0)
-    title:SetText(titleText or "")
+    title:SetText(titleText or "AKIMBO")
     header.title = title
 
     self:UpdateHeader(header, titleText)
@@ -226,32 +263,38 @@ end
 
 function Themes:UpdateHeader(header, titleText)
     if not header then return end
+
     local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(themeKey)
     local isClassic = (themeKey == "CLASSIC")
 
-    local headBg = theme.headerColor
-    if isClassic then
-        header:SetBackdropColor(1.0, 1.0, 1.0, 0.90)
-    else
-        header:SetBackdropColor(headBg[1], headBg[2], headBg[3], headBg[4] or 0.95)
-    end
+    header:SetBackdropColor(theme.headerColor[1], theme.headerColor[2], theme.headerColor[3], 0.90)
 
     local br = theme.borderColor
-    if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
-        if isClassic and Akimbo.db.trimColor == "GOLD" then
-            br = { 0.85, 0.70, 0.20, 1.0 }
-        else
-            local c = COLOR_PALETTES[Akimbo.db.trimColor]
+    if Akimbo.db and Akimbo.db.trimColor then
+        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
+            local c = Akimbo.db.customTrimColor
             br = { c.r, c.g, c.b, c.a or 1.0 }
+        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
+            if isClassic and Akimbo.db.trimColor == "GOLD" then
+                br = { 0.85, 0.70, 0.20, 1.0 }
+            else
+                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                br = { c.r, c.g, c.b, c.a or 1.0 }
+            end
         end
     end
     header:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 
     local textCol = theme.headerTextColor
-    if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
-        local c = COLOR_PALETTES[Akimbo.db.trimColor]
-        textCol = { c.r, c.g, c.b, 1.0 }
+    if Akimbo.db and Akimbo.db.trimColor then
+        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
+            local c = Akimbo.db.customTrimColor
+            textCol = { c.r, c.g, c.b, 1.0 }
+        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
+            local c = COLOR_PALETTES[Akimbo.db.trimColor]
+            textCol = { c.r, c.g, c.b, 1.0 }
+        end
     end
 
     if header.title then

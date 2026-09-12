@@ -271,8 +271,14 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end
 
     slider.UpdateTheme = function(self, trimKey)
-        local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
-        local c = pals and pals[trimKey or (Akimbo.db and Akimbo.db.trimColor) or "GOLD"]
+        local key = trimKey or (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        local c
+        if key == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
+            c = Akimbo.db.customTrimColor
+        else
+            local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+            c = pals and pals[key]
+        end
         if c and self.thumb and self.thumb.SetVertexColor then
             self.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
         elseif self.thumb and self.thumb.SetVertexColor then
@@ -456,8 +462,13 @@ function Options:CreateFloatingPanel()
     function Options:UpdateCardThemes()
         local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
         local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
-        local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
-        local c = pals and pals[trimKey]
+        local c
+        if trimKey == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
+            c = Akimbo.db.customTrimColor
+        else
+            local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+            c = pals and pals[trimKey]
+        end
         local br = c and { c.r * 0.75, c.g * 0.75, c.b * 0.75, 0.85 } or { 0.55, 0.50, 0.35, 0.85 }
         local textR, textG, textB = (c and c.r) or 1.0, (c and c.g) or 0.82, (c and c.b) or 0.0
 
@@ -907,7 +918,7 @@ function Options:CreateFloatingPanel()
     local trimButtons = {
         { "GOLD", "Gold", 1.00, 0.82, 0.00 },
         { "TINKER_BRASS", "Brass", 0.85, 0.65, 0.18 },
-        { "CYAN_GLOW", "Cyan Glow", 0.00, 0.82, 1.00 },
+        { "CYAN_GLOW", "Cyan", 0.00, 0.82, 1.00 },
         { "SILVER", "Silver", 0.72, 0.75, 0.78 },
         { "BRONZE", "Bronze", 0.85, 0.58, 0.25 },
         { "EMERALD", "Emerald", 0.22, 0.82, 0.35 },
@@ -916,11 +927,11 @@ function Options:CreateFloatingPanel()
     local prevTrimBtn = nil
     for _, t in ipairs(trimButtons) do
         local btn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
-        btn:SetSize(104, 24)
+        btn:SetSize(86, 24)
         if not prevTrimBtn then
             btn:SetPoint("TOPLEFT", 12, -32)
         else
-            btn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 8, 0)
+            btn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 6, 0)
         end
         local trimKey = t[1]
         btn.trimKey = trimKey
@@ -937,6 +948,23 @@ function Options:CreateFloatingPanel()
         prevTrimBtn = btn
     end
 
+    local customTrimBtn = CreateFrame("Button", nil, card3_2, "UIPanelButtonTemplate")
+    customTrimBtn:SetSize(110, 24)
+    customTrimBtn:SetPoint("LEFT", prevTrimBtn, "RIGHT", 8, 0)
+    customTrimBtn:SetText("Custom...")
+    customTrimBtn:SetScript("OnClick", function()
+        local cur = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
+        Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, 1.0, false, function(r, g, b)
+            Akimbo.db.customTrimColor = { r = r, g = g, b = b }
+            Akimbo.db.trimColor = "CUSTOM"
+            Akimbo:UpdateTheme()
+            Options:RefreshPanel()
+        end)
+    end)
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(customTrimBtn, "Custom Accent Color", "Open the color picker wheel to select any custom accent tint for borders, headers, and slider thumbs.")
+    end
+
     function Options:UpdateTrimHighlights()
         local curTrim = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
         for _, btn in ipairs(trimBtnFrames) do
@@ -945,6 +973,14 @@ function Options:CreateFloatingPanel()
                 btn:SetText(string.format("|cff%02x%02x%02x[%s]|r", t[3]*255, t[4]*255, t[5]*255, t[2]))
             else
                 btn:SetText(string.format("|cff%02x%02x%02x%s|r", t[3]*255*0.70, t[4]*255*0.70, t[5]*255*0.70, t[2]))
+            end
+        end
+        if customTrimBtn then
+            local c = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
+            if curTrim == "CUSTOM" then
+                customTrimBtn:SetText(string.format("|cff%02x%02x%02x[Custom]|r", c.r*255, c.g*255, c.b*255))
+            else
+                customTrimBtn:SetText(string.format("|cff%02x%02x%02xCustom...|r", c.r*255*0.75, c.g*255*0.75, c.b*255*0.75))
             end
         end
     end
@@ -965,11 +1001,11 @@ function Options:CreateFloatingPanel()
     local prevCanvasBtn = nil
     for _, c in ipairs(canvasButtons) do
         local btn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
-        btn:SetSize(104, 24)
+        btn:SetSize(86, 24)
         if not prevCanvasBtn then
             btn:SetPoint("TOPLEFT", 12, -32)
         else
-            btn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 8, 0)
+            btn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 6, 0)
         end
         local canvasKey = c[1]
         btn.canvasKey = canvasKey
@@ -986,10 +1022,45 @@ function Options:CreateFloatingPanel()
         prevCanvasBtn = btn
     end
 
-    -- Live Workspace Canvas Swatch Preview
+    local alphaSlider -- forward declaration for OpenCustomCanvasPicker
+
+    local customCanvasBtn = CreateFrame("Button", nil, card3_3, "UIPanelButtonTemplate")
+    customCanvasBtn:SetSize(110, 24)
+    customCanvasBtn:SetPoint("LEFT", prevCanvasBtn, "RIGHT", 8, 0)
+    customCanvasBtn:SetText("Custom...")
+    local function OpenCustomCanvasPicker()
+        local cur = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+        local curA = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
+        Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, curA, true, function(r, g, b, a)
+            Akimbo.db.customCanvasColor = { r = r, g = g, b = b }
+            if a ~= nil then
+                Akimbo.db.canvasAlpha = a
+            end
+            Akimbo.db.canvasColor = "CUSTOM"
+            Akimbo:UpdateTheme()
+            if Options.UpdateCanvasHighlights then
+                Options:UpdateCanvasHighlights()
+            end
+            if alphaSlider and alphaSlider.SetValue then
+                alphaSlider:SetValue(Akimbo.db.canvasAlpha)
+            end
+        end)
+    end
+    customCanvasBtn:SetScript("OnClick", OpenCustomCanvasPicker)
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(customCanvasBtn, "Custom Canvas Color", "Open the color wheel to choose any custom background color and opacity for your secondary workspace monitor.")
+    end
+
+    -- Live Workspace Canvas Swatch Preview (Interactive click-to-pick)
     local swatchCard = CreateFrame("Frame", nil, card3_3, "BackdropTemplate")
     swatchCard:SetSize(280, 40)
     swatchCard:SetPoint("TOPLEFT", 380, -70)
+    if swatchCard.EnableMouse then swatchCard:EnableMouse(true) end
+    swatchCard:SetScript("OnMouseDown", OpenCustomCanvasPicker)
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(swatchCard, "Live Background Preview", "Click this swatch preview to open the Color Picker and customize your secondary screen background.")
+    end
+
     local swatchText = swatchCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     swatchText:SetPoint("CENTER", swatchCard, "CENTER", 0, 0)
     card3_3.swatchCard = swatchCard
@@ -1004,16 +1075,30 @@ function Options:CreateFloatingPanel()
                 btn:SetText(btn.canvasTitle)
             end
         end
+        if customCanvasBtn then
+            if curColor == "CUSTOM" then
+                local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+                customCanvasBtn:SetText(string.format("|cff00ff00[#%02x%02x%02x]|r", c.r*255, c.g*255, c.b*255))
+            else
+                customCanvasBtn:SetText("Custom...")
+            end
+        end
 
         if Akimbo.Themes and Akimbo.Themes.ApplyCanvasTheme then
             Akimbo.Themes:ApplyCanvasTheme(swatchCard)
-            local pals = Akimbo.Themes:GetCanvasPalettes()
-            local pName = pals and pals[curColor] and pals[curColor].name or curColor
+            local pName
+            if curColor == "CUSTOM" then
+                local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+                pName = string.format("Custom (#%02x%02x%02x)", c.r*255, c.g*255, c.b*255)
+            else
+                local pals = Akimbo.Themes:GetCanvasPalettes()
+                pName = pals and pals[curColor] and pals[curColor].name or curColor
+            end
             swatchText:SetText(string.format("|cffffd100Preview:|r %s (%d%%)", pName, math.floor(curAlpha * 100 + 0.5)))
         end
     end
 
-    local alphaSlider = CreateNativeSlider(card3_3, "Workspace Background Opacity", 0.10, 1.0, 0.05,
+    alphaSlider = CreateNativeSlider(card3_3, "Workspace Background Opacity", 0.10, 1.0, 0.05,
         function() return (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95 end,
         function(val)
             Akimbo.db.canvasAlpha = val
@@ -1030,7 +1115,7 @@ function Options:CreateFloatingPanel()
 
     local themeNote = card3_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     themeNote:SetPoint("TOPLEFT", 12, -122)
-    themeNote:SetText("|cff888888Colors & opacity apply live to your secondary screen canvas backdrop.|r")
+    themeNote:SetText("|cff888888Colors & opacity apply live to your secondary screen canvas backdrop. Click preview swatch or Custom for color wheel.|r")
 
     -- ========================================================================
     -- BOTTOM ACTION BAR (Shared across tabs)
