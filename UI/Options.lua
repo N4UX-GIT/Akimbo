@@ -576,6 +576,7 @@ function Options:CreateFloatingPanel()
     end
 
     SwitchTab(currentTab or 1)
+    configFrame:Hide()
     return configFrame
 end
 

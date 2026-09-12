@@ -247,82 +247,134 @@ function HUD:HookFrames()
         end
     end
     -- Center Game Menu (Escape menu) and settings panels onto the primary game monitor
-    local isCenteringMenu = false
-    local function CenterMenuFrame(frame)
-        if isCenteringMenu or not frame or not frame:IsShown() or InCombatLockdown() or not Akimbo.db.enabled then return end
-        isCenteringMenu = true
-        local m = Akimbo.Viewport:GetMetrics()
-        Prepare(frame, m)
-        Anchor(frame, "CENTER", m, 0, 0, true)
-        isCenteringMenu = false
+    local function CenterGameMenu()
+        for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+            local frame = _G[name]
+            if frame and frame:IsShown() and not InCombatLockdown() and Akimbo.db and Akimbo.db.enabled then
+                local m = Akimbo.Viewport:GetMetrics()
+                frame:ClearAllPoints()
+                local cx = (m.gameLeft + m.gameRight) / 2
+                local cy = (m.gameBottom + m.gameTop) / 2
+                local factor = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+                frame:SetPoint("CENTER", UIParent, "BOTTOMLEFT", cx * factor, cy * factor)
+            end
+        end
+    end
+
+    if UIPanelWindows then
+        for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
+            if UIPanelWindows[name] then
+                UIPanelWindows[name].centerFrameSkipAnchoring = true
+            end
+        end
     end
 
     for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
         local frame = _G[name]
-        if frame then
-            if SetUIPanelAttribute then
-                pcall(function() SetUIPanelAttribute(frame, "centerFrameSkipAnchoring", true) end)
-            end
-            if not hooks[frame] then
-                hooks[frame] = true
-                frame:HookScript("OnShow", function(self) CenterMenuFrame(self) end)
-                hooksecurefunc(frame, "SetPoint", function(self)
-                    if not isCenteringMenu and self:IsShown() then
-                        CenterMenuFrame(self)
-                    end
-                end)
-            end
-        end
-    end
-
-    if not self.uiPanelPositionsHooked and UpdateUIPanelPositions then
-        self.uiPanelPositionsHooked = true
-        hooksecurefunc("UpdateUIPanelPositions", function()
-            if InCombatLockdown() or not Akimbo.db.enabled then return end
-            for _, name in ipairs({"GameMenuFrame", "SettingsPanel", "InterfaceOptionsFrame", "VideoOptionsFrame"}) do
-                local frame = _G[name]
-                if frame and frame:IsShown() then
-                    CenterMenuFrame(frame)
-                end
-            end
-        end)
-    end
-
-    -- Keep bags on regular monitor unless user explicitly dragged them to workspace
-    local isPositioningBags = false
-    local function RepositionBags()
-        if isPositioningBags or InCombatLockdown() or not Akimbo.db.enabled then return end
-        local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrame1"]
-        if not pos and ContainerFrame1 and ContainerFrame1:IsShown() then
-            isPositioningBags = true
-            pcall(function() ContainerFrame1:SetUserPlaced(false) end)
-            local m = Akimbo.Viewport:GetMetrics()
-            Prepare(ContainerFrame1, m)
-            Anchor(ContainerFrame1, "BOTTOMRIGHT", m, -16, 32, true)
-            isPositioningBags = false
-        end
-    end
-
-    for _, name in ipairs({"ContainerFrame1", "ContainerFrameCombinedBags"}) do
-        local frame = _G[name]
         if frame and not hooks[frame] then
             hooks[frame] = true
             frame:HookScript("OnShow", function(self)
-                RepositionBags()
+                C_Timer.After(0, CenterGameMenu)
             end)
-            hooksecurefunc(frame, "SetPoint", function(self)
-                if not isPositioningBags and not (Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]) then
-                    RepositionBags()
+        end
+    end
+
+    if not self.menuHooksInstalled then
+        self.menuHooksInstalled = true
+        if ToggleGameMenu then
+            hooksecurefunc("ToggleGameMenu", function()
+                C_Timer.After(0, CenterGameMenu)
+            end)
+        end
+        if ShowUIPanel then
+            hooksecurefunc("ShowUIPanel", function(frame)
+                if frame == GameMenuFrame or frame == SettingsPanel then
+                    C_Timer.After(0, CenterGameMenu)
                 end
             end)
         end
     end
 
-    if not self.bagAnchorsHooked and updateContainerFrameAnchors then
-        self.bagAnchorsHooked = true
-        hooksecurefunc("updateContainerFrameAnchors", function()
-            RepositionBags()
-        end)
+    -- Keep bags on regular monitor unless user explicitly dragged them to workspace
+    local isArrangingBags = false
+    function HUD:LayoutBags()
+        if isArrangingBags or InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
+        isArrangingBags = true
+
+        local m = Akimbo.Viewport:GetMetrics()
+        local right = m.gameRight - 16
+        local bottom = m.gameBottom + 32
+        local bagSpacing = 4
+
+        local bagIndex = 0
+        for i = 1, (NUM_CONTAINER_FRAMES or 13) do
+            local frame = _G["ContainerFrame" .. i]
+            if frame and frame:IsShown() then
+                local name = frame:GetName()
+                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                if not pos then
+                    frame:SetUserPlaced(false)
+                    frame:ClearAllPoints()
+                    local w = frame:GetWidth() or 192
+                    local factor = UIParent:GetEffectiveScale() / frame:GetEffectiveScale()
+                    local x = (right - (w + bagSpacing) * bagIndex) * factor
+                    local y = bottom * factor
+                    frame:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", x, y)
+                    bagIndex = bagIndex + 1
+                end
+            end
+        end
+
+        if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
+            local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+            if not pos then
+                ContainerFrameCombinedBags:SetUserPlaced(false)
+                ContainerFrameCombinedBags:ClearAllPoints()
+                local factor = UIParent:GetEffectiveScale() / ContainerFrameCombinedBags:GetEffectiveScale()
+                ContainerFrameCombinedBags:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMLEFT", right * factor, bottom * factor)
+            end
+        end
+
+        isArrangingBags = false
+    end
+
+    if not self.bagHooksInstalled then
+        self.bagHooksInstalled = true
+        if ContainerFrame_GenerateFrame then
+            hooksecurefunc("ContainerFrame_GenerateFrame", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if ToggleBag then
+            hooksecurefunc("ToggleBag", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if ToggleAllBags then
+            hooksecurefunc("ToggleAllBags", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if OpenAllBags then
+            hooksecurefunc("OpenAllBags", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if OpenBag then
+            hooksecurefunc("OpenBag", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if CloseBag then
+            hooksecurefunc("CloseBag", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
+        if CloseAllBags then
+            hooksecurefunc("CloseAllBags", function()
+                C_Timer.After(0, function() HUD:LayoutBags() end)
+            end)
+        end
     end
     for i = 1, 4 do
         local frame = _G["StaticPopup" .. i]
