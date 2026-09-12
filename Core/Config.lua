@@ -67,18 +67,6 @@ function Akimbo:InitializeConfig()
     if AkimboDB.panelPositions then
         AkimboDB.panelPositions = nil
     end
-    if AkimboDB.savedWorkspacePositions then
-        for k in pairs(AkimboDB.savedWorkspacePositions) do
-            if k:match("^ContainerFrame") or k == "PlayerFrame" or k == "TargetFrame" then
-                AkimboDB.savedWorkspacePositions[k] = nil
-            end
-        end
-        -- Sanitize stale WorldMapFrame coordinates that are off-screen or on seam
-        local wmap = AkimboDB.savedWorkspacePositions.WorldMapFrame
-        if wmap and ((wmap.y and wmap.y < 0) or (wmap.x and wmap.x > 300)) then
-            AkimboDB.savedWorkspacePositions.WorldMapFrame = nil
-        end
-    end
     CopyDefaults(defaultSettings, AkimboDB)
     Akimbo.db = AkimboDB
 end

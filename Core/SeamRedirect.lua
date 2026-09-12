@@ -2,6 +2,7 @@
 local _, Akimbo = ...
 local HUD = {}
 Akimbo.SeamRedirect = HUD
+Akimbo.HUD = HUD
 local aligning, pending = false, false
 local hooks = {}
 local desiredFrames = {}
@@ -168,13 +169,16 @@ function HUD:AlignHUDFrames(m)
             {"PlayerCastingBarFrame", "BOTTOM", 0, 165},
         }) do
             local frame = _G[item[1]]
-            Prepare(frame, m)
             if frame then
-                local force = (frame == PlayerFrame or frame == TargetFrame or frame == MinimapCluster)
-                if force then
-                    pcall(function() frame:SetUserPlaced(false) end)
+                Prepare(frame, m)
+                local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
+                if isWorkspace then
+                    if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
+                        Akimbo.Canvas:RestoreWorkspacePosition(frame)
+                    end
+                elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                    Anchor(frame, item[2], m, item[3], item[4], false)
                 end
-                Anchor(frame, item[2], m, item[3], item[4], force)
             end
         end
 
@@ -240,7 +244,8 @@ function HUD:HookFrames()
         if frame and not hooks[frame] then
             hooks[frame] = true
             hooksecurefunc(frame, "SetPoint", function()
-                if not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
                     HUD:RequestLayout()
                 end
             end)
@@ -398,6 +403,10 @@ function HUD:HookFrames()
                 if not pos then
                     if self.SetAlpha then self:SetAlpha(0) end
                     HUD:LayoutBags()
+                else
+                    if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
+                        Akimbo.Canvas:RestoreWorkspacePosition(self)
+                    end
                 end
             end)
         end
@@ -409,6 +418,10 @@ function HUD:HookFrames()
             if not pos then
                 if self.SetAlpha then self:SetAlpha(0) end
                 HUD:LayoutBags()
+            else
+                if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
+                    Akimbo.Canvas:RestoreWorkspacePosition(self)
+                end
             end
         end)
     end

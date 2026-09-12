@@ -128,17 +128,22 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
 end
 
 function Themes:CreateBayHeader(parent, titleText)
-    local header = CreateFrame("Frame", nil, parent)
-    header:SetHeight(24)
-    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 2, -2)
-    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -2, -2)
+    local header = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    header:SetHeight(30)
+    header:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, -6)
+    header:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -6, -6)
 
-    local bg = header:CreateTexture(nil, "BACKGROUND")
-    bg:SetAllPoints()
-    header.bg = bg
+    header:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 12,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 },
+    })
 
     local title = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("LEFT", header, "LEFT", 10, 0)
+    title:SetPoint("LEFT", header, "LEFT", 12, 0)
     title:SetText(titleText or "")
     header.title = title
 
@@ -151,9 +156,14 @@ function Themes:UpdateHeader(header, titleText)
     local theme = self:GetThemeInfo(Akimbo.db and Akimbo.db.theme)
 
     local headBg = theme.headerColor
-    if header.bg then
-        header.bg:SetColorTexture(headBg[1], headBg[2], headBg[3], headBg[4] or 1.0)
+    header:SetBackdropColor(headBg[1], headBg[2], headBg[3], headBg[4] or 0.95)
+
+    local br = theme.borderColor
+    if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
+        local c = COLOR_PALETTES[Akimbo.db.trimColor]
+        br = { c.r, c.g, c.b, c.a or 1.0 }
     end
+    header:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 
     local textCol = theme.headerTextColor
     if Akimbo.db and Akimbo.db.trimColor and COLOR_PALETTES[Akimbo.db.trimColor] then
@@ -181,6 +191,9 @@ function Akimbo:UpdateTheme()
         Themes:ApplyBackdrop(config, themeKey, 0.98)
         if config.header then
             Themes:UpdateHeader(config.header)
+        end
+        if Akimbo.Options.UpdateCardThemes then
+            Akimbo.Options:UpdateCardThemes()
         end
     end
 end

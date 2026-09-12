@@ -342,8 +342,14 @@ OnPanelDragStop = function(frame)
         local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
 
         -- Clamp strictly within the workspace boundaries so panels never bleed across the seam
-        local minX = 12
-        local maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        local minX, maxX
+        if Akimbo.db.primaryPosition ~= "LEFT" then
+            minX = 12
+            maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        else
+            minX = m.gameRight + 12
+            maxX = math.max(minX, m.screenWidth - frameWidth - 12)
+        end
         local clampedX = math.max(minX, math.min(xInParent, maxX))
 
         local minY = 12
@@ -386,6 +392,13 @@ OnPanelDragStop = function(frame)
             local yInParent = (frame:GetBottom() or 0) * scaleFactor
             Akimbo.db.savedMainPositions[name] = { x = xInParent, y = yInParent }
             RegisterSpecialFrame(name)
+        elseif string.match(name, "^ContainerFrame") then
+            pcall(function() frame:SetUserPlaced(false) end)
+            if Akimbo.HUD and Akimbo.HUD.LayoutBags then
+                Akimbo.HUD:LayoutBags()
+            end
+        elseif name == "MinimapCluster" then
+            pcall(function() frame:SetUserPlaced(true) end)
         else
             RemodalizePanel(frame)
             RegisterSpecialFrame(name)
@@ -416,8 +429,14 @@ RestoreWorkspacePosition = function(frame)
         local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
 
         -- Sanitize/clamp in case DB had bad coordinates (like y = -4.2 or x = 493.6)
-        local minX = 12
-        local maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        local minX, maxX
+        if Akimbo.db.primaryPosition ~= "LEFT" then
+            minX = 12
+            maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        else
+            minX = m.gameRight + 12
+            maxX = math.max(minX, m.screenWidth - frameWidth - 12)
+        end
         local clampedX = math.max(minX, math.min(wPos.x, maxX))
 
         local minY = 12
@@ -430,6 +449,7 @@ RestoreWorkspacePosition = function(frame)
         local factor = parentScale / frameScale
         frame:ClearAllPoints()
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
+        pcall(function() frame:SetUserPlaced(true) end)
         if Akimbo.db.persistentWorkspacePanels ~= false then
             UnregisterSpecialFrame(name)
         end
@@ -479,7 +499,7 @@ local function MakePanelDraggable(frame)
         handle:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -36, 0)
         handle:SetHeight(32)
         local lvl = (frame.GetFrameLevel and frame:GetFrameLevel()) or 1
-        handle:SetFrameLevel(lvl + 25)
+        if handle.SetFrameLevel then handle:SetFrameLevel(lvl + 25) end
         handle:EnableMouse(true)
         handle:RegisterForDrag("LeftButton")
 
@@ -513,6 +533,22 @@ local function MakePanelDraggable(frame)
         RestoreWorkspacePosition(frame)
     end)
 
+    if frame == MinimapCluster then
+        if MinimapZoneTextButton and not MinimapZoneTextButton._akimboHooked then
+            MinimapZoneTextButton._akimboHooked = true
+            MinimapZoneTextButton:EnableMouse(true)
+            MinimapZoneTextButton:RegisterForDrag("LeftButton")
+            MinimapZoneTextButton:HookScript("OnDragStart", function(self)
+                if InCombatLockdown() or not Akimbo.db.enabled then return end
+                frame._akimboDragging = true
+                frame:StartMoving()
+            end)
+            MinimapZoneTextButton:HookScript("OnDragStop", function(self)
+                OnPanelDragStop(frame)
+            end)
+        end
+    end
+
     if frame == WorldMapFrame then
         if WorldMapTitleButton and not WorldMapTitleButton._akimboHooked then
             WorldMapTitleButton._akimboHooked = true
@@ -535,6 +571,9 @@ local function MakePanelDraggable(frame)
 
     frame._akimboMovable = true
 end
+
+Canvas.RestoreWorkspacePosition = RestoreWorkspacePosition
+Canvas.MakePanelDraggable = MakePanelDraggable
 
 function Canvas:TryMakeFrameDraggable(frame)
     if not frame or frame._akimboMovable or not frame.GetName then return end
@@ -565,6 +604,7 @@ function Canvas:EnableFreeDragging()
     -- List of standard frames that players love dragging to their secondary workspace
     local frameNames = {
         "WorldMapFrame",
+        "MinimapCluster",
         "CharacterFrame",
         "QuestLogFrame",
         "SpellBookFrame",
@@ -582,6 +622,20 @@ function Canvas:EnableFreeDragging()
         "ClassTrainerFrame",
         "TradeSkillFrame",
         "CraftFrame",
+        "ContainerFrame1",
+        "ContainerFrame2",
+        "ContainerFrame3",
+        "ContainerFrame4",
+        "ContainerFrame5",
+        "ContainerFrame6",
+        "ContainerFrame7",
+        "ContainerFrame8",
+        "ContainerFrame9",
+        "ContainerFrame10",
+        "ContainerFrame11",
+        "ContainerFrame12",
+        "ContainerFrame13",
+        "ContainerFrameCombinedBags",
     }
 
     for _, name in ipairs(frameNames) do
@@ -593,6 +647,20 @@ function Canvas:EnableFreeDragging()
                 DemodalizePanel(frame)
             end
         end
+    end
+
+    if ContainerFrame_GenerateFrame and not Canvas._bagGenHooked then
+        Canvas._bagGenHooked = true
+        hooksecurefunc("ContainerFrame_GenerateFrame", function(frame)
+            if frame then
+                frame:SetClampedToScreen(false)
+                MakePanelDraggable(frame)
+            end
+        end)
+    end
+
+    if Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"] and MinimapCluster then
+        RestoreWorkspacePosition(MinimapCluster)
     end
 
     self:ConfigureWorldMap()
