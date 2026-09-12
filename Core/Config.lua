@@ -28,6 +28,7 @@ local defaultSettings = {
     preventMapCloseOnMove = true,   -- Keep WorldMap open while running/walking
     independentWorkspacePanels = true, -- Panels placed on the secondary workspace stay open independently
     savedWorkspacePositions = {},   -- Persisted coordinates for frames placed on the secondary workspace
+    savedMainPositions = {},        -- Persisted coordinates for movable frames on the main screen
 }
 
 local function CopyDefaults(src, dst)
@@ -66,6 +67,11 @@ function Akimbo:InitializeConfig()
             if k:match("^ContainerFrame") or k == "PlayerFrame" or k == "TargetFrame" then
                 AkimboDB.savedWorkspacePositions[k] = nil
             end
+        end
+        -- Sanitize stale WorldMapFrame coordinates that are off-screen or on seam
+        local wmap = AkimboDB.savedWorkspacePositions.WorldMapFrame
+        if wmap and ((wmap.y and wmap.y < 0) or (wmap.x and wmap.x > 300)) then
+            AkimboDB.savedWorkspacePositions.WorldMapFrame = nil
         end
     end
     CopyDefaults(defaultSettings, AkimboDB)

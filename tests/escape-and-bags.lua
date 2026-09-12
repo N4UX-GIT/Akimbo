@@ -119,6 +119,8 @@ local function makeMockFrame(name, w, h)
     function f:SetFrameLevel() end
     function f:IsMaximized() return false end
     function f:Minimize() end
+    function f:StartMoving() end
+    function f:StopMovingOrSizing() end
     function f:HookScript(script, fn)
         local orig = self.scripts[script]
         self.scripts[script] = function(s, ...)
@@ -162,6 +164,7 @@ GameMenuFrame = makeMockFrame("GameMenuFrame", 200, 400)
 AddonList = makeMockFrame("AddonList", 500, 550)
 CharacterFrame = makeMockFrame("CharacterFrame", 384, 512)
 WorldMapFrame = makeMockFrame("WorldMapFrame", 610, 438)
+WorldMapTitleButton = makeMockFrame("WorldMapTitleButton", 544, 22)
 ContainerFrame1 = makeMockFrame("ContainerFrame1", 192, 250)
 ContainerFrame2 = makeMockFrame("ContainerFrame2", 192, 250)
 
@@ -318,4 +321,35 @@ assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame scale must fit workspace")
 local mapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
 assert(mapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
 
-print("PASS: escape menu centering, AddonList, gaming monitor panel offsets, universal handles, map fitting, bag flicker")
+-- TEST 10: Dragging WorldMapFrame out onto the main gaming monitor
+WorldMapFrame.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 1800, 500 } }
+if WorldMapTitleButton and WorldMapTitleButton.scripts["OnDragStop"] then
+    WorldMapTitleButton.scripts["OnDragStop"]()
+end
+assert(addon.db.savedWorkspacePositions["WorldMapFrame"] == nil, "WorldMapFrame must be cleared from savedWorkspacePositions when on gaming monitor")
+assert(WorldMapFrame:GetScale() == 1, "WorldMapFrame scale must reset to 1.0 on gaming monitor")
+assert(addon.db.savedMainPositions["WorldMapFrame"] ~= nil, "WorldMapFrame position on gaming monitor must be saved in savedMainPositions")
+assert(addon.db.savedMainPositions["WorldMapFrame"].x == 1800, "Saved main x must match 1800")
+
+-- TEST 11: Closing and reopening WorldMapFrame on gaming monitor
+WorldMapFrame:Hide()
+assert(not WorldMapFrame:IsShown(), "WorldMapFrame must be hidden")
+WorldMapFrame.points = {}
+WorldMapFrame:Show()
+assert(WorldMapFrame:IsShown(), "WorldMapFrame must reopen reliably on gaming monitor")
+assert(WorldMapFrame:GetScale() == 1, "WorldMapFrame scale must remain 1.0 on gaming monitor")
+local mainPoint = WorldMapFrame.points[#WorldMapFrame.points]
+assert(mainPoint and mainPoint[4] == 1800, "WorldMapFrame must restore saved position on gaming monitor")
+
+-- TEST 12: Dragging WorldMapFrame back to secondary workspace
+WorldMapFrame.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 20, 200 } }
+if WorldMapTitleButton and WorldMapTitleButton.scripts["OnDragStop"] then
+    WorldMapTitleButton.scripts["OnDragStop"]()
+end
+assert(addon.db.savedWorkspacePositions["WorldMapFrame"] ~= nil, "WorldMapFrame must be saved to workspace positions when dragged to workspace")
+assert(addon.db.savedMainPositions["WorldMapFrame"] == nil, "WorldMapFrame main position must be cleared when on workspace")
+assert(WorldMapFrame:GetScale() <= 1, "WorldMapFrame must scale down to fit workspace width")
+local deckMapWidth = WorldMapFrame:GetWidth() * WorldMapFrame:GetScale()
+assert(deckMapWidth <= metrics.deckWidth, "WorldMapFrame scaled width must not exceed workspace width")
+
+print("PASS: escape menu centering, AddonList, gaming monitor panel offsets, universal handles, map fitting, drag out/in reopen, bag flicker")

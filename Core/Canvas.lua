@@ -72,6 +72,8 @@ local function HasLeatrixPlus()
     return false
 end
 
+local DemodalizePanel, RemodalizePanel, OnPanelDragStop, RestoreWorkspacePosition, IsFrameOnWorkspace
+
 function Canvas:UpdateMapMovementBehavior()
     local map = WorldMapFrame
     if not map then return end
@@ -91,6 +93,11 @@ function Canvas:ConfigureWorldMap()
     local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
     if not m or not m.isSpanned then return end
 
+    -- Enable proper parent scaling so the map scales consistently with UIParent
+    if map.SetIgnoreParentScale then
+        pcall(function() map:SetIgnoreParentScale(false) end)
+    end
+
     -- Ensure windowed mini world map in Classic Era
     pcall(function()
         if GetCVar("miniWorldMap") ~= "1" then
@@ -101,19 +108,42 @@ function Canvas:ConfigureWorldMap()
         end
     end)
 
+    -- Permanently demodalize WorldMapFrame so it never conflicts with UIPanels
+    DemodalizePanel(map)
+
+    -- Hook Blizzard's built-in title button drag handlers
+    if WorldMapTitleButton and not WorldMapTitleButton._akimboHooked then
+        WorldMapTitleButton._akimboHooked = true
+        WorldMapTitleButton:RegisterForDrag("LeftButton")
+        WorldMapTitleButton:HookScript("OnDragStart", function(self)
+            if InCombatLockdown() or not Akimbo.db.enabled then return end
+            map._akimboDragging = true
+        end)
+        WorldMapTitleButton:HookScript("OnDragStop", function(self)
+            OnPanelDragStop(map)
+        end)
+    end
+    if WorldMapTitleButton_OnDragStop and not Canvas._titleButtonHooked then
+        Canvas._titleButtonHooked = true
+        hooksecurefunc("WorldMapTitleButton_OnDragStop", function()
+            OnPanelDragStop(map)
+        end)
+    end
+
     -- If map is on the workspace, scale it down to fit the portrait width cleanly
     local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]
     if pos or IsFrameOnWorkspace(map) then
         local baseWidth = map:GetWidth() or 610
-        if baseWidth > 0 then
-            local availableWidth = m.deckWidth - 24
-            local fitScale = math.min(1, availableWidth / baseWidth)
-            map:SetScale(fitScale)
-        end
+        if baseWidth <= 0 then baseWidth = 610 end
+        local availableWidth = m.deckWidth - 24
+        local fitScale = math.min(1.0, availableWidth / baseWidth)
+        map:SetScale(fitScale)
+    else
+        map:SetScale(1.0)
     end
 end
 
-local function IsFrameOnWorkspace(frame)
+IsFrameOnWorkspace = function(frame)
     if not frame then return false end
     local x = frame:GetLeft()
     if not x then return false end
@@ -121,11 +151,13 @@ local function IsFrameOnWorkspace(frame)
     if not m then return false end
     local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
     local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
-    local xInParent = x * (frameScale / parentScale)
+    local scaleFactor = frameScale / parentScale
+    local width = (frame:GetWidth() or 0) * scaleFactor
+    local centerX = (x * scaleFactor) + (width / 2)
     if Akimbo.db.primaryPosition ~= "LEFT" then
-        return xInParent < (m.deckWidth + 10)
+        return centerX < m.deckWidth
     else
-        return xInParent >= (m.gameWidth + m.bezel - 10)
+        return centerX >= (m.gameWidth + m.bezel)
     end
 end
 
@@ -148,7 +180,7 @@ local function UnregisterSpecialFrame(name)
     end
 end
 
-local function DemodalizePanel(frame)
+DemodalizePanel = function(frame)
     if not frame then return end
     local name = frame:GetName()
     if not name then return end
@@ -164,7 +196,7 @@ local function DemodalizePanel(frame)
     RegisterSpecialFrame(name)
 end
 
-local function RemodalizePanel(frame)
+RemodalizePanel = function(frame)
     if not frame then return end
     local name = frame:GetName()
     if not name then return end
@@ -179,8 +211,10 @@ local function RemodalizePanel(frame)
     end
 end
 
-local function OnPanelDragStop(frame)
-    frame:StopMovingOrSizing()
+OnPanelDragStop = function(frame)
+    if frame.StopMovingOrSizing then
+        pcall(function() frame:StopMovingOrSizing() end)
+    end
     pcall(function() frame:SetUserPlaced(true) end)
     frame._akimboDragging = false
 
@@ -189,47 +223,133 @@ local function OnPanelDragStop(frame)
     if not name then return end
 
     Akimbo.db.savedWorkspacePositions = Akimbo.db.savedWorkspacePositions or {}
+    Akimbo.db.savedMainPositions = Akimbo.db.savedMainPositions or {}
 
-    if IsFrameOnWorkspace(frame) then
-        local x, y = frame:GetLeft(), frame:GetBottom()
-        if x and y then
-            Akimbo.db.savedWorkspacePositions[name] = { x = x, y = y }
-            if Akimbo.db.independentWorkspacePanels then
-                -- Evict from Blizzard UIPanel slot if currently occupying one
-                if GetUIPanel and (GetUIPanel("left") == frame or GetUIPanel("center") == frame or GetUIPanel("right") == frame or GetUIPanel("doublewide") == frame) then
-                    pcall(function() HideUIPanel(frame, 1) end)
-                    frame:ClearAllPoints()
-                    frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x, y)
-                    frame:Show()
-                end
-                DemodalizePanel(frame)
-            end
-        end
+    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    if not m then return end
+
+    local onDeck = IsFrameOnWorkspace(frame)
+
+    if onDeck then
         if frame == WorldMapFrame then
             Canvas:ConfigureWorldMap()
         end
+
+        local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
+        local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+        local scaleFactor = frameScale / parentScale
+        local xInParent = (frame:GetLeft() or 0) * scaleFactor
+        local yInParent = (frame:GetBottom() or 0) * scaleFactor
+        local frameWidth = (frame:GetWidth() or 0) * (frame.GetScale and frame:GetScale() or 1)
+        local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
+
+        -- Clamp strictly within the workspace boundaries so panels never bleed across the seam
+        local minX = 12
+        local maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        local clampedX = math.max(minX, math.min(xInParent, maxX))
+
+        local minY = 12
+        local screenHeight = m.screenHeight or (UIParent.GetHeight and UIParent:GetHeight()) or 1080
+        local maxY = math.max(minY, screenHeight - frameHeight - 30)
+        local clampedY = math.max(minY, math.min(yInParent, maxY))
+
+        Akimbo.db.savedWorkspacePositions[name] = { x = clampedX, y = clampedY }
+        if Akimbo.db.savedMainPositions then
+            Akimbo.db.savedMainPositions[name] = nil
+        end
+
+        frame:ClearAllPoints()
+        local factor = parentScale / frameScale
+        frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
+
+        if Akimbo.db.independentWorkspacePanels or frame == WorldMapFrame then
+            -- Evict from Blizzard UIPanel slot if currently occupying one
+            if GetUIPanel and (GetUIPanel("left") == frame or GetUIPanel("center") == frame or GetUIPanel("right") == frame or GetUIPanel("doublewide") == frame) then
+                pcall(function() HideUIPanel(frame, 1) end)
+                frame:ClearAllPoints()
+                frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
+                frame:Show()
+            end
+            DemodalizePanel(frame)
+        end
     else
         Akimbo.db.savedWorkspacePositions[name] = nil
-        RemodalizePanel(frame)
         if frame == WorldMapFrame then
-            frame:SetScale(1)
+            frame:SetScale(1.0)
+            DemodalizePanel(frame)
+            local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
+            local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+            local scaleFactor = frameScale / parentScale
+            local xInParent = (frame:GetLeft() or 0) * scaleFactor
+            local yInParent = (frame:GetBottom() or 0) * scaleFactor
+            Akimbo.db.savedMainPositions[name] = { x = xInParent, y = yInParent }
+        else
+            RemodalizePanel(frame)
         end
     end
 end
 
-local function RestoreWorkspacePosition(frame)
+RestoreWorkspacePosition = function(frame)
     if not frame or not Akimbo.db or not Akimbo.db.enabled then return end
     local name = frame:GetName()
     if not name then return end
-    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-    if pos and pos.x and pos.y then
-        if Akimbo.db.independentWorkspacePanels then
+
+    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    if not m then return end
+
+    local wPos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+    if wPos and wPos.x and wPos.y then
+        if Akimbo.db.independentWorkspacePanels or frame == WorldMapFrame then
             DemodalizePanel(frame)
         end
-        frame:ClearAllPoints()
-        frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
         if frame == WorldMapFrame then
             Canvas:ConfigureWorldMap()
+        end
+
+        local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
+        local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+        local frameWidth = (frame:GetWidth() or 0) * (frame.GetScale and frame:GetScale() or 1)
+        local frameHeight = (frame:GetHeight() or 0) * (frame.GetScale and frame:GetScale() or 1)
+
+        -- Sanitize/clamp in case DB had bad coordinates (like y = -4.2 or x = 493.6)
+        local minX = 12
+        local maxX = math.max(minX, m.deckWidth - frameWidth - 12)
+        local clampedX = math.max(minX, math.min(wPos.x, maxX))
+
+        local minY = 12
+        local screenHeight = m.screenHeight or (UIParent.GetHeight and UIParent:GetHeight()) or 1080
+        local maxY = math.max(minY, screenHeight - frameHeight - 30)
+        local clampedY = math.max(minY, math.min(wPos.y, maxY))
+
+        wPos.x, wPos.y = clampedX, clampedY
+
+        local factor = parentScale / frameScale
+        frame:ClearAllPoints()
+        frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
+        return
+    end
+
+    -- If frame is WorldMapFrame and on the main gaming screen:
+    if frame == WorldMapFrame then
+        frame:SetScale(1.0)
+        DemodalizePanel(frame)
+        local mPos = Akimbo.db.savedMainPositions and Akimbo.db.savedMainPositions["WorldMapFrame"]
+        local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
+        local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
+        local factor = parentScale / frameScale
+
+        if mPos and mPos.x and mPos.y then
+            local minX = m.gameLeft + 10
+            local maxX = m.gameRight - (frame:GetWidth() or 610) - 10
+            local posX = math.max(minX, math.min(mPos.x, maxX))
+            local posY = math.max(10, math.min(mPos.y, m.gameTop - (frame:GetHeight() or 438) - 10))
+            frame:ClearAllPoints()
+            frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", posX * factor, posY * factor)
+        else
+            local defaultX = m.gameLeft + 20
+            local defaultY = math.max(20, m.gameTop - (frame:GetHeight() or 438) - 40)
+            frame:ClearAllPoints()
+            frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", defaultX * factor, defaultY * factor)
         end
     end
 end
@@ -284,6 +404,26 @@ local function MakePanelDraggable(frame)
     frame:HookScript("OnShow", function(self)
         RestoreWorkspacePosition(frame)
     end)
+
+    if frame == WorldMapFrame then
+        if WorldMapTitleButton and not WorldMapTitleButton._akimboHooked then
+            WorldMapTitleButton._akimboHooked = true
+            WorldMapTitleButton:RegisterForDrag("LeftButton")
+            WorldMapTitleButton:HookScript("OnDragStart", function(self)
+                if InCombatLockdown() or not Akimbo.db.enabled then return end
+                frame._akimboDragging = true
+            end)
+            WorldMapTitleButton:HookScript("OnDragStop", function(self)
+                OnPanelDragStop(frame)
+            end)
+        end
+        if WorldMapTitleButton_OnDragStop and not Canvas._titleButtonHooked then
+            Canvas._titleButtonHooked = true
+            hooksecurefunc("WorldMapTitleButton_OnDragStop", function()
+                OnPanelDragStop(frame)
+            end)
+        end
+    end
 
     frame._akimboMovable = true
 end
