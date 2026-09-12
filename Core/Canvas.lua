@@ -394,8 +394,10 @@ OnPanelDragStop = function(frame)
             RegisterSpecialFrame(name)
         elseif string.match(name, "^ContainerFrame") then
             pcall(function() frame:SetUserPlaced(false) end)
-            if Akimbo.HUD and Akimbo.HUD.LayoutBags then
-                Akimbo.HUD:LayoutBags()
+            if not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
+                if Akimbo.HUD and Akimbo.HUD.LayoutBags then
+                    Akimbo.HUD:LayoutBags()
+                end
             end
         elseif name == "MinimapCluster" then
             pcall(function() frame:SetUserPlaced(true) end)
@@ -487,6 +489,15 @@ end
 -- ============================================================================
 local function MakePanelDraggable(frame)
     if not frame or frame._akimboMovable then return end
+    local name = frame.GetName and frame:GetName()
+
+    if name == "MinimapCluster" and Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon() then
+        return
+    end
+
+    if name and string.match(name, "^ContainerFrame") and Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon() then
+        return
+    end
 
     frame:SetMovable(true)
     frame:SetClampedToScreen(false)
@@ -579,6 +590,12 @@ function Canvas:TryMakeFrameDraggable(frame)
     if not frame or frame._akimboMovable or not frame.GetName then return end
     local name = frame:GetName()
     if not name then return end
+    if name == "MinimapCluster" and Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon() then
+        return
+    end
+    if string.match(name, "^ContainerFrame") and Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon() then
+        return
+    end
     local isPanel = UIPanelWindows and UIPanelWindows[name]
     if isPanel or frame.TitleContainer or frame.TitleText or _G[name .. "TitleText"] then
         frame:SetClampedToScreen(false)
@@ -601,10 +618,13 @@ function Canvas:EnableFreeDragging()
         end
         return
     end
+
+    local hasCustomBags = Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()
+    local hasCustomMinimap = Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon()
+
     -- List of standard frames that players love dragging to their secondary workspace
     local frameNames = {
         "WorldMapFrame",
-        "MinimapCluster",
         "CharacterFrame",
         "QuestLogFrame",
         "SpellBookFrame",
@@ -622,21 +642,18 @@ function Canvas:EnableFreeDragging()
         "ClassTrainerFrame",
         "TradeSkillFrame",
         "CraftFrame",
-        "ContainerFrame1",
-        "ContainerFrame2",
-        "ContainerFrame3",
-        "ContainerFrame4",
-        "ContainerFrame5",
-        "ContainerFrame6",
-        "ContainerFrame7",
-        "ContainerFrame8",
-        "ContainerFrame9",
-        "ContainerFrame10",
-        "ContainerFrame11",
-        "ContainerFrame12",
-        "ContainerFrame13",
-        "ContainerFrameCombinedBags",
     }
+
+    if not hasCustomMinimap then
+        table.insert(frameNames, "MinimapCluster")
+    end
+
+    if not hasCustomBags then
+        for i = 1, 13 do
+            table.insert(frameNames, "ContainerFrame" .. i)
+        end
+        table.insert(frameNames, "ContainerFrameCombinedBags")
+    end
 
     for _, name in ipairs(frameNames) do
         local frame = _G[name]
@@ -649,17 +666,17 @@ function Canvas:EnableFreeDragging()
         end
     end
 
-    if ContainerFrame_GenerateFrame and not Canvas._bagGenHooked then
+    if not hasCustomBags and ContainerFrame_GenerateFrame and not Canvas._bagGenHooked then
         Canvas._bagGenHooked = true
         hooksecurefunc("ContainerFrame_GenerateFrame", function(frame)
-            if frame then
+            if frame and not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
                 frame:SetClampedToScreen(false)
                 MakePanelDraggable(frame)
             end
         end)
     end
 
-    if Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"] and MinimapCluster then
+    if not hasCustomMinimap and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"] and MinimapCluster then
         RestoreWorkspacePosition(MinimapCluster)
     end
 

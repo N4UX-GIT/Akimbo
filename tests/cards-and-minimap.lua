@@ -198,4 +198,26 @@ local header = addon.Themes:CreateBayHeader(mockParent, "TEST HEADER")
 assert(header:GetHeight() == 30, "BayHeader height must be 30px")
 assert(header.template == "BackdropTemplate", "BayHeader must use BackdropTemplate")
 
-print("PASS: MinimapCluster workspace persistence, bag dragging & redocking, header border & close button")
+-- 7. Test 3rd-party Bag Addon detection and yielding (e.g. Bagnon / AdiBags)
+_G.Bagnon = { version = "10.0" }
+assert(addon.HasCustomBagAddon() == true, "HasCustomBagAddon must return true when Bagnon is present")
+ContainerFrame1.points = {}
+addon.HUD:LayoutBags()
+assert(#ContainerFrame1.points == 0, "HUD:LayoutBags must yield and NOT alter points when Bagnon is present")
+
+local customBag = makeMockFrame("ContainerFrame2", 192, 250)
+addon.Canvas.MakePanelDraggable(customBag)
+assert(customBag._akimboHandle == nil, "MakePanelDraggable must yield and NOT attach handles to container frames when custom bag addon is active")
+
+-- 8. Test 3rd-party Minimap Addon detection and yielding (e.g. SexyMap / BasicMinimap)
+_G.SexyMap = { version = "1.0" }
+assert(addon.HasCustomMinimapAddon() == true, "HasCustomMinimapAddon must return true when SexyMap is present")
+MinimapCluster.points = {}
+addon.HUD:AlignHUDFrames()
+assert(#MinimapCluster.points == 0, "HUD:AlignHUDFrames must yield and NOT alter MinimapCluster points when SexyMap is present")
+
+local customMinimap = makeMockFrame("MinimapCluster", 192, 192)
+addon.Canvas.MakePanelDraggable(customMinimap)
+assert(customMinimap._akimboMovable == nil, "MakePanelDraggable must yield and NOT manage MinimapCluster when SexyMap is present")
+
+print("PASS: MinimapCluster & Bag workspace persistence, header border & close button, 3rd-party addon yielding without conflict")

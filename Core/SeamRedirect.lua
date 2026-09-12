@@ -6,14 +6,53 @@ Akimbo.HUD = HUD
 local aligning, pending = false, false
 local hooks = {}
 local desiredFrames = {}
-local function HasCustomActionBarAddon()
+local function IsAddonPresent(name)
     if C_AddOns and C_AddOns.IsAddOnLoaded then
-        return C_AddOns.IsAddOnLoaded("Bartender4") or C_AddOns.IsAddOnLoaded("Dominos")
+        if C_AddOns.IsAddOnLoaded(name) then return true end
     elseif IsAddOnLoaded then
-        return IsAddOnLoaded("Bartender4") or IsAddOnLoaded("Dominos")
+        if IsAddOnLoaded(name) then return true end
+    end
+    if _G and _G[name] ~= nil then return true end
+    return false
+end
+
+local function HasCustomActionBarAddon()
+    return IsAddonPresent("Bartender4") or IsAddonPresent("Dominos") or IsAddonPresent("ElvUI") or IsAddonPresent("Tukui")
+end
+
+local function HasCustomBagAddon()
+    local bagAddons = {
+        "Bagnon", "BagBrother", "AdiBags", "ArkInventory", "BetterBags",
+        "Inventorian", "LiteBag", "BaudBag", "Combuctor", "OneBag3", "OneBag",
+        "cargBags_Nivaya", "cargBags", "ElvUI", "Tukui"
+    }
+    for _, name in ipairs(bagAddons) do
+        if IsAddonPresent(name) then return true end
+    end
+    if _G and (_G.Bagnon or _G.AdiBags or _G.ArkInventory or _G.BetterBags or _G.Inventorian or _G.LiteBag or _G.BaudBag or _G.Combuctor or _G.OneBagFrame) then
+        return true
     end
     return false
 end
+
+local function HasCustomMinimapAddon()
+    local minimapAddons = {
+        "SexyMap", "BasicMinimap", "Chinchilla", "Carbonite",
+        "Carbonite.Info", "Mappy", "SimpleMinimap", "PocketMinimap",
+        "ElvUI", "Tukui"
+    }
+    for _, name in ipairs(minimapAddons) do
+        if IsAddonPresent(name) then return true end
+    end
+    if _G and (_G.SexyMap or _G.BasicMinimap or _G.Chinchilla or _G.Carbonite) then
+        return true
+    end
+    return false
+end
+
+Akimbo.HasCustomActionBarAddon = HasCustomActionBarAddon
+Akimbo.HasCustomBagAddon = HasCustomBagAddon
+Akimbo.HasCustomMinimapAddon = HasCustomMinimapAddon
 
 local actionNames = {"MainMenuBar", "MainActionBar", "StatusTrackingBarManager", "MainMenuExpBar",
     "MultiBarBottomLeft", "MultiBarBottomRight", "MultiBarLeft", "MultiBarRight",
@@ -170,14 +209,18 @@ function HUD:AlignHUDFrames(m)
         }) do
             local frame = _G[item[1]]
             if frame then
-                Prepare(frame, m)
-                local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
-                if isWorkspace then
-                    if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                        Akimbo.Canvas:RestoreWorkspacePosition(frame)
+                if item[1] == "MinimapCluster" and HasCustomMinimapAddon() then
+                    -- Yield completely to custom minimap addon (e.g. SexyMap, BasicMinimap, ElvUI)
+                else
+                    Prepare(frame, m)
+                    local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
+                    if isWorkspace then
+                        if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
+                            Akimbo.Canvas:RestoreWorkspacePosition(frame)
+                        end
+                    elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                        Anchor(frame, item[2], m, item[3], item[4], false)
                     end
-                elseif not (frame.IsUserPlaced and frame:IsUserPlaced()) then
-                    Anchor(frame, item[2], m, item[3], item[4], false)
                 end
             end
         end
@@ -242,13 +285,16 @@ function HUD:HookFrames()
         "BuffFrame", "UIErrorsFrame", "RaidWarningFrame"}) do
         local frame = _G[name]
         if frame and not hooks[frame] then
-            hooks[frame] = true
-            hooksecurefunc(frame, "SetPoint", function()
-                local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
-                if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
-                    HUD:RequestLayout()
-                end
-            end)
+            if name ~= "MinimapCluster" or not HasCustomMinimapAddon() then
+                hooks[frame] = true
+                hooksecurefunc(frame, "SetPoint", function()
+                    if name == "MinimapCluster" and HasCustomMinimapAddon() then return end
+                    local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                    if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
+                        HUD:RequestLayout()
+                    end
+                end)
+            end
         end
     end
 
@@ -350,7 +396,7 @@ function HUD:HookFrames()
     -- Keep bags on regular monitor unless user explicitly dragged them to workspace
     local isArrangingBags = false
     function HUD:LayoutBags()
-        if isArrangingBags or InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
+        if HasCustomBagAddon() or isArrangingBags or InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
         isArrangingBags = true
 
         local m = Akimbo.Viewport:GetMetrics()
@@ -398,6 +444,7 @@ function HUD:HookFrames()
         if frame and not hooks[frame] then
             hooks[frame] = true
             frame:HookScript("OnShow", function(self)
+                if HasCustomBagAddon() then return end
                 local name = self:GetName()
                 local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
                 if not pos then
@@ -414,6 +461,7 @@ function HUD:HookFrames()
     if ContainerFrameCombinedBags and not hooks[ContainerFrameCombinedBags] then
         hooks[ContainerFrameCombinedBags] = true
         ContainerFrameCombinedBags:HookScript("OnShow", function(self)
+            if HasCustomBagAddon() then return end
             local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
             if not pos then
                 if self.SetAlpha then self:SetAlpha(0) end
@@ -429,8 +477,13 @@ function HUD:HookFrames()
     if not self.bagHooksInstalled then
         self.bagHooksInstalled = true
         local function TriggerBagLayout()
+            if HasCustomBagAddon() then return end
             HUD:LayoutBags()
-            C_Timer.After(0, function() HUD:LayoutBags() end)
+            C_Timer.After(0, function()
+                if not HasCustomBagAddon() then
+                    HUD:LayoutBags()
+                end
+            end)
         end
         if ContainerFrame_GenerateFrame then
             hooksecurefunc("ContainerFrame_GenerateFrame", TriggerBagLayout)

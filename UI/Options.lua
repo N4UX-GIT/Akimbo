@@ -626,8 +626,12 @@ function Options:CreateFloatingPanel()
     )
     forceCheck:SetPoint("TOPLEFT", 10, -138)
 
+    local compatDesc = card2_2:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    compatDesc:SetPoint("TOPLEFT", 12, -162)
+    card2_2.compatDesc = compatDesc
 
-    local card2_3 = CreateCard(tab2, "Bezel Compensation & Window Spanning", -306, 94)
+
+    local card2_3 = CreateCard(tab2, "Bezel Compensation & Window Spanning", -312, 92)
 
     local bezelSlider = CreateNativeSlider(card2_3, "Bezel Compensation Gap", 0, 100, 2,
         function() return (Akimbo.db and Akimbo.db.bezelGap) or 0 end,
@@ -819,6 +823,20 @@ function Options:CreateFloatingPanel()
         alphaSlider:UpdateText()
         hudSlider:UpdateText()
         mapScaleSlider:UpdateText()
+
+        local bagAddon = Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()
+        local mmAddon = Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon()
+        if card2_2.compatDesc then
+            if bagAddon and mmAddon then
+                card2_2.compatDesc:SetText("|cff00ff00Addon Compatibility:|r Custom Bag & Minimap addons active (control yielded).")
+            elseif bagAddon then
+                card2_2.compatDesc:SetText("|cff00ff00Addon Compatibility:|r Custom Bag addon active (control yielded).")
+            elseif mmAddon then
+                card2_2.compatDesc:SetText("|cff00ff00Addon Compatibility:|r Custom Minimap addon active (control yielded).")
+            else
+                card2_2.compatDesc:SetText("|cff888888Auto-detects Bagnon, SexyMap, AdiBags, ElvUI, etc. to prevent conflicts.|r")
+            end
+        end
 
         Options:UpdateCardThemes()
         Akimbo:ApplyFullLayout()
