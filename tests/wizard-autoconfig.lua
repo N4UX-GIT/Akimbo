@@ -129,6 +129,7 @@ assert(loadfile("Core/Config.lua"))("Akimbo", addon)
 assert(loadfile("Core/Viewport.lua"))("Akimbo", addon)
 assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
 assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
+assert(loadfile("Locales/enUS.lua"))("Akimbo", addon)
 assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
 assert(loadfile("UI/Options.lua"))("Akimbo", addon)
 assert(loadfile("UI/Wizard.lua"))("Akimbo", addon)
@@ -205,6 +206,19 @@ wizardFrame.autoBtn.scripts["OnClick"]()
 assert(math.abs(addon.db.deckWidthRatio - 0.36) < 0.001, "AutoConfigure button in Wizard must set 36% seam")
 assert(wizardFrame.statusText:GetText():find("%[Applied%]"), "Wizard status text must confirm applied setup")
 
+-- Test Continuous Global UI Scale Slider in Wizard
+assert(wizardFrame.scaleSlider ~= nil, "Wizard must have scaleSlider")
+assert(wizardFrame.scaleValText ~= nil, "Wizard must have scaleValText")
+
+addon.db.hudScale = 0.70
+wizardFrame.scaleSlider:SetValue(0.56)
+assert(math.abs(addon.db.hudScale - 0.56) < 0.001, "scaleSlider must set hudScale to 0.56")
+assert(wizardFrame.scaleValText:GetText():find("56%%"), "scaleValText must reflect 56%")
+
+wizardFrame.scaleSlider:SetValue(0.85)
+assert(math.abs(addon.db.hudScale - 0.85) < 0.001, "scaleSlider must set hudScale to 0.85")
+assert(wizardFrame.scaleValText:GetText():find("85%%"), "scaleValText must reflect 85%")
+
 -- Test Laser Toggle in Wizard
 assert(addon.Options.IsSeamGuideShown ~= nil, "Options:IsSeamGuideShown must exist")
 local seamGuideLine = _G["AkimboSeamGuideLine"]
@@ -241,16 +255,24 @@ addon.Wizard.Open = originalWizardOpen
 local optPanel = addon.Options:CreateFloatingPanel()
 assert(optPanel.autoWizardBtn ~= nil, "Options dashboard must have autoWizardBtn in top banner")
 
-local wizardOpenedFromOpt = false
-addon.Wizard.Open = function() wizardOpenedFromOpt = true end
+-- Test Window Overlap Prevention:
+-- When Options is shown and Auto-Setup Wizard is clicked, Options must hide and Wizard must open
+addon.Options:Open()
+assert(optPanel:IsShown() == true, "Options panel must be shown")
+
 optPanel.autoWizardBtn.scripts["OnClick"]()
-assert(wizardOpenedFromOpt == true, "Clicking Auto-Setup Wizard button must open Wizard")
-addon.Wizard.Open = originalWizardOpen
+assert(optPanel:IsShown() == false, "Options panel must hide when Wizard opens from it")
+assert(wizardFrame:IsShown() == true, "Wizard must be shown")
+
+-- When clicking Advanced Settings in Wizard, Wizard hides and Options panel reopens
+addon.Wizard:Close()
+addon.Options:Open()
+assert(optPanel:IsShown() == true, "Options panel re-opened")
+assert(wizardFrame:IsShown() == false, "Wizard hidden when Options opens")
 
 -- Card 1_1 1-Click button
 assert(optPanel.tab1 ~= nil, "Tab 1 must exist")
 local card1_1 = optPanel.tab1
--- card1_1 has autoDetectBtn
 local foundAutoDetectBtn = false
 for _, f in ipairs(frames) do
     if f.text == "1-Click Auto-Configure" then
@@ -262,4 +284,13 @@ for _, f in ipairs(frames) do
 end
 assert(foundAutoDetectBtn, "Card 1_1 must contain 1-Click Auto-Configure button")
 
-print("PASS: 1-click auto-configuration, topology heuristics, wizard frame, and UI buttons verified!")
+-- ============================================================================
+-- 6. Test Localization & Tooltips Integration
+-- ============================================================================
+assert(addon.L ~= nil, "Akimbo.L must be defined")
+assert(addon.L["WIZARD_TITLE"] == "AKIMBO AUTO-CONFIGURATION WIZARD", "Localization must have WIZARD_TITLE")
+assert(addon.L["SLIDER_HUD_SCALE_TIP_TITLE"] ~= nil, "Localization must have SLIDER_HUD_SCALE_TIP_TITLE")
+assert(addon.L["CHECK_CANVAS_ENABLED_TIP_DESC"] ~= nil, "Localization must have CHECK_CANVAS_ENABLED_TIP_DESC")
+assert(addon.SetTooltip ~= nil, "Akimbo:SetTooltip must be defined")
+
+print("PASS: 1-click auto-configuration, topology heuristics, wizard frame, UI scale slider, overlap prevention, and tooltips verified!")

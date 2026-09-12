@@ -40,6 +40,45 @@ function Akimbo:Debug(msg, ...)
     end
 end
 
+-- Localization table fallback
+Akimbo.L = Akimbo.L or setmetatable({}, {
+    __index = function(t, key)
+        return key
+    end
+})
+
+-- ============================================================================
+-- Universal Tooltip Helper
+-- ============================================================================
+function Akimbo:SetTooltip(frame, title, text, anchor)
+    if not frame then return end
+    if not (title or text) then return end
+    if frame.EnableMouse then frame:EnableMouse(true) end
+
+    local oldEnter = frame.GetScript and frame:GetScript("OnEnter")
+    local oldLeave = frame.GetScript and frame:GetScript("OnLeave")
+
+    frame:SetScript("OnEnter", function(self, ...)
+        if oldEnter then pcall(oldEnter, self, ...) end
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, anchor or "ANCHOR_RIGHT")
+        if title and title ~= "" then
+            GameTooltip:AddLine(title, 1.0, 0.82, 0.0, true)
+        end
+        if text and text ~= "" then
+            GameTooltip:AddLine(text, 1.0, 1.0, 1.0, true)
+        end
+        GameTooltip:Show()
+    end)
+
+    frame:SetScript("OnLeave", function(self, ...)
+        if oldLeave then pcall(oldLeave, self, ...) end
+        if GameTooltip and GameTooltip:GetOwner() == self then
+            GameTooltip:Hide()
+        end
+    end)
+end
+
 -- ============================================================================
 -- Combat-Safe Queue System
 -- Modifying protected frames or layout during InCombatLockdown causes Lua errors.

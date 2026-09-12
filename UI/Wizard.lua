@@ -1,10 +1,17 @@
 --[[
     Akimbo: Dual Monitor Workstation Addon
     UI/Wizard.lua: Visual 1-Click Auto-Configuration Wizard & Display Calibration
-    Provides an authentic Classic WoW dialog for 1-click display setup and physical seam calibration.
+    Provides an authentic Classic WoW dialog for 1-click display setup, physical seam calibration,
+    and fine continuous Global UI Scale adjustment.
 --]]
 
 local _, Akimbo = ...
+
+local L = Akimbo.L or setmetatable({}, {
+    __index = function(t, key)
+        return key
+    end
+})
 
 local Wizard = {}
 Akimbo.Wizard = Wizard
@@ -30,7 +37,7 @@ end
 
 local function CreateWizardCard(parent, titleText, yOffset, height)
     local card = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    card:SetSize(608, height)
+    card:SetSize(628, height)
     card:SetPoint("TOPLEFT", parent, "TOPLEFT", 16, yOffset)
 
     card:SetBackdrop({
@@ -63,8 +70,8 @@ function Wizard:CreateFrame()
     if not CreateFrame then return nil end
 
     local f = CreateFrame("Frame", "AkimboSetupWizardFrame", UIParent, "BackdropTemplate")
-    f:SetSize(640, 545)
-    f:SetFrameStrata("DIALOG")
+    f:SetSize(660, 640)
+    f:SetFrameStrata("FULLSCREEN_DIALOG")
     f:EnableMouse(true)
     f:SetMovable(true)
     f:SetClampedToScreen(true)
@@ -77,10 +84,10 @@ function Wizard:CreateFrame()
     end
 
     if Akimbo.Themes and Akimbo.Themes.ApplyBackdrop then
-        Akimbo.Themes:ApplyBackdrop(f, (Akimbo.db and Akimbo.db.theme) or "CLASSIC", 0.98)
+        Akimbo.Themes:ApplyBackdrop(f, (Akimbo.db and Akimbo.db.theme) or "CLASSIC", 1.0)
     end
     if Akimbo.Themes and Akimbo.Themes.CreateBayHeader then
-        f.header = Akimbo.Themes:CreateBayHeader(f, "AKIMBO AUTO-CONFIGURATION WIZARD")
+        f.header = Akimbo.Themes:CreateBayHeader(f, L["WIZARD_TITLE"])
     end
 
     local closeBtn = CreateFrame("Button", nil, f.header or f, "UIPanelCloseButton")
@@ -92,7 +99,16 @@ function Wizard:CreateFrame()
     end
     closeBtn:SetScript("OnClick", function()
         Wizard:Close()
+        if Wizard.openedFromOptions then
+            Wizard.openedFromOptions = false
+            if Akimbo.Options and Akimbo.Options.Open then
+                Akimbo.Options:Open()
+            end
+        end
     end)
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(closeBtn, "Close Wizard", "Close the setup wizard without saving new preferences.")
+    end
 
     f:SetScript("OnHide", function()
         if Akimbo.Options and Akimbo.Options.HideSeamGuide then
@@ -103,93 +119,102 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 1: DISPLAY TOPOLOGY & 1-CLICK AUTO-SETUP
     -- ========================================================================
-    local card1 = CreateWizardCard(f, "1. Display Topology & 1-Click Auto-Setup", -58, 122)
+    local card1 = CreateWizardCard(f, L["WIZARD_CARD1_TITLE"], -58, 120)
 
     local logoIcon = card1:CreateTexture(nil, "ARTWORK")
     local textLeft = 12
     if logoIcon and logoIcon.SetSize and logoIcon.SetPoint and logoIcon.SetTexture then
         logoIcon:SetSize(40, 40)
-        logoIcon:SetPoint("TOPLEFT", 12, -22)
+        logoIcon:SetPoint("TOPLEFT", 12, -20)
         logoIcon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
         card1.logoIcon = logoIcon
         textLeft = 60
     end
 
     local topoText = card1:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-    topoText:SetPoint("TOPLEFT", textLeft, -24)
-    topoText:SetPoint("TOPRIGHT", -12, -24)
+    topoText:SetPoint("TOPLEFT", textLeft, -20)
+    topoText:SetPoint("TOPRIGHT", -12, -20)
     topoText:SetJustifyH("LEFT")
     f.topoText = topoText
 
     local recomText = card1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    recomText:SetPoint("TOPLEFT", textLeft, -42)
-    recomText:SetPoint("TOPRIGHT", -12, -42)
+    recomText:SetPoint("TOPLEFT", textLeft, -38)
+    recomText:SetPoint("TOPRIGHT", -12, -38)
     recomText:SetJustifyH("LEFT")
     f.recomText = recomText
 
     local autoBtn = CreateFrame("Button", nil, card1, "UIPanelButtonTemplate")
-    autoBtn:SetSize(584, 30)
-    autoBtn:SetPoint("TOPLEFT", 12, -60)
-    autoBtn:SetText("|cff00ff001-Click Auto-Configure & Apply (Recommended)|r")
+    autoBtn:SetSize(604, 28)
+    autoBtn:SetPoint("TOPLEFT", 12, -58)
+    autoBtn:SetText("|cff00ff00" .. L["WIZARD_BTN_AUTOCONFIG"] .. "|r")
+    if Akimbo.SetTooltip then
+        Akimbo:SetTooltip(autoBtn, L["WIZARD_BTN_AUTOCONFIG_TIP_TITLE"], L["WIZARD_BTN_AUTOCONFIG_TIP_DESC"])
+    end
     f.autoBtn = autoBtn
 
     local statusText = card1:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
-    statusText:SetPoint("TOPLEFT", 12, -96)
-    statusText:SetPoint("TOPRIGHT", -12, -96)
+    statusText:SetPoint("TOPLEFT", 12, -92)
+    statusText:SetPoint("TOPRIGHT", -12, -92)
     statusText:SetJustifyH("CENTER")
-    statusText:SetText("Click above to automatically detect resolution and configure seam, orientation, and viewport.")
+    statusText:SetText(L["WIZARD_STATUS_READY"])
     f.statusText = statusText
 
     autoBtn:SetScript("OnClick", function()
         if Akimbo.Options and Akimbo.Options.AutoConfigure then
             local info = Akimbo.Options:AutoConfigure(false)
             f:UpdateState()
-            statusText:SetText(string.format("|cff00ff00[Applied]|r Setup automatically configured for %s", info.description))
+            statusText:SetText(string.format("|cff00ff00[Applied]|r " .. (L["WIZARD_STATUS_APPLIED"] and string.format(L["WIZARD_STATUS_APPLIED"], info.description) or "Setup automatically configured for " .. info.description)))
         end
     end)
 
     -- ========================================================================
     -- CARD 2: MONITOR ORIENTATION & 3D VIEWPORT
     -- ========================================================================
-    local card2 = CreateWizardCard(f, "2. Monitor Orientation & 3D Viewport", -188, 125)
+    local card2 = CreateWizardCard(f, L["WIZARD_CARD2_TITLE"], -186, 126)
 
     local orientLabel = card2:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    orientLabel:SetPoint("TOPLEFT", 12, -26)
-    orientLabel:SetText("Monitor Layout Preset:")
+    orientLabel:SetPoint("TOPLEFT", 12, -18)
+    orientLabel:SetText(L["WIZARD_LABEL_LAYOUT"])
 
     local btnPl = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btnPl:SetSize(188, 24)
-    btnPl:SetPoint("TOPLEFT", 12, -44)
-    btnPl:SetText("Portrait Left + Game Right")
+    btnPl:SetSize(196, 24)
+    btnPl:SetPoint("TOPLEFT", 12, -34)
+    btnPl:SetText(L["PRESET_PL_LR"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPl, L["PRESET_PL_LR_TIP_TITLE"], L["PRESET_PL_LR_TIP_DESC"]) end
 
     local btnPr = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btnPr:SetSize(188, 24)
-    btnPr:SetPoint("LEFT", btnPl, "RIGHT", 10, 0)
-    btnPr:SetText("Game Left + Portrait Right")
+    btnPr:SetSize(196, 24)
+    btnPr:SetPoint("LEFT", btnPl, "RIGHT", 8, 0)
+    btnPr:SetText(L["PRESET_GL_PR"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPr, L["PRESET_GL_PR_TIP_TITLE"], L["PRESET_GL_PR_TIP_DESC"]) end
 
     local btnDual = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btnDual:SetSize(188, 24)
-    btnDual:SetPoint("LEFT", btnPr, "RIGHT", 10, 0)
-    btnDual:SetText("Dual Landscape (50/50)")
+    btnDual:SetSize(196, 24)
+    btnDual:SetPoint("LEFT", btnPr, "RIGHT", 8, 0)
+    btnDual:SetText(L["PRESET_DUAL_LANDSCAPE"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnDual, L["PRESET_DUAL_LANDSCAPE_TIP_TITLE"], L["PRESET_DUAL_LANDSCAPE_TIP_DESC"]) end
 
     local arLabel = card2:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    arLabel:SetPoint("TOPLEFT", 12, -74)
-    arLabel:SetText("3D Game Viewport Aspect Ratio:")
+    arLabel:SetPoint("TOPLEFT", 12, -68)
+    arLabel:SetText(L["WIZARD_LABEL_AR"])
 
     local btn169 = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btn169:SetSize(188, 24)
-    btn169:SetPoint("TOPLEFT", 12, -92)
-    btn169:SetText("16:9 Standard Widescreen")
+    btn169:SetSize(196, 24)
+    btn169:SetPoint("TOPLEFT", 12, -86)
+    btn169:SetText(L["AR_16_9"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btn169, L["AR_16_9_TIP_TITLE"], L["AR_16_9_TIP_DESC"]) end
 
     local btn219 = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btn219:SetSize(188, 24)
-    btn219:SetPoint("LEFT", btn169, "RIGHT", 10, 0)
-    btn219:SetText("21:9 Ultrawide")
+    btn219:SetSize(196, 24)
+    btn219:SetPoint("LEFT", btn169, "RIGHT", 8, 0)
+    btn219:SetText(L["AR_21_9"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btn219, L["AR_21_9_TIP_TITLE"], L["AR_21_9_TIP_DESC"]) end
 
     local btnFill = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
-    btnFill:SetSize(188, 24)
-    btnFill:SetPoint("LEFT", btn219, "RIGHT", 10, 0)
-    btnFill:SetText("Fit Window Height (Fill)")
+    btnFill:SetSize(196, 24)
+    btnFill:SetPoint("LEFT", btn219, "RIGHT", 8, 0)
+    btnFill:SetText(L["AR_FILL"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnFill, L["AR_FILL_TIP_TITLE"], L["AR_FILL_TIP_DESC"]) end
 
     btnPl:SetScript("OnClick", function()
         Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
@@ -234,19 +259,19 @@ function Wizard:CreateFrame()
     -- ========================================================================
     -- CARD 3: BEZEL SEAM ALIGNMENT & LASER GUIDE
     -- ========================================================================
-    local card3 = CreateWizardCard(f, "3. Physical Monitor Seam Alignment & Calibration", -322, 160)
+    local card3 = CreateWizardCard(f, L["WIZARD_CARD3_TITLE"], -320, 126)
 
     local seamHelp = card3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    seamHelp:SetPoint("TOPLEFT", 12, -26)
-    seamHelp:SetPoint("TOPRIGHT", -12, -26)
+    seamHelp:SetPoint("TOPLEFT", 12, -18)
+    seamHelp:SetPoint("TOPRIGHT", -12, -18)
     seamHelp:SetJustifyH("LEFT")
-    seamHelp:SetText("Align the red laser line with the physical bezel dividing your two monitors:")
+    seamHelp:SetText(L["WIZARD_SEAM_INSTRUCTION"])
 
     -- Seam Slider
     local seamSlider = CreateFrame("Slider", nil, card3, "BackdropTemplate")
     seamSlider:SetOrientation("HORIZONTAL")
     seamSlider:SetSize(280, 16)
-    seamSlider:SetPoint("TOPLEFT", 12, -48)
+    seamSlider:SetPoint("TOPLEFT", 12, -42)
     seamSlider:SetMinMaxValues(0.15, 0.80)
     seamSlider:SetValueStep(0.005)
     seamSlider:SetObeyStepOnDrag(true)
@@ -277,22 +302,25 @@ function Wizard:CreateFrame()
 
     local seamTitle = seamSlider:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     seamTitle:SetPoint("BOTTOMLEFT", seamSlider, "TOPLEFT", 0, 4)
-    seamTitle:SetText("Bezel Seam Width:")
+    seamTitle:SetText(L["WIZARD_LABEL_SEAM"])
 
     local btnMinus = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnMinus:SetSize(46, 22)
     btnMinus:SetPoint("LEFT", seamSlider, "RIGHT", 10, 0)
-    btnMinus:SetText("- 1%")
+    btnMinus:SetText(L["BTN_SEAM_MINUS"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnMinus, L["BTN_SEAM_MINUS_TIP_TITLE"], L["BTN_SEAM_MINUS_TIP_DESC"]) end
 
     local btnPlus = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnPlus:SetSize(46, 22)
     btnPlus:SetPoint("LEFT", btnMinus, "RIGHT", 4, 0)
-    btnPlus:SetText("+ 1%")
+    btnPlus:SetText(L["BTN_SEAM_PLUS"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPlus, L["BTN_SEAM_PLUS_TIP_TITLE"], L["BTN_SEAM_PLUS_TIP_DESC"]) end
 
     local btnLaser = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnLaser:SetSize(130, 22)
+    btnLaser:SetSize(140, 22)
     btnLaser:SetPoint("LEFT", btnPlus, "RIGHT", 10, 0)
-    btnLaser:SetText("Toggle Laser Guide")
+    btnLaser:SetText(L["BTN_LASER_TOGGLE"])
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnLaser, L["BTN_LASER_TOGGLE_TIP_TITLE"], L["BTN_LASER_TOGGLE_TIP_DESC"]) end
 
     seamSlider:SetScript("OnValueChanged", function(self, val)
         val = math.floor((val / 0.005) + 0.5) * 0.005
@@ -304,6 +332,7 @@ function Wizard:CreateFrame()
         Akimbo:ApplyFullLayout()
         f:UpdateLaserButton()
     end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(seamSlider, L["SLIDER_SEAM_WIDTH_TIP_TITLE"], L["SLIDER_SEAM_WIDTH_TIP_DESC"]) end
 
     btnMinus:SetScript("OnClick", function()
         local current = seamSlider:GetValue() or 0.36
@@ -328,90 +357,178 @@ function Wizard:CreateFrame()
 
     -- Quick Seam Presets
     local btnSeam36 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnSeam36:SetSize(188, 22)
-    btnSeam36:SetPoint("TOPLEFT", seamSlider, "BOTTOMLEFT", 0, -10)
-    btnSeam36:SetText("1440/4000 Seam (36%)")
+    btnSeam36:SetSize(196, 22)
+    btnSeam36:SetPoint("TOPLEFT", seamSlider, "BOTTOMLEFT", 0, -12)
+    btnSeam36:SetText(L["WIZARD_PRESET_SEAM_36"])
     btnSeam36:SetScript("OnClick", function() seamSlider:SetValue(0.36) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam36, L["WIZARD_PRESET_SEAM_36_TIP_TITLE"], L["WIZARD_PRESET_SEAM_36_TIP_DESC"]) end
 
     local btnSeam50 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnSeam50:SetSize(188, 22)
-    btnSeam50:SetPoint("LEFT", btnSeam36, "RIGHT", 10, 0)
-    btnSeam50:SetText("Equal Split (50%)")
+    btnSeam50:SetSize(196, 22)
+    btnSeam50:SetPoint("LEFT", btnSeam36, "RIGHT", 8, 0)
+    btnSeam50:SetText(L["WIZARD_PRESET_SEAM_50"])
     btnSeam50:SetScript("OnClick", function() seamSlider:SetValue(0.50) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam50, L["WIZARD_PRESET_SEAM_50_TIP_TITLE"], L["WIZARD_PRESET_SEAM_50_TIP_DESC"]) end
 
     local btnSeam55 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnSeam55:SetSize(188, 22)
-    btnSeam55:SetPoint("LEFT", btnSeam50, "RIGHT", 10, 0)
-    btnSeam55:SetText("Custom Split (55%)")
+    btnSeam55:SetSize(196, 22)
+    btnSeam55:SetPoint("LEFT", btnSeam50, "RIGHT", 8, 0)
+    btnSeam55:SetText(L["WIZARD_PRESET_SEAM_55"])
     btnSeam55:SetScript("OnClick", function() seamSlider:SetValue(0.55) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam55, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
 
-    -- HUD Scale Presets
-    local hudLabel = card3:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-    hudLabel:SetPoint("TOPLEFT", btnSeam36, "BOTTOMLEFT", 0, -8)
-    hudLabel:SetText("Global UI Scale Preset:")
+    -- ========================================================================
+    -- CARD 4: GLOBAL UI SCALE & CALIBRATION (CONTINUOUS SLIDER)
+    -- ========================================================================
+    local card4 = CreateWizardCard(f, L["WIZARD_CARD4_TITLE"], -454, 126)
 
-    local btnHud56 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnHud56:SetSize(188, 22)
-    btnHud56:SetPoint("TOPLEFT", hudLabel, "BOTTOMLEFT", 0, -4)
-    btnHud56:SetText("Compact (56%)")
-    btnHud56:SetScript("OnClick", function()
-        Akimbo.db.hudScale = 0.56
-        f:UpdateState()
+    local scaleHelp = card4:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    scaleHelp:SetPoint("TOPLEFT", 12, -18)
+    scaleHelp:SetPoint("TOPRIGHT", -12, -18)
+    scaleHelp:SetJustifyH("LEFT")
+    scaleHelp:SetText(L["WIZARD_UI_SCALE_INSTRUCTION"])
+
+    -- Continuous UI Scale Slider
+    local scaleSlider = CreateFrame("Slider", nil, card4, "BackdropTemplate")
+    scaleSlider:SetOrientation("HORIZONTAL")
+    scaleSlider:SetSize(280, 16)
+    scaleSlider:SetPoint("TOPLEFT", 12, -42)
+    scaleSlider:SetMinMaxValues(0.25, 1.25)
+    scaleSlider:SetValueStep(0.01)
+    scaleSlider:SetObeyStepOnDrag(true)
+    scaleSlider:EnableMouse(true)
+    scaleSlider:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 },
+    })
+    scaleSlider:SetBackdropColor(0.06, 0.06, 0.08, 0.95)
+    scaleSlider:SetBackdropBorderColor(0.40, 0.38, 0.30, 0.9)
+
+    local scaleThumb = scaleSlider:CreateTexture(nil, "OVERLAY")
+    if scaleThumb and scaleThumb.SetTexture then
+        scaleThumb:SetTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+    elseif scaleThumb and scaleThumb.SetColorTexture then
+        scaleThumb:SetColorTexture(1.0, 0.82, 0.0, 1.0)
+    end
+    if scaleThumb and scaleThumb.SetSize then
+        scaleThumb:SetSize(18, 20)
+    end
+    scaleSlider:SetThumbTexture(scaleThumb)
+    scaleSlider.thumb = scaleThumb
+
+    local scaleValText = scaleSlider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    scaleValText:SetPoint("BOTTOMRIGHT", scaleSlider, "TOPRIGHT", 0, 4)
+
+    local scaleTitle = scaleSlider:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    scaleTitle:SetPoint("BOTTOMLEFT", scaleSlider, "TOPLEFT", 0, 4)
+    scaleTitle:SetText(L["WIZARD_LABEL_UI_SCALE"])
+
+    local btnScaleMinus = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnScaleMinus:SetSize(46, 22)
+    btnScaleMinus:SetPoint("LEFT", scaleSlider, "RIGHT", 10, 0)
+    btnScaleMinus:SetText("- 1%")
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleMinus, "Scale Down", "Decreases the global UI scale by 1%.") end
+
+    local btnScalePlus = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnScalePlus:SetSize(46, 22)
+    btnScalePlus:SetPoint("LEFT", btnScaleMinus, "RIGHT", 4, 0)
+    btnScalePlus:SetText("+ 1%")
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScalePlus, "Scale Up", "Increases the global UI scale by 1%.") end
+
+    local btnScaleReset = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnScaleReset:SetSize(140, 22)
+    btnScaleReset:SetPoint("LEFT", btnScalePlus, "RIGHT", 10, 0)
+    btnScaleReset:SetText("Reset (70%)")
+    btnScaleReset:SetScript("OnClick", function()
+        scaleSlider:SetValue(0.70)
+    end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, "Reset UI Scale", "Resets the Global UI Scale to the recommended standard default of 70%.") end
+
+    scaleSlider:SetScript("OnValueChanged", function(self, val)
+        val = math.floor((val / 0.01) + 0.5) * 0.01
+        Akimbo.db.hudScale = val
+        scaleValText:SetText(string.format("Scale: %.0f%%", val * 100))
         Akimbo:ApplyFullLayout()
     end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(scaleSlider, L["WIZARD_UI_SCALE_TIP_TITLE"], L["WIZARD_UI_SCALE_TIP_DESC"]) end
 
-    local btnHud65 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnHud65:SetSize(188, 22)
+    btnScaleMinus:SetScript("OnClick", function()
+        local current = scaleSlider:GetValue() or 0.70
+        scaleSlider:SetValue(math.max(0.25, current - 0.01))
+    end)
+
+    btnScalePlus:SetScript("OnClick", function()
+        local current = scaleSlider:GetValue() or 0.70
+        scaleSlider:SetValue(math.min(1.25, current + 0.01))
+    end)
+
+    -- Quick Scale Preset Buttons
+    local btnHud56 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnHud56:SetSize(144, 22)
+    btnHud56:SetPoint("TOPLEFT", scaleSlider, "BOTTOMLEFT", 0, -12)
+    btnHud56:SetText(L["WIZARD_PRESET_SCALE_56"])
+    btnHud56:SetScript("OnClick", function() scaleSlider:SetValue(0.56) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud56, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
+
+    local btnHud65 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnHud65:SetSize(144, 22)
     btnHud65:SetPoint("LEFT", btnHud56, "RIGHT", 10, 0)
-    btnHud65:SetText("Balanced (65%)")
-    btnHud65:SetScript("OnClick", function()
-        Akimbo.db.hudScale = 0.65
-        f:UpdateState()
-        Akimbo:ApplyFullLayout()
-    end)
+    btnHud65:SetText(L["WIZARD_PRESET_SCALE_65"])
+    btnHud65:SetScript("OnClick", function() scaleSlider:SetValue(0.65) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud65, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
 
-    local btnHud70 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
-    btnHud70:SetSize(188, 22)
+    local btnHud70 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnHud70:SetSize(144, 22)
     btnHud70:SetPoint("LEFT", btnHud65, "RIGHT", 10, 0)
-    btnHud70:SetText("Standard (70%)")
-    btnHud70:SetScript("OnClick", function()
-        Akimbo.db.hudScale = 0.70
-        f:UpdateState()
-        Akimbo:ApplyFullLayout()
-    end)
+    btnHud70:SetText(L["WIZARD_PRESET_SCALE_70"])
+    btnHud70:SetScript("OnClick", function() scaleSlider:SetValue(0.70) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud70, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
+
+    local btnHud100 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
+    btnHud100:SetSize(144, 22)
+    btnHud100:SetPoint("LEFT", btnHud70, "RIGHT", 10, 0)
+    btnHud100:SetText(L["WIZARD_PRESET_SCALE_100"])
+    btnHud100:SetScript("OnClick", function() scaleSlider:SetValue(1.00) end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud100, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     -- ========================================================================
     -- FOOTER ACTIONS
     -- ========================================================================
     local advBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    advBtn:SetSize(240, 28)
+    advBtn:SetSize(250, 28)
     advBtn:SetPoint("BOTTOMLEFT", 16, 14)
-    advBtn:SetText("Advanced Settings (/akimbo)")
+    advBtn:SetText(L["WIZARD_BTN_ADVANCED"])
     advBtn:SetScript("OnClick", function()
+        Wizard.openedFromOptions = false
         Wizard:Close()
         if Akimbo.Options and Akimbo.Options.Open then
             Akimbo.Options:Open()
         end
     end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(advBtn, L["WIZARD_BTN_ADVANCED_TIP_TITLE"], L["WIZARD_BTN_ADVANCED_TIP_DESC"]) end
 
     local finishBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    finishBtn:SetSize(240, 28)
+    finishBtn:SetSize(250, 28)
     finishBtn:SetPoint("BOTTOMRIGHT", -16, 14)
-    finishBtn:SetText("|cffffd100Save & Finish Setup|r")
+    finishBtn:SetText("|cffffd100" .. L["WIZARD_BTN_FINISH"] .. "|r")
     finishBtn:SetScript("OnClick", function()
         if Akimbo.db then
             Akimbo.db.firstRunComplete = true
         end
+        Wizard.openedFromOptions = false
         Wizard:Close()
         Akimbo:ApplyFullLayout()
         if Akimbo.Print then
-            Akimbo:Print("Configuration saved! Welcome to Akimbo Dual Monitor Workstation.")
+            Akimbo:Print(L["CONFIG_SAVED"] or "Configuration saved! Welcome to Akimbo Dual Monitor Workstation.")
         end
     end)
+    if Akimbo.SetTooltip then Akimbo:SetTooltip(finishBtn, L["WIZARD_BTN_FINISH_TIP_TITLE"], L["WIZARD_BTN_FINISH_TIP_DESC"]) end
 
     function f:UpdateLaserButton()
         local isShown = Akimbo.Options and Akimbo.Options.IsSeamGuideShown and Akimbo.Options:IsSeamGuideShown()
-        btnLaser:SetText(isShown and "|cffff3333Hide Laser|r" or "Show Laser")
+        btnLaser:SetText(isShown and ("|cffff3333" .. L["WIZARD_BTN_LASER_HIDE"] .. "|r") or L["WIZARD_BTN_LASER_SHOW"])
     end
 
     function f:UpdateState()
@@ -425,6 +542,9 @@ function Wizard:CreateFrame()
         seamSlider:SetValue(seam)
         seamValText:SetText(string.format("Seam: %.1f%%", seam * 100))
 
+        scaleSlider:SetValue(hud)
+        scaleValText:SetText(string.format("Scale: %.0f%%", hud * 100))
+
         btnPl:SetEnabled(not (p == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and pos == "RIGHT"))
         btnPr:SetEnabled(not (p == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and pos == "LEFT"))
         btnDual:SetEnabled(not (p == "LANDSCAPE_DUAL"))
@@ -433,17 +553,28 @@ function Wizard:CreateFrame()
         btn219:SetEnabled(ar ~= "21_9")
         btnFill:SetEnabled(ar ~= "FILL")
 
-        btnHud56:SetEnabled(math.abs(hud - 0.56) > 0.03)
-        btnHud65:SetEnabled(math.abs(hud - 0.65) > 0.03)
-        btnHud70:SetEnabled(math.abs(hud - 0.70) > 0.03)
+        btnHud56:SetEnabled(math.abs(hud - 0.56) > 0.02)
+        btnHud65:SetEnabled(math.abs(hud - 0.65) > 0.02)
+        btnHud70:SetEnabled(math.abs(hud - 0.70) > 0.02)
+        btnHud100:SetEnabled(math.abs(hud - 1.00) > 0.02)
 
         local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
         local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
         local c = pals and pals[trimKey]
-        if c and seamSlider.thumb and seamSlider.thumb.SetVertexColor then
-            seamSlider.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
-        elseif seamSlider.thumb and seamSlider.thumb.SetVertexColor then
-            seamSlider.thumb:SetVertexColor(1.0, 0.82, 0.0, 1.0)
+        if c then
+            if seamSlider.thumb and seamSlider.thumb.SetVertexColor then
+                seamSlider.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
+            end
+            if scaleSlider.thumb and scaleSlider.thumb.SetVertexColor then
+                scaleSlider.thumb:SetVertexColor(c.r, c.g, c.b, 1.0)
+            end
+        else
+            if seamSlider.thumb and seamSlider.thumb.SetVertexColor then
+                seamSlider.thumb:SetVertexColor(1.0, 0.82, 0.0, 1.0)
+            end
+            if scaleSlider.thumb and scaleSlider.thumb.SetVertexColor then
+                scaleSlider.thumb:SetVertexColor(1.0, 0.82, 0.0, 1.0)
+            end
         end
 
         self:UpdateLaserButton()
@@ -451,26 +582,38 @@ function Wizard:CreateFrame()
 
     f.seamSlider = seamSlider
     f.seamValText = seamValText
+    f.scaleSlider = scaleSlider
+    f.scaleValText = scaleValText
 
     wizardFrame = f
     return f
 end
 
 function Wizard:Open()
+    -- Hide Options dashboard if it is currently open to prevent overlapping windows
+    if Akimbo.Options and Akimbo.Options.GetConfigFrame then
+        local cfg = Akimbo.Options:GetConfigFrame()
+        if cfg and cfg:IsShown() then
+            Wizard.openedFromOptions = true
+            cfg:Hide()
+        end
+    end
+
     local f = self:CreateFrame()
     if not f then return end
 
     local info = self:DetectTopology()
 
-    f.topoText:SetText(string.format("|cffffd100Detected Display:|r %s (%dx%d, AR %.2f:1)",
-        info.description, info.physWidth, info.physHeight, info.aspectRatio))
+    f.topoText:SetText(string.format("|cffffd100%s|r %s (%dx%d, AR %.2f:1)",
+        L["WIZARD_DETECTED_PREFIX"], info.description, info.physWidth, info.physHeight, info.aspectRatio))
 
-    f.recomText:SetText(string.format("|cffffd100Recommendation:|r %s | Seam: %.1f%% | Viewport: %s",
-        (info.recommendedPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and (info.recommendedPosition == "RIGHT" and "Portrait Left + Game Right" or "Game Left + Portrait Right") or "Dual Landscape 50/50"),
+    f.recomText:SetText(string.format("|cffffd100%s|r %s | Seam: %.1f%% | Viewport: %s",
+        L["WIZARD_RECOM_PREFIX"],
+        (info.recommendedPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and (info.recommendedPosition == "RIGHT" and L["PRESET_PL_LR"] or L["PRESET_GL_PR"]) or L["PRESET_DUAL_LANDSCAPE"]),
         info.recommendedDeckRatio * 100,
         info.recommendedAR or "16:9"))
 
-    f.statusText:SetText("Click above to automatically detect resolution and configure seam, orientation, and viewport.")
+    f.statusText:SetText(L["WIZARD_STATUS_READY"])
 
     f:UpdateState()
 

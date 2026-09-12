@@ -17,6 +17,9 @@ Core\Viewport.lua
 Core\SeamRedirect.lua
 Core\Canvas.lua
 
+# Locales
+Locales\enUS.lua
+
 # UI & Themes
 UI\Themes.lua
 UI\Options.lua
