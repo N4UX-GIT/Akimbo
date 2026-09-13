@@ -620,21 +620,26 @@ function Options:CreateFloatingPanel()
     banner:SetJustifyH("LEFT")
     configFrame.banner = banner
 
-    -- Three Distinct Tab Switchers
+    -- Four Distinct Tab Switchers (162 width each + 12px gaps)
     local tab1Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
-    tab1Btn:SetSize(220, 26)
+    tab1Btn:SetSize(162, 26)
     tab1Btn:SetPoint("TOPLEFT", 18, -84)
     tab1Btn:SetText(L["TAB_DISPLAY"])
 
     local tab2Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
-    tab2Btn:SetSize(220, 26)
+    tab2Btn:SetSize(162, 26)
     tab2Btn:SetPoint("LEFT", tab1Btn, "RIGHT", 12, 0)
     tab2Btn:SetText(L["TAB_WORKSPACE"])
 
     local tab3Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
-    tab3Btn:SetSize(220, 26)
+    tab3Btn:SetSize(162, 26)
     tab3Btn:SetPoint("LEFT", tab2Btn, "RIGHT", 12, 0)
     tab3Btn:SetText(L["TAB_THEMES"])
+
+    local tab4Btn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
+    tab4Btn:SetSize(162, 26)
+    tab4Btn:SetPoint("LEFT", tab3Btn, "RIGHT", 12, 0)
+    tab4Btn:SetText(L["TAB_PROFILES"])
 
     -- Tab Content Containers (Anchored below tab headers)
     local tab1 = CreateFrame("Frame", nil, configFrame)
@@ -651,6 +656,11 @@ function Options:CreateFloatingPanel()
     tab3:SetPoint("TOPLEFT", 16, -118)
     tab3:SetPoint("BOTTOMRIGHT", -16, 52)
     configFrame.tab3 = tab3
+    
+    local tab4 = CreateFrame("Frame", nil, configFrame)
+    tab4:SetPoint("TOPLEFT", 16, -118)
+    tab4:SetPoint("BOTTOMRIGHT", -16, 52)
+    configFrame.tab4 = tab4
 
     local registeredCards = {}
 
@@ -728,15 +738,28 @@ function Options:CreateFloatingPanel()
         tab1:SetShown(tabIndex == 1)
         tab2:SetShown(tabIndex == 2)
         tab3:SetShown(tabIndex == 3)
+        tab4:SetShown(tabIndex == 4)
+        local normalColor = {0.8, 0.8, 0.8}
+        local activeColor = {1.0, 0.82, 0.0}
+        local t1c = (tabIndex == 1) and activeColor or normalColor
+        local t2c = (tabIndex == 2) and activeColor or normalColor
+        local t3c = (tabIndex == 3) and activeColor or normalColor
+        local t4c = (tabIndex == 4) and activeColor or normalColor
 
-        tab1Btn:SetEnabled(tabIndex ~= 1)
-        tab2Btn:SetEnabled(tabIndex ~= 2)
-        tab3Btn:SetEnabled(tabIndex ~= 3)
+        local fs1 = tab1Btn.GetFontString and tab1Btn:GetFontString()
+        local fs2 = tab2Btn.GetFontString and tab2Btn:GetFontString()
+        local fs3 = tab3Btn.GetFontString and tab3Btn:GetFontString()
+        local fs4 = tab4Btn.GetFontString and tab4Btn:GetFontString()
+        if fs1 then fs1:SetTextColor(t1c[1], t1c[2], t1c[3]) end
+        if fs2 then fs2:SetTextColor(t2c[1], t2c[2], t2c[3]) end
+        if fs3 then fs3:SetTextColor(t3c[1], t3c[2], t3c[3]) end
+        if fs4 then fs4:SetTextColor(t4c[1], t4c[2], t4c[3]) end
     end
 
     tab1Btn:SetScript("OnClick", function() SwitchTab(1) end)
     tab2Btn:SetScript("OnClick", function() SwitchTab(2) end)
     tab3Btn:SetScript("OnClick", function() SwitchTab(3) end)
+    tab4Btn:SetScript("OnClick", function() SwitchTab(4) end)
 
     -- ========================================================================
     -- TAB 1: DISPLAY & VIEWPORT CALIBRATION
@@ -1411,6 +1434,148 @@ function Options:CreateFloatingPanel()
     themeNote:SetText("|cff888888Colors & opacity apply live to your secondary screen canvas backdrop. Click preview swatch or Custom for color wheel.|r")
 
     -- ========================================================================
+    -- TAB 4: PROFILES
+    -- ========================================================================
+    local card4_1 = CreateCard(tab4, L["PROFILES_LIST_TITLE"] or "Profiles", 0, 560)
+    
+    local activeProfileLabel = card4_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
+    activeProfileLabel:SetPoint("TOPLEFT", 16, -24)
+    activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((AkimboCharDB and AkimboCharDB.activeProfile) or "Default") .. "|r")
+
+    local profileScroll = CreateFrame("ScrollFrame", "AkimboProfileScrollFrame", card4_1, "UIPanelScrollFrameTemplate")
+    profileScroll:SetPoint("TOPLEFT", 16, -56)
+    profileScroll:SetSize(280, 420)
+    
+    local profileScrollBG = CreateFrame("Frame", nil, profileScroll, "BackdropTemplate")
+    profileScrollBG:SetPoint("TOPLEFT", -4, 4)
+    profileScrollBG:SetPoint("BOTTOMRIGHT", 24, -4)
+    if profileScrollBG.SetFrameLevel then
+        profileScrollBG:SetFrameLevel(profileScroll.GetFrameLevel and (profileScroll:GetFrameLevel() - 1) or 1)
+    end
+    profileScrollBG:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        edgeSize = 16, insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    profileScrollBG:SetBackdropColor(0, 0, 0, 0.8)
+
+    local profileScrollContent = CreateFrame("Frame", nil, profileScroll)
+    profileScrollContent:SetSize(280, 420)
+    if profileScroll.SetScrollChild then profileScroll:SetScrollChild(profileScrollContent) end
+
+    local selectedProfileName = nil
+    local profileButtons = {}
+    
+    local loadBtn = CreateFrame("Button", nil, card4_1, "UIPanelButtonTemplate")
+    loadBtn:SetSize(160, 26)
+    loadBtn:SetPoint("TOPLEFT", profileScroll, "TOPRIGHT", 40, 0)
+    loadBtn:SetText(L["PROFILES_BTN_LOAD"] or "Load")
+    
+    local copyBtn = CreateFrame("Button", nil, card4_1, "UIPanelButtonTemplate")
+    copyBtn:SetSize(160, 26)
+    copyBtn:SetPoint("TOPLEFT", loadBtn, "BOTTOMLEFT", 0, -8)
+    copyBtn:SetText(L["PROFILES_BTN_COPY"] or "Copy From")
+    
+    local deleteBtn = CreateFrame("Button", nil, card4_1, "UIPanelButtonTemplate")
+    deleteBtn:SetSize(160, 26)
+    deleteBtn:SetPoint("TOPLEFT", copyBtn, "BOTTOMLEFT", 0, -8)
+    deleteBtn:SetText(L["PROFILES_BTN_DELETE"] or "Delete")
+    
+    local resetBtn = CreateFrame("Button", nil, card4_1, "UIPanelButtonTemplate")
+    resetBtn:SetSize(160, 26)
+    resetBtn:SetPoint("TOPLEFT", deleteBtn, "BOTTOMLEFT", 0, -24)
+    resetBtn:SetText(L["PROFILES_BTN_RESET"] or "Reset Current")
+    
+    local createEditBox = CreateFrame("EditBox", nil, card4_1, "InputBoxTemplate")
+    createEditBox:SetSize(200, 26)
+    createEditBox:SetPoint("TOPLEFT", profileScroll, "BOTTOMLEFT", 6, -16)
+    createEditBox:SetAutoFocus(false)
+    
+    local createBtn = CreateFrame("Button", nil, card4_1, "UIPanelButtonTemplate")
+    createBtn:SetSize(80, 26)
+    createBtn:SetPoint("LEFT", createEditBox, "RIGHT", 4, 0)
+    createBtn:SetText(L["PROFILES_BTN_CREATE"] or "Create")
+
+    function Options:UpdateProfileList()
+        local profiles = Akimbo.GetProfiles and Akimbo:GetProfiles() or {"Default"}
+        activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((AkimboCharDB and AkimboCharDB.activeProfile) or "Default") .. "|r")
+        
+        -- Hide old buttons
+        for _, btn in ipairs(profileButtons) do btn:Hide() end
+        
+        local yOffset = -4
+        for i, pName in ipairs(profiles) do
+            local btn = profileButtons[i]
+            if not btn then
+                btn = CreateFrame("Button", nil, profileScrollContent)
+                btn:SetSize(270, 20)
+                local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+                fs:SetPoint("LEFT", btn, "LEFT", 8, 0)
+                btn.text = fs
+                local tex = btn:CreateTexture(nil, "BACKGROUND")
+                tex:SetAllPoints()
+                tex:SetColorTexture(1, 0.82, 0, 0.3)
+                tex:Hide()
+                btn.highlight = tex
+                
+                btn:SetScript("OnClick", function()
+                    selectedProfileName = pName
+                    Options:UpdateProfileList()
+                end)
+                profileButtons[i] = btn
+            end
+            btn:SetPoint("TOPLEFT", profileScrollContent, "TOPLEFT", 4, yOffset)
+            btn.text:SetText(pName)
+            if pName == selectedProfileName then
+                btn.highlight:Show()
+            else
+                btn.highlight:Hide()
+            end
+            btn:Show()
+            yOffset = yOffset - 22
+        end
+        
+        loadBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile))
+        copyBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile))
+        deleteBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile) and selectedProfileName ~= "Default")
+    end
+
+    loadBtn:SetScript("OnClick", function()
+        if selectedProfileName and Akimbo.SetProfile then
+            Akimbo:SetProfile(selectedProfileName)
+        end
+    end)
+    copyBtn:SetScript("OnClick", function()
+        if selectedProfileName and Akimbo.CopyProfile then
+            Akimbo:CopyProfile(selectedProfileName)
+        end
+    end)
+    deleteBtn:SetScript("OnClick", function()
+        if selectedProfileName and Akimbo.DeleteProfile then
+            Akimbo:DeleteProfile(selectedProfileName)
+            selectedProfileName = nil
+            Options:UpdateProfileList()
+        end
+    end)
+    resetBtn:SetScript("OnClick", function()
+        if Akimbo.ResetConfig then Akimbo:ResetConfig() end
+    end)
+    createBtn:SetScript("OnClick", function()
+        local t = strtrim(createEditBox:GetText() or "")
+        if t ~= "" and Akimbo.CreateProfile then
+            local success, err = Akimbo:CreateProfile(t)
+            if success then
+                createEditBox:SetText("")
+                createEditBox:ClearFocus()
+                selectedProfileName = t
+                Options:UpdateProfileList()
+            else
+                Akimbo:Print("|cffff3333" .. tostring(err) .. "|r")
+            end
+        end
+    end)
+
+    -- ========================================================================
     -- BOTTOM ACTION BAR (Shared across tabs)
     -- ========================================================================
     local applyBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
@@ -1474,6 +1639,10 @@ function Options:CreateFloatingPanel()
         alphaSlider:UpdateText()
         hudSlider:UpdateText()
         mapScaleSlider:UpdateText()
+
+        if Options.UpdateProfileList then
+            Options:UpdateProfileList()
+        end
 
         local bagAddon = Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()
         local mmAddon = Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon()

@@ -402,3 +402,26 @@ L["MSG_SPAN_GUIDE"] = "Use the included Akimbo-Span.bat to stretch WoW across bo
 L["MSG_STATUS"] = "Status: %s. Type |cffffcc00/akimbo|r for options, or |cff00ff00/akimbo wizard|r for auto-setup."
 L["MSG_PANEL_LAYOUT_ERROR"] = "Panel layout error: %s"
 L["MSG_MAP_LAYOUT_ERROR"] = "Map layout error: %s"
+
+-- ============================================================================
+-- Profile Management
+-- ============================================================================
+L["TAB_PROFILES"] = "Profiles"
+L["PROFILES_CURRENT_LABEL"] = "Active Profile:"
+L["PROFILES_LIST_TITLE"] = "Saved Profiles"
+L["PROFILES_BTN_CREATE"] = "Create"
+L["PROFILES_BTN_LOAD"] = "Load"
+L["PROFILES_BTN_COPY"] = "Copy From"
+L["PROFILES_BTN_DELETE"] = "Delete"
+L["PROFILES_BTN_RESET"] = "Reset Current"
+L["PROFILES_CREATE_TIP_TITLE"] = "Create Profile"
+L["PROFILES_CREATE_TIP_DESC"] = "Create a new profile with the given name."
+L["MSG_PROFILE_CREATED"] = "Created profile: %s"
+L["MSG_PROFILE_LOADED"] = "Loaded profile: %s"
+L["MSG_PROFILE_DELETED"] = "Deleted profile: %s"
+L["MSG_PROFILE_RESET"] = "Profile reset to defaults."
+L["MSG_PROFILE_COPIED"] = "Copied settings from profile: %s"
+L["PROFILES_WARN_DELETE_ACTIVE"] = "Cannot delete the active profile."
+L["PROFILES_WARN_DEFAULT"] = "Cannot delete the Default profile."
+L["PROFILES_WARN_EMPTY_NAME"] = "Profile name cannot be empty."
+L["PROFILES_WARN_EXISTS"] = "A profile with that name already exists."

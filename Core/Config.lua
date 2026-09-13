@@ -52,30 +52,123 @@ local function CopyDefaults(src, dst)
 end
 
 function Akimbo:InitializeConfig()
-    if type(AkimboDB) ~= "table" then
-        AkimboDB = {}
+    if type(AkimboDB) ~= "table" then AkimboDB = {} end
+    if type(AkimboCharDB) ~= "table" then AkimboCharDB = {} end
+
+    -- Migrate legacy flat config to Profiles
+    if type(AkimboDB.profiles) ~= "table" then
+        AkimboDB.profiles = {}
+        AkimboDB.profiles["Default"] = {}
+        for k, v in pairs(AkimboDB) do
+            if k ~= "profiles" then
+                AkimboDB.profiles["Default"][k] = v
+                AkimboDB[k] = nil
+            end
+        end
     end
+
+    local current = AkimboCharDB.activeProfile or "Default"
+    if not AkimboDB.profiles[current] then
+        AkimboDB.profiles[current] = {}
+        AkimboCharDB.activeProfile = current
+    end
+
+    Akimbo.db = AkimboDB.profiles[current]
+
     -- Auto-migrate to vertical portrait setup if preset is unset or old default
-    if not AkimboDB.layoutPreset or AkimboDB.layoutPreset == "AUTO" then
-        AkimboDB.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-        AkimboDB.primaryPosition = AkimboDB.primaryPosition or "RIGHT"
+    if not Akimbo.db.layoutPreset or Akimbo.db.layoutPreset == "AUTO" then
+        Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        Akimbo.db.primaryPosition = Akimbo.db.primaryPosition or "RIGHT"
     end
     -- Fill missing settings without overwriting a player's calibration.
-    -- Legacy uiScale values are retained but no longer used or created.
-    if not AkimboDB.chatPosition then
-        AkimboDB.chatPosition = "GAME"
+    if not Akimbo.db.chatPosition then
+        Akimbo.db.chatPosition = "GAME"
     end
     -- Purge legacy panelPositions from earlier Astra docking modules
-    if AkimboDB.panelPositions then
-        AkimboDB.panelPositions = nil
+    if Akimbo.db.panelPositions then
+        Akimbo.db.panelPositions = nil
     end
-    CopyDefaults(defaultSettings, AkimboDB)
-    Akimbo.db = AkimboDB
+
+    CopyDefaults(defaultSettings, Akimbo.db)
+end
+
+function Akimbo:GetProfiles()
+    local list = {}
+    if AkimboDB and AkimboDB.profiles then
+        for k in pairs(AkimboDB.profiles) do
+            table.insert(list, k)
+        end
+        table.sort(list)
+    end
+    return list
+end
+
+function Akimbo:SetProfile(name)
+    if not AkimboDB.profiles[name] then
+        AkimboDB.profiles[name] = CopyDefaults(defaultSettings, {})
+    end
+    AkimboCharDB.activeProfile = name
+    Akimbo.db = AkimboDB.profiles[name]
+    CopyDefaults(defaultSettings, Akimbo.db)
+    
+    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+    Akimbo:ApplyFullLayout()
+    if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
+    Akimbo:Print(L["MSG_PROFILE_LOADED"]:format(name))
+end
+
+function Akimbo:CreateProfile(name)
+    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+    if not name or strtrim(name) == "" then return false, L["PROFILES_WARN_EMPTY_NAME"] end
+    name = strtrim(name)
+    if AkimboDB.profiles[name] then return false, L["PROFILES_WARN_EXISTS"] end
+    
+    AkimboDB.profiles[name] = CopyDefaults(defaultSettings, {})
+    self:SetProfile(name)
+    Akimbo:Print(L["MSG_PROFILE_CREATED"]:format(name))
+    return true
+end
+
+function Akimbo:DeleteProfile(name)
+    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+    if name == "Default" then return false, L["PROFILES_WARN_DEFAULT"] end
+    if name == AkimboCharDB.activeProfile then return false, L["PROFILES_WARN_DELETE_ACTIVE"] end
+    
+    AkimboDB.profiles[name] = nil
+    if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
+    Akimbo:Print(L["MSG_PROFILE_DELETED"]:format(name))
+    return true
+end
+
+function Akimbo:CopyProfile(sourceName)
+    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+    if not AkimboDB.profiles[sourceName] then return false end
+    
+    local dest = AkimboCharDB.activeProfile
+    AkimboDB.profiles[dest] = {}
+    for k, v in pairs(AkimboDB.profiles[sourceName]) do
+        if type(v) == "table" then
+            AkimboDB.profiles[dest][k] = CopyDefaults(v, {})
+        else
+            AkimboDB.profiles[dest][k] = v
+        end
+    end
+    
+    Akimbo.db = AkimboDB.profiles[dest]
+    CopyDefaults(defaultSettings, Akimbo.db)
+    Akimbo:ApplyFullLayout()
+    if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
+    Akimbo:Print(L["MSG_PROFILE_COPIED"]:format(sourceName))
+    return true
 end
 
 function Akimbo:ResetConfig()
-    AkimboDB = CopyDefaults(defaultSettings, {})
-    Akimbo.db = AkimboDB
+    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+    local current = (AkimboCharDB and AkimboCharDB.activeProfile) or "Default"
+    AkimboDB.profiles[current] = CopyDefaults(defaultSettings, {})
+    Akimbo.db = AkimboDB.profiles[current]
+    
     Akimbo:ApplyFullLayout()
-    Akimbo:Print("Settings reset to defaults.")
+    if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
+    Akimbo:Print(L["MSG_PROFILE_RESET"])
 end
