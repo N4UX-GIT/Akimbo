@@ -291,7 +291,7 @@ code {
     margin: 0 auto 40px;
 }
 
-/* Offhand Emblem Centerpiece Stage */
+/* Offhand Emblem Centerpiece Stage (Floating Borderless - Aligned with Mockup) */
 .hero-emblem-stage,
 .hero-gnome-stage {
     position: relative;
@@ -299,7 +299,7 @@ code {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 28px;
+    margin: 10px auto 24px;
 }
 
 .hero-emblem-aura,
@@ -307,51 +307,40 @@ code {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 480px;
-    height: 320px;
+    width: 520px;
+    height: 340px;
     transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse, rgba(42, 144, 232, 0.45) 0%, rgba(212, 152, 36, 0.22) 50%, transparent 75%);
-    filter: blur(36px);
+    background: radial-gradient(ellipse, rgba(42, 144, 232, 0.40) 0%, rgba(212, 152, 36, 0.20) 45%, transparent 70%);
+    filter: blur(40px);
     pointer-events: none;
     z-index: 1;
 }
 
+.hero-emblem-floating,
 .hero-emblem-frame,
 .hero-gnome-frame {
     position: relative;
     z-index: 2;
-    max-width: 440px;
+    max-width: 480px;
     width: 100%;
-    border-radius: 14px;
-    padding: 5px;
-    background: linear-gradient(135deg, #d49824 0%, #202b3c 40%, #0d121c 70%, #f0b836 100%);
-    box-shadow: 
-        0 0 35px rgba(42, 144, 232, 0.4),
-        0 0 45px rgba(212, 152, 36, 0.25),
-        0 16px 40px rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 24px rgba(42, 144, 232, 0.3));
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
 }
 
+.hero-emblem-floating:hover,
 .hero-emblem-frame:hover,
 .hero-gnome-frame:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 
-        0 0 50px rgba(90, 184, 255, 0.6),
-        0 0 60px rgba(240, 184, 54, 0.45),
-        0 20px 48px rgba(0, 0, 0, 0.98);
+    filter: drop-shadow(0 20px 48px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 36px rgba(90, 184, 255, 0.5));
 }
 
 .hero-emblem-img,
 .hero-gnome-img {
     width: 100%;
     height: auto;
-    border-radius: 10px;
-    object-fit: cover;
-    background: #090a0d;
-    border: 2px solid #151821;
     display: block;
 }
 
@@ -426,10 +415,26 @@ code {
 }
 
 /* ============================================================================
+   Unified Main Content Deck (Wireframe Mockup Layout)
+   ============================================================================ */
+.content-deck {
+    max-width: 1240px;
+    margin: 15px auto 80px;
+    padding: 40px 36px 60px;
+    background: linear-gradient(180deg, rgba(16, 22, 34, 0.96) 0%, rgba(10, 14, 22, 0.98) 100%);
+    border: 2px solid var(--metal-rim);
+    border-radius: var(--radius-lg);
+    box-shadow: 
+        0 24px 60px rgba(0, 0, 0, 0.95),
+        0 0 35px rgba(42, 144, 232, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================================================
    Battlestation Showcase (Dark Metal Frame)
    ============================================================================ */
 .showcase-section {
-    margin-top: 40px;
+    margin-top: 0;
 }
 
 .showcase-frame {
@@ -553,14 +558,27 @@ code {
 }
 
 /* ============================================================================
-   Features Grid (Dark Metal Panels)
+   Content Sections (Nested within Content Deck)
    ============================================================================ */
+.content-section,
 .section {
-    padding: 70px 24px;
+    padding: 50px 0;
+    border-bottom: 1px solid rgba(50, 64, 84, 0.45);
+}
+
+.content-section:first-child,
+.section:first-child {
+    padding-top: 0;
+}
+
+.content-section:last-child,
+.section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .section-container {
-    max-width: 1240px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
@@ -851,6 +869,11 @@ code {
    Responsive Adjustments
    ============================================================================ */
 @media (max-width: 960px) {
+    .content-deck {
+        margin: 10px 12px 50px;
+        padding: 28px 16px 40px;
+        border-radius: var(--radius-md);
+    }
     .grid-3, .steps-container, .faq-grid {
         grid-template-columns: 1fr;
     }
@@ -864,6 +887,7 @@ code {
     .showcase-annotations {
         grid-template-columns: 1fr;
     }
+    .hero-emblem-floating,
     .hero-emblem-frame,
     .hero-gnome-frame {
         max-width: 320px;
