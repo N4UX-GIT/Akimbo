@@ -346,18 +346,29 @@ code {
     background: linear-gradient(180deg, #1a2232 0%, #0c1018 100%);
     border: 2px solid var(--brass-dim);
     border-radius: 4px;
-    padding: 5px 20px;
-    white-space: nowrap;
+    padding: 4px 24px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .ribbon-text {
     font-family: var(--font-warcraft);
-    font-size: 0.76rem;
+    font-size: 0.85rem;
     font-weight: 900;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
     color: var(--brass-bright);
     text-shadow: 0 1px 3px #000;
+}
+
+.hero-gnome-tagline {
+    position: relative;
+    z-index: 3;
+    margin-top: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: var(--blue-bright);
+    text-shadow: 0 0 10px rgba(42, 144, 232, 0.4);
+    font-style: italic;
 }
 
 .hero-badge {
