@@ -5,7 +5,7 @@
 ## Interface-Retail: 110100
 ## Title: |cff00ccffAkimbo|r |cffffffff[Dual Monitor Workstation]|r
 ## Notes: Transforms dual monitor setups into a dedicated primary 3D viewport and secondary command deck.
-## Author: Akimbo Team
+## Author: N4UX (Noggaholic)
 ## Version: 1.0.1
 ## SavedVariables: AkimboDB
 ## SavedVariablesPerCharacter: AkimboCharDB
