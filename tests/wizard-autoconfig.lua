@@ -367,8 +367,8 @@ assert(foundAutoDetectBtn, "Card 1_1 must contain 1-Click Auto-Configure button"
 -- ============================================================================
 -- 6. Test Localization & Tooltips Integration
 -- ============================================================================
-assert(addon.L ~= nil, "Akimbo.L must be defined")
-assert(addon.L["WIZARD_TITLE"] == "AKIMBO AUTO-CONFIGURATION WIZARD", "Localization must have WIZARD_TITLE")
+assert(addon.L ~= nil, "Offhand.L must be defined")
+assert(addon.L["WIZARD_TITLE"] == "OFFHAND AUTO-CONFIGURATION WIZARD", "Localization must have WIZARD_TITLE")
 assert(addon.L["SLIDER_HUD_SCALE_TIP_TITLE"] ~= nil, "Localization must have SLIDER_HUD_SCALE_TIP_TITLE")
 assert(addon.L["CHECK_CANVAS_ENABLED_TIP_DESC"] ~= nil, "Localization must have CHECK_CANVAS_ENABLED_TIP_DESC")
 assert(addon.SetTooltip ~= nil, "Akimbo:SetTooltip must be defined")

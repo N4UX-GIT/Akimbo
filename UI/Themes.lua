@@ -3,9 +3,11 @@
     UI/Themes.lua: Authentic Classic WoW UI styling, theme presets, and color palettes
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 
 local Themes = {}
+Offhand.Themes = Themes
 Akimbo.Themes = Themes
 
 local THEME_DATA = {

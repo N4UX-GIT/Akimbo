@@ -1,6 +1,8 @@
 -- Calculate in physical pixels, then convert into UIParent units.
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 local Viewport = {}
+Offhand.Viewport = Viewport
 Akimbo.Viewport = Viewport
 
 local function Number(value, fallback, low, high)
@@ -87,7 +89,7 @@ end
 function Viewport:CaptureDiagnostics()
     local m = self:GetMetrics()
     local snapshot = { metrics = m, frames = {} }
-    for _, name in ipairs({"WorldFrame", "AkimboCanvasFrame", "MainMenuBar",
+    for _, name in ipairs({"WorldFrame", "OffhandCanvasFrame", "AkimboCanvasFrame", "MainMenuBar",
         "MainActionBar", "ActionButton1", "PlayerFrame", "MinimapCluster"}) do
         local frame = _G[name]
         if frame then
@@ -131,5 +133,7 @@ function Viewport:Reset()
     WorldFrame:SetAllPoints(UIParent)
 end
 
+function Offhand:InitializeViewport() end
+function Offhand:UpdateViewport() Viewport:Apply() end
 function Akimbo:InitializeViewport() end
 function Akimbo:UpdateViewport() Viewport:Apply() end

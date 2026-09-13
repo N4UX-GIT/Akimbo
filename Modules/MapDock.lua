@@ -1,7 +1,9 @@
 -- Docked map is an independent window; other panels retain Blizzard behavior.
-local _, Akimbo = ...
-local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+local _, Offhand = ...
+local Akimbo = Offhand
+local L = Offhand.L or Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
 local Map = {}
+Offhand.modules.MapDock = Map
 Akimbo.modules.MapDock = Map
 local busy=false
 local scheduled=false

@@ -1,18 +1,18 @@
 param([switch]$Watch)
-. (Join-Path $PSScriptRoot 'Companion\Akimbo-Window.ps1')
+. (Join-Path $PSScriptRoot 'Companion\Offhand-Window.ps1')
 
-Write-Host 'Akimbo: borderless window spanning'
-Write-Host 'Enable Akimbo in WoW and select Windowed mode. Run only one WoW client.'
-Write-Host 'After spanning, use /akimbo wizard to calibrate; existing settings are reused.'
+Write-Host 'Offhand: borderless window spanning'
+Write-Host 'Enable Offhand in WoW and select Windowed mode. Run only one WoW client.'
+Write-Host 'After spanning, use /offhand wizard to calibrate; existing settings are reused.'
 $completed = @{}
 $lastMessage = ''
 do {
     $proc = Get-WoWProcess
     if ($proc -and -not $completed.ContainsKey($proc.Id)) {
         try {
-            $bounds = Invoke-AkimboSpan $proc
+            $bounds = Invoke-OffhandSpan $proc
             Write-Host "Spanned $($bounds.Width)x$($bounds.Height) at ($($bounds.X), $($bounds.Y))."
-            Write-Host 'Confirm Akimbo is enabled. Use /akimbo wizard for seam, HUD and bottom alignment.'
+            Write-Host 'Confirm Offhand is enabled. Use /offhand wizard for seam, HUD and bottom alignment.'
             $completed[$proc.Id] = $true
             $lastMessage = ''
         } catch {

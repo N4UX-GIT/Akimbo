@@ -4,9 +4,10 @@
     (Pure ASCII, sleek tabbed interface, zero clutter, bulletproof native widgets)
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 
-local L = Akimbo.L or setmetatable({}, {
+local L = Offhand.L or Akimbo.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
@@ -15,6 +16,7 @@ local L = Akimbo.L or setmetatable({}, {
 local tinsert = table.insert
 
 local Options = {}
+Offhand.Options = Options
 Akimbo.Options = Options
 
 local configFrame

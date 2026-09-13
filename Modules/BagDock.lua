@@ -3,9 +3,11 @@
     Modules/BagDock.lua: Container and inventory management for secondary workspace
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 
 local BagDock = {}
+Offhand.modules.BagDock = BagDock
 Akimbo.modules.BagDock = BagDock
 
 function BagDock:Initialize()

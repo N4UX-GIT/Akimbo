@@ -3,12 +3,12 @@
 ## Interface-Classic: 11509
 ## Interface-Cata: 40402
 ## Interface-Retail: 110100
-## Title: |cff00ccffAkimbo|r |cffffffff[Dual Monitor Workstation]|r
-## Notes: Transforms dual monitor setups into a dedicated primary 3D viewport and secondary command deck.
+## Title: |cff00e5ffOffhand|r |cffffffff[Multi-Monitor Workspace]|r
+## Notes: Transforms multi-monitor setups into a dedicated primary 3D viewport and secondary command deck.
 ## Author: N4UX (Noggaholic)
 ## Version: 1.0.1
-## SavedVariables: AkimboDB
-## SavedVariablesPerCharacter: AkimboCharDB
+## SavedVariables: OffhandDB, AkimboDB
+## SavedVariablesPerCharacter: OffhandCharDB, AkimboCharDB
 
 # Core Subsystems
 Core\Init.lua
@@ -24,4 +24,3 @@ Locales\enUS.lua
 UI\Themes.lua
 UI\Options.lua
 UI\Wizard.lua
-

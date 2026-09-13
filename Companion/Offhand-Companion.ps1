@@ -1,5 +1,5 @@
-# ==============================================================================
-# Akimbo Companion: Multi-Monitor Desktop Controller & Background Watcher
+﻿# ==============================================================================
+# Offhand Companion: Multi-Monitor Desktop Controller & Background Watcher
 # Native Windows GUI with System Tray, Auto-Spanning, and Addon Validation
 # Classic Warcraft Theme
 # ==============================================================================
@@ -7,25 +7,25 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-. (Join-Path $PSScriptRoot 'Akimbo-Window.ps1')
+. (Join-Path $PSScriptRoot 'Offhand-Window.ps1')
 
 # ==============================================================================
 # Suppress all PowerShell terminal windows
-# AkimboNative is already available from Akimbo-Window.ps1
+# OffhandNative is already available from Offhand-Window.ps1
 # ==============================================================================
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
-public static class AkimboConsole {
+public static class OffhandConsole {
     [DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
     [DllImport("user32.dll")]   public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 }
 "@
 
 # Hide our own console window immediately
-$consoleHwnd = [AkimboConsole]::GetConsoleWindow()
+$consoleHwnd = [OffhandConsole]::GetConsoleWindow()
 if ($consoleHwnd -ne [IntPtr]::Zero) {
-    [void][AkimboConsole]::ShowWindow($consoleHwnd, 0)
+    [void][OffhandConsole]::ShowWindow($consoleHwnd, 0)
 }
 
 # Hide any other PowerShell terminal windows (but not our companion GUI)
@@ -33,7 +33,7 @@ $myPid = [System.Diagnostics.Process]::GetCurrentProcess().Id
 $psProcs = @(Get-Process -Name 'powershell','pwsh' -ErrorAction SilentlyContinue |
              Where-Object { $_.Id -ne $myPid -and $_.MainWindowHandle -ne [IntPtr]::Zero })
 foreach ($p in $psProcs) {
-    [void][AkimboNative]::ShowWindow($p.MainWindowHandle, 0)
+    [void][OffhandNative]::ShowWindow($p.MainWindowHandle, 0)
 }
 
 # ==============================================================================
@@ -108,7 +108,7 @@ function New-CardPanel {
 # Main Window
 # ==============================================================================
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Akimbo Companion"
+$form.Text = "Offhand Companion"
 $form.Size = New-Object System.Drawing.Size(524, 628)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
@@ -117,7 +117,7 @@ $form.BackColor = $cBg
 $form.ForeColor = $cText
 
 # ==============================================================================
-# HEADER — Logo + Title
+# HEADER â€” Logo + Title
 # ==============================================================================
 $headerPanel = New-Object System.Windows.Forms.Panel
 $headerPanel.Location = New-Object System.Drawing.Point(0, 0)
@@ -140,9 +140,9 @@ $logoPicBox.SizeMode = "Zoom"
 $logoPicBox.BackColor = [System.Drawing.Color]::Transparent
 
 $logoCandidates = @(
-    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.png"),
+    (Join-Path $PSScriptRoot "..\Media\OFFHAND-logo.png"),
     "C:\Users\NAUX\.gemini\antigravity\brain\937603db-0268-4223-88ae-effc8cc5441c\.user_uploaded\media_1789282129946.png",
-    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.jpg")
+    (Join-Path $PSScriptRoot "..\Media\OFFHAND-logo.jpg")
 )
 foreach ($path in $logoCandidates) {
     if (Test-Path $path -ErrorAction SilentlyContinue) {
@@ -152,7 +152,7 @@ foreach ($path in $logoCandidates) {
 $headerPanel.Controls.Add($logoPicBox)
 
 $titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Text = "AKIMBO"
+$titleLabel.Text = "OFFHAND"
 $titleLabel.Location = New-Object System.Drawing.Point(96, 10)
 $titleLabel.Size = New-Object System.Drawing.Size(400, 36)
 $titleLabel.Font = New-Object System.Drawing.Font("Georgia", 22, [System.Drawing.FontStyle]::Bold)
@@ -193,7 +193,7 @@ $lblWowStatus.ForeColor = $cMuted
 $statusPanel.Controls.Add($lblWowStatus)
 
 $lblAddonStatus = New-Object System.Windows.Forms.Label
-$lblAddonStatus.Text = "  Akimbo Addon: Checking..."
+$lblAddonStatus.Text = "  Offhand Addon: Checking..."
 $lblAddonStatus.Location = New-Object System.Drawing.Point(0, 54)
 $lblAddonStatus.Size = New-Object System.Drawing.Size(490, 20)
 $lblAddonStatus.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
@@ -286,7 +286,7 @@ function Add-Log {
 # SYSTEM TRAY ICON
 # ==============================================================================
 $trayIcon = New-Object System.Windows.Forms.NotifyIcon
-$trayIcon.Text = "Akimbo Companion"
+$trayIcon.Text = "Offhand Companion"
 $trayIcon.Visible = $true
 
 $bmp = New-Object System.Drawing.Bitmap 16, 16
@@ -328,14 +328,14 @@ $itemAuto.add_Click({
 function Invoke-SpanWindow {
     param([bool]$manual = $false)
     try {
-        $bounds = Invoke-AkimboSpan (Get-WoWProcess)
-        Add-Log "Spanned $($bounds.Width)x$($bounds.Height). Calibrate with /akimbo wizard."
-        $trayIcon.ShowBalloonTip(3000, "Akimbo Spanned", "Window spanned. Use /akimbo wizard to calibrate.", "Info")
+        $bounds = Invoke-OffhandSpan (Get-WoWProcess)
+        Add-Log "Spanned $($bounds.Width)x$($bounds.Height). Calibrate with /OFFHAND wizard."
+        $trayIcon.ShowBalloonTip(3000, "Offhand Spanned", "Window spanned. Use /OFFHAND wizard to calibrate.", "Info")
         return $true
     } catch {
         Add-Log $_.Exception.Message
         if ($manual) {
-            [void][System.Windows.Forms.MessageBox]::Show($_.Exception.Message, "Akimbo", "OK", "Information")
+            [void][System.Windows.Forms.MessageBox]::Show($_.Exception.Message, "OFFHAND", "OK", "Information")
         }
         return $false
     }
@@ -353,7 +353,7 @@ $timer.Interval = 2000
 
 $timer.add_Tick({
     try {
-        $vs = Get-AkimboDesktopBounds
+        $vs = Get-OFFHANDDesktopBounds
         $lblDisplayInfo.Text = "  Virtual Desktop: $($vs.Width) x $($vs.Height) px  (Offset X:$($vs.X), Y:$($vs.Y))"
     } catch {
         $lblDisplayInfo.Text = "  Virtual Desktop: physical coordinates unavailable"
@@ -361,16 +361,16 @@ $timer.add_Tick({
 
     $proc = Get-WoWProcess
     if ($proc) {
-        $lblWowStatus.Text = "  ● WoW Running  ($($proc.ProcessName)  PID: $($proc.Id))"
+        $lblWowStatus.Text = "  â— WoW Running  ($($proc.ProcessName)  PID: $($proc.Id))"
         $lblWowStatus.ForeColor = $cGreen
 
-        $status = Test-AkimboAddonStatus -proc $proc
+        $status = Test-OffhandAddonStatus -proc $proc
         if ($status.Installed) {
-            $lblAddonStatus.Text = "  ● Akimbo Addon: INSTALLED"
+            $lblAddonStatus.Text = "  â— Offhand Addon: INSTALLED"
             $lblAddonStatus.ForeColor = $cGreen
-            $lblAddonReason.Text = "  Confirm Akimbo is enabled in the current WoW session."
+            $lblAddonReason.Text = "  Confirm OFFHAND is enabled in the current WoW session."
         } else {
-            $lblAddonStatus.Text = "  ○ Akimbo Addon: NOT VERIFIED"
+            $lblAddonStatus.Text = "  â—‹ Offhand Addon: NOT VERIFIED"
             $lblAddonStatus.ForeColor = $cRed
             $lblAddonReason.Text = "  $($status.Reason)"
         }
@@ -384,9 +384,9 @@ $timer.add_Tick({
             }
         }
     } else {
-        $lblWowStatus.Text = "  ○ WoW Process: Not running"
+        $lblWowStatus.Text = "  â—‹ WoW Process: Not running"
         $lblWowStatus.ForeColor = $cMuted
-        $lblAddonStatus.Text = "  ○ Akimbo Addon: Waiting for WoW..."
+        $lblAddonStatus.Text = "  â—‹ Offhand Addon: Waiting for WoW..."
         $lblAddonStatus.ForeColor = $cMuted
         $lblAddonReason.Text = ""
     }
@@ -425,7 +425,7 @@ $chkAutoSpan.add_CheckedChanged({
 
 $btnMinimize.add_Click({
     $form.Hide()
-    $trayIcon.ShowBalloonTip(2000, "Akimbo Running in Tray",
+    $trayIcon.ShowBalloonTip(2000, "Offhand Running in Tray",
         "Monitoring in background. Double-click tray icon to restore.", "Info")
 })
 
@@ -446,7 +446,7 @@ $form.add_FormClosing({
     if ($e.CloseReason -eq [System.Windows.Forms.CloseReason]::UserClosing) {
         $e.Cancel = $true
         $form.Hide()
-        $trayIcon.ShowBalloonTip(1500, "Akimbo Minimized",
+        $trayIcon.ShowBalloonTip(1500, "Offhand Minimized",
             "Running in System Tray. Right-click or double-click to control.", "Info")
     }
 })
@@ -454,8 +454,9 @@ $form.add_FormClosing({
 # ==============================================================================
 # LAUNCH
 # ==============================================================================
-Add-Log "Akimbo Companion v1.2 initialized."
-Add-Log "Monitoring active. Enable Akimbo in WoW; calibrate with /akimbo wizard."
+Add-Log "Offhand Companion v1.2 initialized."
+Add-Log "Monitoring active. Enable OFFHAND in WoW; calibrate with /OFFHAND wizard."
 $timer.Start()
 
 [System.Windows.Forms.Application]::Run($form)
+

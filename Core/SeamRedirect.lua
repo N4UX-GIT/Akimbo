@@ -1,6 +1,9 @@
 -- Anchor managed HUD frames inside the same rectangle used by WorldFrame.
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 local HUD = {}
+Offhand.SeamRedirect = HUD
+Offhand.HUD = HUD
 Akimbo.SeamRedirect = HUD
 Akimbo.HUD = HUD
 local aligning, pending = false, false
@@ -643,10 +646,16 @@ function HUD:HookFrames()
     end
 end
 
-function Akimbo:InitializeSeamRedirect()
+function Offhand:InitializeSeamRedirect()
     HUD:HookFrames()
 end
-function Akimbo:UpdateSeamRedirect()
+function Offhand:UpdateSeamRedirect()
     HUD:HookFrames()
     HUD:AlignHUDFrames()
+end
+function Akimbo:InitializeSeamRedirect()
+    Offhand:InitializeSeamRedirect()
+end
+function Akimbo:UpdateSeamRedirect()
+    Offhand:UpdateSeamRedirect()
 end

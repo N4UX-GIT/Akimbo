@@ -1,41 +1,44 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     Core/Init.lua: Addon initialization, namespace, event dispatcher, and combat-safe queue
 --]]
 
-local addonName, Akimbo = ...
-_G.Akimbo = Akimbo
+local addonName, Offhand = ...
+_G.Offhand = Offhand
+_G.Akimbo = Offhand
+local Akimbo = Offhand
 
-Akimbo.name = addonName
-Akimbo.version = "1.0.0"
-Akimbo.modules = {}
-Akimbo.callbacks = {}
+Offhand.name = addonName
+Offhand.version = "1.1.0"
+Offhand.modules = {}
+Offhand.callbacks = {}
 
 -- Client flavor detection
 local tocVersion = select(4, GetBuildInfo())
-Akimbo.tocVersion = tocVersion
-Akimbo.isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-Akimbo.isRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+Offhand.tocVersion = tocVersion
+Offhand.isClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+Offhand.isRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 -- Formatted chat printing
-function Akimbo:Print(msg, ...)
+function Offhand:Print(msg, ...)
     if select("#", ...) > 0 then
         msg = string.format(msg, ...)
     end
     local frame = DEFAULT_CHAT_FRAME or (ChatFrame1 and ChatFrame1:IsShown() and ChatFrame1)
     if frame then
-        frame:AddMessage("|cff00ccff[Akimbo]|r " .. tostring(msg))
+        frame:AddMessage("|cff00e5ff[Offhand]|r " .. tostring(msg))
     end
 end
 
-function Akimbo:Debug(msg, ...)
-    if AkimboDB and AkimboDB.debugMode then
+function Offhand:Debug(msg, ...)
+    local db = (OffhandDB or AkimboDB)
+    if db and db.debugMode then
         if select("#", ...) > 0 then
             msg = string.format(msg, ...)
         end
         local frame = DEFAULT_CHAT_FRAME or (ChatFrame1 and ChatFrame1:IsShown() and ChatFrame1)
         if frame then
-            frame:AddMessage("|cff888888[Akimbo Debug]|r " .. tostring(msg))
+            frame:AddMessage("|cff888888[Offhand Debug]|r " .. tostring(msg))
         end
     end
 end
@@ -515,10 +518,12 @@ end
 -- ============================================================================
 -- Primary Slash Command Registration (Registered immediately on load)
 -- ============================================================================
-SLASH_AKIMBO1 = "/akimbo"
-SLASH_AKIMBO2 = "/ak"
+SLASH_OFFHAND1 = "/offhand"
+SLASH_OFFHAND2 = "/oh"
+SLASH_OFFHAND3 = "/akimbo"
+SLASH_OFFHAND4 = "/ak"
 
-SlashCmdList["AKIMBO"] = function(msg)
+SlashCmdList["OFFHAND"] = function(msg)
     msg = strtrim(msg or ""):lower()
 
     local cmd, arg = strsplit(" ", msg, 2)
@@ -638,3 +643,5 @@ SlashCmdList["AKIMBO"] = function(msg)
         end
     end
 end
+
+SlashCmdList["AKIMBO"] = SlashCmdList["OFFHAND"]

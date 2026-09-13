@@ -1,9 +1,12 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     Locales/enUS.lua: English localization dictionary and comprehensive user help tooltips
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
+_G.Offhand = Offhand
+_G.Akimbo = Offhand
 
 local L = Akimbo.L or setmetatable({}, {
     __index = function(t, key)
@@ -11,21 +14,22 @@ local L = Akimbo.L or setmetatable({}, {
     end
 })
 
+Offhand.L = L
 Akimbo.L = L
 
 -- ============================================================================
 -- Core & General Strings
 -- ============================================================================
-L["ADDON_TITLE"] = "Akimbo: Dual Monitor Workstation"
+L["ADDON_TITLE"] = "Offhand: Multi-Monitor Workspace"
 L["ADDON_DESC"] = "Transforms dual monitor setups into a dedicated primary 3D viewport and secondary command deck."
-L["CMD_HELP_TITLE"] = "Akimbo Slash Commands"
+L["CMD_HELP_TITLE"] = "Offhand Slash Commands"
 L["LAYOUT_REAPPLIED"] = "Layout reapplied!"
-L["CONFIG_SAVED"] = "Configuration saved! Welcome to Akimbo Dual Monitor Workstation."
+L["CONFIG_SAVED"] = "Configuration saved! Welcome to Offhand Multi-Monitor Workspace."
 
 -- ============================================================================
 -- Options Dashboard Header & Tabs
 -- ============================================================================
-L["OPTIONS_TITLE"] = "AKIMBO DUAL MONITOR WORKSTATION"
+L["OPTIONS_TITLE"] = "OFFHAND MULTI-MONITOR WORKSPACE"
 L["TAB_DISPLAY"] = "Display & Viewport"
 L["TAB_WORKSPACE"] = "Workspace & Map"
 L["TAB_THEMES"] = "Themes & Colors"
@@ -113,8 +117,8 @@ L["SLIDER_BEZEL_GAP_TIP_DESC"] = "Compensates for the physical plastic border be
 -- Tab 2: Workspace & Map
 -- ============================================================================
 L["CARD_WORKSPACE_MGMT"] = "1. Workspace Panel Management & Behavior"
-L["CHECK_CANVAS_ENABLED"] = "Enable Akimbo Workspace Canvas"
-L["CHECK_CANVAS_ENABLED_TIP_TITLE"] = "Akimbo Workspace Canvas"
+L["CHECK_CANVAS_ENABLED"] = "Enable Offhand Workspace Canvas"
+L["CHECK_CANVAS_ENABLED_TIP_TITLE"] = "Offhand Workspace Canvas"
 L["CHECK_CANVAS_ENABLED_TIP_DESC"] = "Enables the secondary monitor workstation backdrop where UI panels, maps, character sheets, and bags are organized."
 
 L["CHECK_ESC_PERSIST"] = "Keep Panels in Workspace on ESC (Independent Panels)"
@@ -219,7 +223,7 @@ L["SLIDER_CANVAS_OPACITY_TIP_DESC"] = "Adjusts how solid or translucent the seco
 -- ============================================================================
 -- Wizard Dialog Strings & Tooltips
 -- ============================================================================
-L["WIZARD_TITLE"] = "AKIMBO AUTO-CONFIGURATION WIZARD"
+L["WIZARD_TITLE"] = "OFFHAND AUTO-CONFIGURATION WIZARD"
 L["WIZARD_CARD1_TITLE"] = "1. Display Topology & 1-Click Auto-Setup"
 L["WIZARD_DETECTED_PREFIX"] = "Detected Display:"
 L["WIZARD_RECOM_PREFIX"] = "Recommendation:"
@@ -266,7 +270,7 @@ L["WIZARD_PRESET_SCALE_65_TIP_DESC"] = "A well-balanced scale providing crisp te
 
 L["WIZARD_PRESET_SCALE_70"] = "Standard (70%)"
 L["WIZARD_PRESET_SCALE_70_TIP_TITLE"] = "Standard UI (70%)"
-L["WIZARD_PRESET_SCALE_70_TIP_DESC"] = "Standard Akimbo default scale, ideal for 1440p and 4K displays at normal desk viewing distance."
+L["WIZARD_PRESET_SCALE_70_TIP_DESC"] = "Standard Offhand default scale, ideal for 1440p and 4K displays at normal desk viewing distance."
 
 L["WIZARD_PRESET_SCALE_100"] = "Default (100%)"
 L["WIZARD_PRESET_SCALE_100_TIP_TITLE"] = "Unscaled UI (100%)"
@@ -276,9 +280,9 @@ L["WIZARD_PRESET_SCALE_85"] = "Comfortable (85%)"
 L["WIZARD_PRESET_SCALE_85_TIP_TITLE"] = "Comfortable UI (85%)"
 L["WIZARD_PRESET_SCALE_85_TIP_DESC"] = "A larger, relaxed scale for players who prefer bigger text and icons at normal viewing distance."
 
-L["WIZARD_BTN_ADVANCED"] = "Advanced Settings (/akimbo)"
+L["WIZARD_BTN_ADVANCED"] = "Advanced Settings (/offhand)"
 L["WIZARD_BTN_ADVANCED_TIP_TITLE"] = "Advanced Settings"
-L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab Akimbo options dashboard with complete customization controls."
+L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab Offhand options dashboard with complete customization controls."
 
 L["WIZARD_BTN_FINISH"] = "Save & Finish Setup"
 L["WIZARD_BTN_FINISH_TIP_TITLE"] = "Finish Calibration"
@@ -289,7 +293,7 @@ L["WIZARD_BTN_CLOSE_TIP_TITLE"] = "Close Wizard"
 L["WIZARD_BTN_CLOSE_TIP_DESC"] = "Close the setup wizard without saving any new changes."
 
 -- ============================================================================
--- Wizard — Inline Display Text (non-button)
+-- Wizard â€” Inline Display Text (non-button)
 -- ============================================================================
 L["WIZARD_SEAM_VAL_FMT"] = "Seam: %.1f%%"
 L["WIZARD_SCALE_VAL_FMT"] = "Scale: %.0f%%"
@@ -306,7 +310,7 @@ L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"] = "Reset UI Scale"
 L["WIZARD_BTN_SCALE_RESET_TIP_DESC"] = "Resets the Global UI Scale to the recommended standard default of 70%."
 
 -- ============================================================================
--- Options Panel — Tab Labels & General Buttons
+-- Options Panel â€” Tab Labels & General Buttons
 -- ============================================================================
 L["BTN_APPLY_LAYOUT"] = "Apply Layout"
 L["BTN_APPLY_LAYOUT_TIP_TITLE"] = "Apply Layout"
@@ -317,7 +321,7 @@ L["BTN_SAVE_CLOSE_TIP_DESC"] = "Saves all settings and closes the configuration 
 L["LABEL_BOTTOM_OFFSET_SHORT"] = "Game bottom offset (pixels):"
 
 -- ============================================================================
--- Options Panel — Slider Step & Edit Tooltips (shared factory)
+-- Options Panel â€” Slider Step & Edit Tooltips (shared factory)
 -- ============================================================================
 L["SLIDER_STEP_UP_TIP_TITLE"] = "Step Up"
 L["SLIDER_STEP_UP_TIP_DESC_FMT"] = "Increases the value by %s."
@@ -327,7 +331,7 @@ L["SLIDER_EDITBOX_TIP_TITLE"] = "Manual Value Entry"
 L["SLIDER_EDITBOX_TIP_DESC"] = "Click to type an exact numeric or percentage value and press Enter."
 
 -- ============================================================================
--- Options Panel — World Map Section
+-- Options Panel â€” World Map Section
 -- ============================================================================
 L["BTN_MAP_AUTOFIT"] = "Auto-Fit"
 L["BTN_MAP_AUTOFIT_TIP_TITLE"] = "Auto-Fit World Map"
@@ -342,7 +346,7 @@ L["BTN_MAP_250_TIP_TITLE"] = "250% Map Scale"
 L["BTN_MAP_250_TIP_DESC"] = "Sets the World Map to 250% scale, filling a large portion of your secondary deck."
 
 -- ============================================================================
--- Options Panel — Canvas & Trim Color Buttons
+-- Options Panel â€” Canvas & Trim Color Buttons
 -- ============================================================================
 L["BTN_CANVAS_TONE_TIP_TITLE_FMT"] = "%s Tone"
 L["BTN_CANVAS_TONE_TIP_DESC_FMT"] = "Sets the secondary monitor workspace background tone to %s."
@@ -360,27 +364,27 @@ L["BTN_TRIM_CUSTOM_TIP_TITLE"] = "Custom Accent Color"
 L["BTN_TRIM_CUSTOM_TIP_DESC"] = "Open the color picker wheel to select any custom accent tint for borders, headers, and slider thumbs."
 
 -- ============================================================================
--- Options Panel — Guide Link & Autoconfig Print
+-- Options Panel â€” Guide Link & Autoconfig Print
 -- ============================================================================
 L["BTN_GUIDE_LINK"] = "View Window Spanning Guide"
 L["BTN_GUIDE_LINK_TIP_TITLE"] = "Window Spanning Guide"
 L["BTN_GUIDE_LINK_TIP_DESC"] = "View instructions and batch files for spanning World of Warcraft across multiple physical monitors."
-L["MSG_AUTOCONFIG_APPLIED"] = "|cff00ff00[Akimbo] 1-Click Auto-Configuration applied:|r %s"
+L["MSG_AUTOCONFIG_APPLIED"] = "|cff00ff00[Offhand] 1-Click Auto-Configuration applied:|r %s"
 L["MSG_AUTOCONFIG_DETAILS"] = "Preset: |cffffd100%s|r | Seam: |cffffd100%.1f%%|r | Viewport: |cffffd100%s|r"
 L["MSG_LAYOUT_APPLIED"] = "Layout applied successfully."
 
 -- ============================================================================
 -- Slash Command System Messages
 -- ============================================================================
-L["MSG_LOADED"] = "v%s loaded! Type |cffffcc00/akimbo|r to configure."
-L["MSG_FIRST_RUN"] = "First time using Akimbo? Type |cff00ff00/akimbo wizard|r for 1-click auto-setup & calibration."
+L["MSG_LOADED"] = "v%s loaded! Type |cffffcc00/offhand|r to configure."
+L["MSG_FIRST_RUN"] = "First time using Offhand? Type |cff00ff00/offhand wizard|r for 1-click auto-setup & calibration."
 L["MSG_LAYOUT_ERROR"] = "Layout error: %s"
 L["MSG_AR_16_9"] = "Aspect Ratio locked to 16:9 (Standard Widescreen)."
 L["MSG_AR_21_9"] = "Aspect Ratio locked to 21:9 (Ultrawide)."
-L["MSG_AR_FILL"] = "Using configured game height. Adjust with /akimbo height <5-100 percent>."
+L["MSG_AR_FILL"] = "Using configured game height. Adjust with /offhand height <5-100 percent>."
 L["MSG_AR_CUSTOM"] = "Custom Aspect Ratio set to %.3f:1."
 L["MSG_HUD_SET"] = "Global UI size set to %.0f%% of game view."
-L["MSG_HUD_CURRENT"] = "Current global UI size multiplier: %.2f (default 0.70). Usage: /akimbo hud <25-125 percent>"
+L["MSG_HUD_CURRENT"] = "Current global UI size multiplier: %.2f (default 0.70). Usage: /offhand hud <25-125 percent>"
 L["MSG_CHAT_DECK"] = "Chat docked to Command Deck (Bottom Bay)."
 L["MSG_CHAT_GAME"] = "Chat locked to 3D Game Monitor (Bottom-Left)."
 L["MSG_CHAT_TOGGLED"] = "Chat position toggled to: %s."
@@ -394,12 +398,12 @@ L["MSG_DIAG_GAME_PIX"] = "Game pixels: %dx%d at (%d, %d), global UI scale %.3f."
 L["MSG_DIAG_FULL"] = "Diagnostics: Phys=%dx%d | Screen=%dx%d | EffScale=%.3f | DeckWidth=%d (%.1f%%) | GameArea=%dx%d"
 L["MSG_TOGGLE_ON"] = "|cff00ff00Enabled|r"
 L["MSG_TOGGLE_OFF"] = "|cffff3333Disabled|r"
-L["MSG_TOGGLED"] = "Akimbo is now %s."
+L["MSG_TOGGLED"] = "Offhand is now %s."
 L["MSG_DEBUG_ON"] = "|cff00ff00On|r"
 L["MSG_DEBUG_OFF"] = "|cffff3333Off|r"
 L["MSG_DEBUG_TOGGLED"] = "Debug mode %s."
-L["MSG_SPAN_GUIDE"] = "Use the included Akimbo-Span.bat to stretch WoW across both monitors."
-L["MSG_STATUS"] = "Status: %s. Type |cffffcc00/akimbo|r for options, or |cff00ff00/akimbo wizard|r for auto-setup."
+L["MSG_SPAN_GUIDE"] = "Use the included Offhand.exe to stretch WoW across both monitors."
+L["MSG_STATUS"] = "Status: %s. Type |cffffcc00/offhand|r for options, or |cff00ff00/offhand wizard|r for auto-setup."
 L["MSG_PANEL_LAYOUT_ERROR"] = "Panel layout error: %s"
 L["MSG_MAP_LAYOUT_ERROR"] = "Map layout error: %s"
 
@@ -425,3 +429,4 @@ L["PROFILES_WARN_DELETE_ACTIVE"] = "Cannot delete the active profile."
 L["PROFILES_WARN_DEFAULT"] = "Cannot delete the Default profile."
 L["PROFILES_WARN_EMPTY_NAME"] = "Profile name cannot be empty."
 L["PROFILES_WARN_EXISTS"] = "A profile with that name already exists."
+

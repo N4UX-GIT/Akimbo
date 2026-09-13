@@ -1,11 +1,13 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     Core/Canvas.lua: Unsegmented free-space secondary monitor workspace with universal window dragging
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 
 local Canvas = {}
+Offhand.Canvas = Canvas
 Akimbo.Canvas = Canvas
 
 local rootCanvas
@@ -14,7 +16,8 @@ function Canvas:CreateFrames()
     if rootCanvas then return end
 
     -- Root Canvas (covers the secondary monitor as an open, unsegmented free workspace)
-    rootCanvas = CreateFrame("Frame", "AkimboCanvasFrame", UIParent, "BackdropTemplate")
+    rootCanvas = CreateFrame("Frame", "OffhandCanvasFrame", UIParent, "BackdropTemplate")
+    _G.AkimboCanvasFrame = rootCanvas
     rootCanvas:SetFrameStrata("BACKGROUND")
     rootCanvas:SetFrameLevel(1)
 
@@ -26,6 +29,7 @@ function Canvas:CreateFrames()
         end
     end
 
+    Offhand.canvas = rootCanvas
     Akimbo.canvas = rootCanvas
 end
 
@@ -740,7 +744,7 @@ function Canvas:EnableFreeDragging()
     self:UpdatePersistenceBehavior()
 end
 
-function Akimbo:InitializeCanvas()
+function Offhand:InitializeCanvas()
     Canvas:CreateFrames()
 
     -- Re-check draggable frames when Blizzard on-demand addons load
@@ -764,6 +768,14 @@ function Akimbo:InitializeCanvas()
     end
 end
 
-function Akimbo:UpdateCanvas()
+function Offhand:UpdateCanvas()
     Canvas:UpdateLayout()
+end
+
+function Akimbo:InitializeCanvas()
+    Offhand:InitializeCanvas()
+end
+
+function Akimbo:UpdateCanvas()
+    Offhand:UpdateCanvas()
 end

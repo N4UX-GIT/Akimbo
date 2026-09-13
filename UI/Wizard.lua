@@ -5,15 +5,17 @@
     and fine continuous Global UI Scale adjustment.
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+local Akimbo = Offhand
 
-local L = Akimbo.L or setmetatable({}, {
+local L = Offhand.L or Akimbo.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
 })
 
 local Wizard = {}
+Offhand.Wizard = Wizard
 Akimbo.Wizard = Wizard
 
 local wizardFrame = nil

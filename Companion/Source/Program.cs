@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -7,15 +7,15 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-[assembly: AssemblyTitle("Akimbo Companion")]
+[assembly: AssemblyTitle("Offhand Companion")]
 [assembly: AssemblyDescription("Dual-Monitor Multi-Display Controller for World of Warcraft")]
-[assembly: AssemblyCompany("Akimbo Project")]
-[assembly: AssemblyProduct("Akimbo")]
-[assembly: AssemblyCopyright("Copyright (C) 2026 Akimbo Project")]
+[assembly: AssemblyCompany("Offhand Project")]
+[assembly: AssemblyProduct("Offhand")]
+[assembly: AssemblyCopyright("Copyright (C) 2026 Offhand Project")]
 [assembly: AssemblyVersion("1.2.0.0")]
 [assembly: AssemblyFileVersion("1.2.0.0")]
 
-namespace Akimbo.Companion
+namespace Offhand.Companion
 {
     public static class NativeMethods
     {
@@ -155,13 +155,13 @@ namespace Akimbo.Companion
             InitializeTray();
             InitializeTimer();
 
-            AddLog("Akimbo Companion v1.2 initialized.");
-            AddLog("Monitoring active. Enable Akimbo in WoW; calibrate with /akimbo wizard.");
+            AddLog("Offhand Companion v1.2 initialized.");
+            AddLog("Monitoring active. Enable Offhand in WoW; calibrate with /offhand wizard.");
         }
 
         private void InitializeUI()
         {
-            this.Text = "Akimbo Companion";
+            this.Text = "Offhand Companion";
             this.Size = new Size(524, 628);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -172,7 +172,7 @@ namespace Akimbo.Companion
             // Load Application Icon if available
             try
             {
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Akimbo.Companion.Resources.akimbo-logo.ico"))
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Offhand.Companion.Resources.offhand-logo.ico"))
                 {
                     if (stream != null) this.Icon = new Icon(stream);
                 }
@@ -202,7 +202,7 @@ namespace Akimbo.Companion
 
             try
             {
-                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Akimbo.Companion.Resources.akimbo-logo.png"))
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Offhand.Companion.Resources.offhand-logo.png"))
                 {
                     if (stream != null)
                     {
@@ -216,9 +216,9 @@ namespace Akimbo.Companion
             {
                 // Fallback to disk asset if running unpackaged
                 string[] diskFallbacks = new string[] {
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\akimbo-logo.png"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\akimbo-logo.png"),
-                    @"d:\Tools\Code\Akimbo\Media\akimbo-logo.png"
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\offhand-logo.png"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-logo.png"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\akimbo-logo.png")
                 };
                 foreach (string path in diskFallbacks)
                 {
@@ -232,7 +232,7 @@ namespace Akimbo.Companion
 
             // Title
             Label titleLabel = new Label();
-            titleLabel.Text = "AKIMBO";
+            titleLabel.Text = "OFFHAND";
             titleLabel.Location = new Point(96, 10);
             titleLabel.Size = new Size(400, 36);
             titleLabel.Font = new Font("Georgia", 22, FontStyle.Bold);
@@ -242,7 +242,7 @@ namespace Akimbo.Companion
 
             // Subtitle
             Label subLabel = new Label();
-            subLabel.Text = "Dual-Monitor Companion for World of Warcraft";
+            subLabel.Text = "Multi-Monitor Companion for World of Warcraft";
             subLabel.Location = new Point(98, 50);
             subLabel.Size = new Size(400, 18);
             subLabel.Font = new Font("Segoe UI", 8.5f);
@@ -276,7 +276,7 @@ namespace Akimbo.Companion
 
             lblAddonStatus = new Label
             {
-                Text = "  Akimbo Addon: Checking...",
+                Text = "  Offhand Addon: Checking...",
                 Location = new Point(0, 54),
                 Size = new Size(490, 20),
                 Font = new Font("Segoe UI", 9, FontStyle.Bold),
@@ -369,7 +369,7 @@ namespace Akimbo.Companion
             btnMinimize.Click += (s, e) =>
             {
                 this.Hide();
-                trayIcon.ShowBalloonTip(2000, "Akimbo Running in Tray", "Monitoring in background. Double-click tray icon to restore.", ToolTipIcon.Info);
+                trayIcon.ShowBalloonTip(2000, "Offhand Running in Tray", "Monitoring in background. Double-click tray icon to restore.", ToolTipIcon.Info);
             };
             this.Controls.Add(btnMinimize);
 
@@ -383,7 +383,7 @@ namespace Akimbo.Companion
                 {
                     e.Cancel = true;
                     this.Hide();
-                    trayIcon.ShowBalloonTip(1500, "Akimbo Minimized", "Running in System Tray. Right-click or double-click to control.", ToolTipIcon.Info);
+                    trayIcon.ShowBalloonTip(1500, "Offhand Minimized", "Running in System Tray. Right-click or double-click to control.", ToolTipIcon.Info);
                 }
             };
         }
@@ -444,7 +444,7 @@ namespace Akimbo.Companion
         {
             trayIcon = new NotifyIcon
             {
-                Text = "Akimbo Companion",
+                Text = "Offhand Companion",
                 Visible = true
             };
 
@@ -558,16 +558,16 @@ namespace Akimbo.Companion
                 lblWowStatus.Text = string.Format("  * WoW Running  ({0}  PID: {1})", proc.ProcessName, proc.Id);
                 lblWowStatus.ForeColor = cGreen;
 
-                AddonStatus status = TestAkimboAddonStatus(proc);
+                AddonStatus status = TestOffhandAddonStatus(proc);
                 if (status.Installed)
                 {
-                    lblAddonStatus.Text = "  * Akimbo Addon: INSTALLED";
+                    lblAddonStatus.Text = "  * Offhand Addon: INSTALLED";
                     lblAddonStatus.ForeColor = cGreen;
-                    lblAddonReason.Text = "  Confirm Akimbo is enabled in the current WoW session.";
+                    lblAddonReason.Text = "  Confirm Offhand is enabled in the current WoW session.";
                 }
                 else
                 {
-                    lblAddonStatus.Text = "  o Akimbo Addon: NOT VERIFIED";
+                    lblAddonStatus.Text = "  o Offhand Addon: NOT VERIFIED";
                     lblAddonStatus.ForeColor = cRed;
                     lblAddonReason.Text = "  " + status.Reason;
                 }
@@ -590,7 +590,7 @@ namespace Akimbo.Companion
             {
                 lblWowStatus.Text = "  o WoW Process: Not running";
                 lblWowStatus.ForeColor = cMuted;
-                lblAddonStatus.Text = "  o Akimbo Addon: Waiting for WoW...";
+                lblAddonStatus.Text = "  o Offhand Addon: Waiting for WoW...";
                 lblAddonStatus.ForeColor = cMuted;
                 lblAddonReason.Text = "";
             }
@@ -627,7 +627,7 @@ namespace Akimbo.Companion
             return null;
         }
 
-        private AddonStatus TestAkimboAddonStatus(Process proc)
+        private AddonStatus TestOffhandAddonStatus(Process proc)
         {
             AddonStatus result = new AddonStatus { Installed = false, Reason = "Launch exactly one WoW client." };
             if (proc == null) return result;
@@ -642,24 +642,34 @@ namespace Akimbo.Companion
                     return result;
                 }
 
-                string addonDir = Path.Combine(result.WowDir, @"Interface\AddOns\Akimbo");
-                string[] manifests = new string[] { "Akimbo.toc", "Akimbo_Vanilla.toc" };
-                foreach (string m in manifests)
+                string addonDir = Path.Combine(result.WowDir, @"Interface\AddOns\Offhand");
+                string legacyDir = Path.Combine(result.WowDir, @"Interface\AddOns\Akimbo");
+                string[] manifests = new string[] { "Offhand.toc", "Offhand_Vanilla.toc", "Akimbo.toc", "Akimbo_Vanilla.toc" };
+                
+                bool exists = false;
+                if (Directory.Exists(addonDir))
                 {
-                    if (File.Exists(Path.Combine(addonDir, m)))
+                    foreach (string m in manifests)
                     {
-                        result.Installed = true;
-                        break;
+                        if (File.Exists(Path.Combine(addonDir, m))) { exists = true; break; }
+                    }
+                }
+                if (!exists && Directory.Exists(legacyDir))
+                {
+                    foreach (string m in manifests)
+                    {
+                        if (File.Exists(Path.Combine(legacyDir, m))) { exists = true; break; }
                     }
                 }
 
-                if (result.Installed)
+                if (exists)
                 {
+                    result.Installed = true;
                     result.Reason = "Installed; confirm enabled in WoW. Live addon state is unavailable.";
                 }
                 else
                 {
-                    result.Reason = "Install Akimbo in this client's Interface\\AddOns folder.";
+                    result.Reason = "Install Offhand in this client's Interface\\AddOns folder.";
                 }
             }
             catch
@@ -714,7 +724,7 @@ namespace Akimbo.Companion
                 Process proc = GetWoWProcess();
                 if (proc == null) throw new Exception("Launch exactly one WoW client first.");
 
-                AddonStatus status = TestAkimboAddonStatus(proc);
+                AddonStatus status = TestOffhandAddonStatus(proc);
                 if (!status.Installed) throw new Exception(status.Reason);
 
                 IntPtr handle = GetWoWWindowHandle(proc);
@@ -766,8 +776,8 @@ namespace Akimbo.Companion
                     throw;
                 }
 
-                AddLog(string.Format("Spanned {0}x{1}. Calibrate with /akimbo wizard.", bounds.Width, bounds.Height));
-                trayIcon.ShowBalloonTip(3000, "Akimbo Spanned", "Window spanned. Use /akimbo wizard to calibrate.", ToolTipIcon.Info);
+                AddLog(string.Format("Spanned {0}x{1}. Calibrate with /offhand wizard.", bounds.Width, bounds.Height));
+                trayIcon.ShowBalloonTip(3000, "Offhand Spanned", "Window spanned. Use /offhand wizard to calibrate.", ToolTipIcon.Info);
                 return true;
             }
             catch (Exception ex)
@@ -775,7 +785,7 @@ namespace Akimbo.Companion
                 AddLog(ex.Message);
                 if (manual)
                 {
-                    MessageBox.Show(ex.Message, "Akimbo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(ex.Message, "Offhand", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 return false;
             }

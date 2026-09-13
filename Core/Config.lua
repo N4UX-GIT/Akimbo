@@ -1,9 +1,12 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     Core/Config.lua: SavedVariables management and defaults
 --]]
 
-local _, Akimbo = ...
+local _, Offhand = ...
+_G.Offhand = Offhand
+_G.Akimbo = Offhand
+local Akimbo = Offhand
 
 local defaultSettings = {
     enabled = true,
@@ -51,51 +54,72 @@ local function CopyDefaults(src, dst)
     return dst
 end
 
-function Akimbo:InitializeConfig()
-    if type(AkimboDB) ~= "table" then AkimboDB = {} end
-    if type(AkimboCharDB) ~= "table" then AkimboCharDB = {} end
+function Offhand:InitializeConfig()
+    -- Reset if legacy global is explicitly set to invalid non-table
+    if AkimboDB ~= nil and type(AkimboDB) ~= "table" then
+        OffhandDB = nil
+    end
+    if AkimboCharDB ~= nil and type(AkimboCharDB) ~= "table" then
+        OffhandCharDB = nil
+    end
+
+    -- Seamless migration from AkimboDB / AkimboCharDB
+    if type(OffhandDB) ~= "table" and type(AkimboDB) == "table" then
+        OffhandDB = AkimboDB
+    end
+    if type(OffhandCharDB) ~= "table" and type(AkimboCharDB) == "table" then
+        OffhandCharDB = AkimboCharDB
+    end
+
+    if type(OffhandDB) ~= "table" then OffhandDB = {} end
+    if type(OffhandCharDB) ~= "table" then OffhandCharDB = {} end
+
+    -- Keep AkimboDB aliased for backward compatibility
+    AkimboDB = OffhandDB
+    AkimboCharDB = OffhandCharDB
 
     -- Migrate legacy flat config to Profiles
-    if type(AkimboDB.profiles) ~= "table" then
-        AkimboDB.profiles = {}
-        AkimboDB.profiles["Default"] = {}
-        for k, v in pairs(AkimboDB) do
+    if type(OffhandDB.profiles) ~= "table" then
+        OffhandDB.profiles = {}
+        OffhandDB.profiles["Default"] = {}
+        for k, v in pairs(OffhandDB) do
             if k ~= "profiles" then
-                AkimboDB.profiles["Default"][k] = v
-                AkimboDB[k] = nil
+                OffhandDB.profiles["Default"][k] = v
+                OffhandDB[k] = nil
             end
         end
     end
 
-    local current = AkimboCharDB.activeProfile or "Default"
-    if not AkimboDB.profiles[current] then
-        AkimboDB.profiles[current] = {}
-        AkimboCharDB.activeProfile = current
+    local current = OffhandCharDB.activeProfile or "Default"
+    if not OffhandDB.profiles[current] then
+        OffhandDB.profiles[current] = {}
+        OffhandCharDB.activeProfile = current
     end
 
-    Akimbo.db = AkimboDB.profiles[current]
+    Offhand.db = OffhandDB.profiles[current]
+    Akimbo.db = Offhand.db
 
     -- Auto-migrate to vertical portrait setup if preset is unset or old default
-    if not Akimbo.db.layoutPreset or Akimbo.db.layoutPreset == "AUTO" then
-        Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-        Akimbo.db.primaryPosition = Akimbo.db.primaryPosition or "RIGHT"
+    if not Offhand.db.layoutPreset or Offhand.db.layoutPreset == "AUTO" then
+        Offhand.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        Offhand.db.primaryPosition = Offhand.db.primaryPosition or "RIGHT"
     end
     -- Fill missing settings without overwriting a player's calibration.
-    if not Akimbo.db.chatPosition then
-        Akimbo.db.chatPosition = "GAME"
+    if not Offhand.db.chatPosition then
+        Offhand.db.chatPosition = "GAME"
     end
-    -- Purge legacy panelPositions from earlier Astra docking modules
-    if Akimbo.db.panelPositions then
-        Akimbo.db.panelPositions = nil
+    -- Purge legacy panelPositions from earlier docking modules
+    if Offhand.db.panelPositions then
+        Offhand.db.panelPositions = nil
     end
 
-    CopyDefaults(defaultSettings, Akimbo.db)
+    CopyDefaults(defaultSettings, Offhand.db)
 end
 
-function Akimbo:GetProfiles()
+function Offhand:GetProfiles()
     local list = {}
-    if AkimboDB and AkimboDB.profiles then
-        for k in pairs(AkimboDB.profiles) do
+    if OffhandDB and OffhandDB.profiles then
+        for k in pairs(OffhandDB.profiles) do
             table.insert(list, k)
         end
         table.sort(list)
@@ -103,72 +127,75 @@ function Akimbo:GetProfiles()
     return list
 end
 
-function Akimbo:SetProfile(name)
-    if not AkimboDB.profiles[name] then
-        AkimboDB.profiles[name] = CopyDefaults(defaultSettings, {})
+function Offhand:SetProfile(name)
+    if not OffhandDB.profiles[name] then
+        OffhandDB.profiles[name] = CopyDefaults(defaultSettings, {})
     end
-    AkimboCharDB.activeProfile = name
-    Akimbo.db = AkimboDB.profiles[name]
-    CopyDefaults(defaultSettings, Akimbo.db)
+    OffhandCharDB.activeProfile = name
+    Offhand.db = OffhandDB.profiles[name]
+    Akimbo.db = Offhand.db
+    CopyDefaults(defaultSettings, Offhand.db)
     
-    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
-    Akimbo:ApplyFullLayout()
+    local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
+    Offhand:ApplyFullLayout()
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
-    Akimbo:Print(L["MSG_PROFILE_LOADED"]:format(name))
+    Offhand:Print(L["MSG_PROFILE_LOADED"]:format(name))
 end
 
-function Akimbo:CreateProfile(name)
-    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+function Offhand:CreateProfile(name)
+    local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
     if not name or strtrim(name) == "" then return false, L["PROFILES_WARN_EMPTY_NAME"] end
     name = strtrim(name)
-    if AkimboDB.profiles[name] then return false, L["PROFILES_WARN_EXISTS"] end
+    if OffhandDB.profiles[name] then return false, L["PROFILES_WARN_EXISTS"] end
     
-    AkimboDB.profiles[name] = CopyDefaults(defaultSettings, {})
+    OffhandDB.profiles[name] = CopyDefaults(defaultSettings, {})
     self:SetProfile(name)
-    Akimbo:Print(L["MSG_PROFILE_CREATED"]:format(name))
+    Offhand:Print(L["MSG_PROFILE_CREATED"]:format(name))
     return true
 end
 
-function Akimbo:DeleteProfile(name)
-    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+function Offhand:DeleteProfile(name)
+    local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
     if name == "Default" then return false, L["PROFILES_WARN_DEFAULT"] end
-    if name == AkimboCharDB.activeProfile then return false, L["PROFILES_WARN_DELETE_ACTIVE"] end
+    if name == OffhandCharDB.activeProfile then return false, L["PROFILES_WARN_DELETE_ACTIVE"] end
     
-    AkimboDB.profiles[name] = nil
+    OffhandDB.profiles[name] = nil
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
-    Akimbo:Print(L["MSG_PROFILE_DELETED"]:format(name))
+    Offhand:Print(L["MSG_PROFILE_DELETED"]:format(name))
     return true
 end
 
-function Akimbo:CopyProfile(sourceName)
-    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
-    if not AkimboDB.profiles[sourceName] then return false end
+function Offhand:CopyProfile(sourceName)
+    local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
+    if not OffhandDB.profiles[sourceName] then return false end
     
-    local dest = AkimboCharDB.activeProfile
-    AkimboDB.profiles[dest] = {}
-    for k, v in pairs(AkimboDB.profiles[sourceName]) do
+    local dest = OffhandCharDB.activeProfile
+    OffhandDB.profiles[dest] = {}
+    for k, v in pairs(OffhandDB.profiles[sourceName]) do
         if type(v) == "table" then
-            AkimboDB.profiles[dest][k] = CopyDefaults(v, {})
+            OffhandDB.profiles[dest][k] = CopyDefaults(v, {})
         else
-            AkimboDB.profiles[dest][k] = v
+            OffhandDB.profiles[dest][k] = v
         end
     end
     
-    Akimbo.db = AkimboDB.profiles[dest]
-    CopyDefaults(defaultSettings, Akimbo.db)
-    Akimbo:ApplyFullLayout()
+    Offhand.db = OffhandDB.profiles[dest]
+    Akimbo.db = Offhand.db
+    CopyDefaults(defaultSettings, Offhand.db)
+    Offhand:ApplyFullLayout()
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
-    Akimbo:Print(L["MSG_PROFILE_COPIED"]:format(sourceName))
+    Offhand:Print(L["MSG_PROFILE_COPIED"]:format(sourceName))
     return true
 end
 
-function Akimbo:ResetConfig()
-    local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
-    local current = (AkimboCharDB and AkimboCharDB.activeProfile) or "Default"
-    AkimboDB.profiles[current] = CopyDefaults(defaultSettings, {})
-    Akimbo.db = AkimboDB.profiles[current]
+function Offhand:ResetConfig()
+    local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
+    local current = (OffhandCharDB and OffhandCharDB.activeProfile) or "Default"
+    OffhandDB.profiles[current] = CopyDefaults(defaultSettings, {})
+    Offhand.db = OffhandDB.profiles[current]
+    Akimbo.db = Offhand.db
     
-    Akimbo:ApplyFullLayout()
+    Offhand:ApplyFullLayout()
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
-    Akimbo:Print(L["MSG_PROFILE_RESET"])
+    Offhand:Print(L["MSG_PROFILE_RESET"])
 end

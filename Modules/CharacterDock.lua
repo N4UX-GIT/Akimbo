@@ -1,8 +1,11 @@
 -- Keep standard panels inside a physically visible monitor rectangle.
 -- Leave UIPanelWindows intact so Blizzard's opening/closing logic still works.
-local _, Akimbo = ...
-local L = Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+local _, Offhand = ...
+local Akimbo = Offhand
+local L = Offhand.L or Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
 local Panels = {}
+Offhand.modules.CharacterDock = Panels
+Offhand.Panels = Panels
 Akimbo.modules.CharacterDock = Panels
 Akimbo.Panels = Panels
 local hooked, attempted, placing, queued = {}, {}, false, false

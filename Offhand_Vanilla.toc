@@ -1,0 +1,22 @@
+## Interface: 11509
+## Title: |cff00e5ffOffhand|r |cffffffff[Multi-Monitor Workspace]|r
+## Notes: Transforms multi-monitor setups into a dedicated primary 3D viewport and secondary command deck.
+## Author: N4UX (Noggaholic)
+## Version: 1.0.1
+## SavedVariables: OffhandDB, AkimboDB
+## SavedVariablesPerCharacter: OffhandCharDB, AkimboCharDB
+
+# Core Subsystems
+Core\Init.lua
+Core\Config.lua
+Core\Viewport.lua
+Core\SeamRedirect.lua
+Core\Canvas.lua
+
+# Locales
+Locales\enUS.lua
+
+# UI & Themes
+UI\Themes.lua
+UI\Options.lua
+UI\Wizard.lua
