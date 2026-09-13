@@ -37,22 +37,24 @@ foreach ($p in $psProcs) {
 }
 
 # ==============================================================================
-# Classic Warcraft Color Palette
+# Dark Metal & Blue Color Palette
 # ==============================================================================
-$cBg           = [System.Drawing.Color]::FromArgb(22, 18, 12)
-$cCard         = [System.Drawing.Color]::FromArgb(36, 29, 18)
-$cBorder       = [System.Drawing.Color]::FromArgb(160, 130, 60)
-$cBorderDim    = [System.Drawing.Color]::FromArgb(90, 74, 36)
-$cText         = [System.Drawing.Color]::FromArgb(240, 225, 185)
-$cMuted        = [System.Drawing.Color]::FromArgb(155, 140, 108)
-$cGold         = [System.Drawing.Color]::FromArgb(255, 210, 64)
-$cGreen        = [System.Drawing.Color]::FromArgb(100, 210, 90)
-$cRed          = [System.Drawing.Color]::FromArgb(210, 70, 60)
-$cYellow       = [System.Drawing.Color]::FromArgb(225, 185, 60)
-$cBtnBg        = [System.Drawing.Color]::FromArgb(60, 48, 28)
-$cBtnDanger    = [System.Drawing.Color]::FromArgb(60, 28, 24)
-$cLogBg        = [System.Drawing.Color]::FromArgb(14, 11, 7)
-$cLogText      = [System.Drawing.Color]::FromArgb(185, 175, 140)
+$cBg           = [System.Drawing.Color]::FromArgb(8, 10, 18)          # Near-black deep metal
+$cCard         = [System.Drawing.Color]::FromArgb(17, 24, 38)         # Dark steel card
+$cBorder       = [System.Drawing.Color]::FromArgb(58, 74, 94)         # Forged steel rim
+$cBorderDim    = [System.Drawing.Color]::FromArgb(26, 48, 80)         # Dim blue border
+$cText         = [System.Drawing.Color]::FromArgb(216, 232, 245)      # Cool arctic white
+$cMuted        = [System.Drawing.Color]::FromArgb(122, 150, 176)      # Steel grey muted
+$cGold         = [System.Drawing.Color]::FromArgb(42, 144, 232)       # Blue glow primary
+$cGoldBright   = [System.Drawing.Color]::FromArgb(90, 184, 255)       # Blue highlight
+$cBrass        = [System.Drawing.Color]::FromArgb(180, 138, 52)       # Antique brass (secondary trim)
+$cGreen        = [System.Drawing.Color]::FromArgb(68, 204, 136)       # Status green
+$cRed          = [System.Drawing.Color]::FromArgb(204, 68, 68)        # Status red
+$cYellow       = [System.Drawing.Color]::FromArgb(220, 180, 60)       # Warning amber
+$cBtnBg        = [System.Drawing.Color]::FromArgb(26, 36, 56)         # Button dark metal
+$cBtnDanger    = [System.Drawing.Color]::FromArgb(40, 16, 16)         # Danger button
+$cLogBg        = [System.Drawing.Color]::FromArgb(6, 8, 14)           # Log deep black
+$cLogText      = [System.Drawing.Color]::FromArgb(140, 180, 218)      # Log cool steel text
 
 # ==============================================================================
 # Helper: Styled Button with gold border
@@ -120,7 +122,7 @@ $form.ForeColor = $cText
 $headerPanel = New-Object System.Windows.Forms.Panel
 $headerPanel.Location = New-Object System.Drawing.Point(0, 0)
 $headerPanel.Size = New-Object System.Drawing.Size(524, 90)
-$headerPanel.BackColor = [System.Drawing.Color]::FromArgb(28, 22, 12)
+$headerPanel.BackColor = [System.Drawing.Color]::FromArgb(10, 14, 24)
 $form.Controls.Add($headerPanel)
 
 $headerPanel.add_Paint({
@@ -138,9 +140,9 @@ $logoPicBox.SizeMode = "Zoom"
 $logoPicBox.BackColor = [System.Drawing.Color]::Transparent
 
 $logoCandidates = @(
-    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.jpg"),
     (Join-Path $PSScriptRoot "..\Media\akimbo-logo.png"),
-    "C:\Users\NAUX\.gemini\antigravity\brain\937603db-0268-4223-88ae-effc8cc5441c\.user_uploaded\media_1789279358760.jpg"
+    "C:\Users\NAUX\.gemini\antigravity\brain\937603db-0268-4223-88ae-effc8cc5441c\.user_uploaded\media_1789282129946.png",
+    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.jpg")
 )
 foreach ($path in $logoCandidates) {
     if (Test-Path $path -ErrorAction SilentlyContinue) {
@@ -289,8 +291,8 @@ $trayIcon.Visible = $true
 
 $bmp = New-Object System.Drawing.Bitmap 16, 16
 $g = [System.Drawing.Graphics]::FromImage($bmp)
-$g.Clear([System.Drawing.Color]::FromArgb(22, 18, 12))
-$brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 210, 64))
+$g.Clear([System.Drawing.Color]::FromArgb(8, 10, 18))
+$brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(90, 184, 255))
 $fontIcon = New-Object System.Drawing.Font("Georgia", 9, [System.Drawing.FontStyle]::Bold)
 $g.DrawString("A", $fontIcon, $brush, 1, 0)
 $g.Dispose(); $brush.Dispose(); $fontIcon.Dispose()
@@ -298,6 +300,8 @@ $hIcon = $bmp.GetHicon()
 $trayIcon.Icon = [System.Drawing.Icon]::FromHandle($hIcon)
 
 $trayMenu = New-Object System.Windows.Forms.ContextMenuStrip
+$trayMenu.BackColor = $cCard
+$trayMenu.ForeColor = $cText
 $itemOpen = $trayMenu.Items.Add("Open Dashboard")
 $trayMenu.Items.Add("-")
 $itemSpan = $trayMenu.Items.Add("Span WoW Now")

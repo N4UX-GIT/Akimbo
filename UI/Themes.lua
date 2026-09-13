@@ -59,37 +59,39 @@ local THEME_DATA = {
     },
     GNOMISH_TINKER = {
         name = "Gnomish Tinker",
-        description = "Clockwork brass borders with glowing cyan engineering accents",
+        description = "Dark forged metal with electric blue HUD accents",
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
         edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
         edgeSize = 16,
         insets = { left = 4, right = 4, top = 4, bottom = 4 },
-        bgColor = { 0.05, 0.07, 0.10, 0.97 },      -- Deep Tinker Blueprint Slate
-        borderColor = { 0.85, 0.65, 0.18, 1.0 },    -- Antique Clockwork Brass
-        headerColor = { 0.08, 0.12, 0.18, 1.0 },     -- Goggle Housing Blue-Slate
-        headerTextColor = { 0.00, 0.82, 1.0, 1.0 }, -- Electric Cyan Lens Glow
+        bgColor         = { 0.04, 0.06, 0.10, 0.97 },   -- Near-black deep metal
+        borderColor     = { 0.22, 0.30, 0.40, 1.0  },   -- Forged steel-blue rim
+        headerColor     = { 0.06, 0.10, 0.18, 1.0  },   -- Dark panel header
+        headerTextColor = { 0.35, 0.72, 1.00, 1.0  },   -- HUD display blue
     },
 }
 
 -- Preset color options for trim/accents
 local COLOR_PALETTES = {
-    GOLD         = { name = "Blizzard Gold",    r = 1.00, g = 0.82, b = 0.00, a = 1.0 },
-    TINKER_BRASS = { name = "Clockwork Brass",  r = 0.85, g = 0.65, b = 0.18, a = 1.0 },
-    CYAN_GLOW    = { name = "Goggle Cyan",      r = 0.00, g = 0.82, b = 1.00, a = 1.0 },
-    SILVER       = { name = "Pewter Silver",    r = 0.72, g = 0.75, b = 0.78, a = 1.0 },
-    BRONZE       = { name = "Warm Bronze",      r = 0.85, g = 0.58, b = 0.25, a = 1.0 },
-    EMERALD      = { name = "Emerald Green",    r = 0.22, g = 0.82, b = 0.35, a = 1.0 },
-    CRIMSON      = { name = "Crimson Red",      r = 0.85, g = 0.22, b = 0.22, a = 1.0 },
+    GOLD         = { name = "Blizzard Gold",     r = 1.00, g = 0.82, b = 0.00, a = 1.0 },
+    TINKER_BRASS = { name = "Clockwork Brass",   r = 0.85, g = 0.65, b = 0.18, a = 1.0 },
+    TINKER_STEEL = { name = "Forged Steel Blue", r = 0.35, g = 0.72, b = 1.00, a = 1.0 },
+    CYAN_GLOW    = { name = "Goggle Cyan",       r = 0.00, g = 0.82, b = 1.00, a = 1.0 },
+    SILVER       = { name = "Pewter Silver",     r = 0.72, g = 0.75, b = 0.78, a = 1.0 },
+    BRONZE       = { name = "Warm Bronze",       r = 0.85, g = 0.58, b = 0.25, a = 1.0 },
+    EMERALD      = { name = "Emerald Green",     r = 0.22, g = 0.82, b = 0.35, a = 1.0 },
+    CRIMSON      = { name = "Crimson Red",       r = 0.85, g = 0.22, b = 0.22, a = 1.0 },
 }
 
 -- Preset color options for the workspace background
 local CANVAS_PALETTES = {
-    CLASSIC_STONE= { name = "Classic Stone",    r = 0.72, g = 0.72, b = 0.75, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
-    TINKER_SLATE = { name = "Tinker Slate",     r = 0.22, g = 0.42, b = 0.64, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    CHARCOAL     = { name = "Charcoal Slate",   r = 0.26, g = 0.27, b = 0.30, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    WARM_NIGHT   = { name = "Warm Night",       r = 0.40, g = 0.28, b = 0.22, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    DEEP_BLUE    = { name = "Midnight Navy",    r = 0.15, g = 0.24, b = 0.48, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
-    PURE_BLACK   = { name = "Pitch Black",      r = 0.00, g = 0.00, b = 0.00, bg = "Interface\\Buttons\\WHITE8X8" },
+    CLASSIC_STONE= { name = "Classic Stone",  r = 0.72, g = 0.72, b = 0.75, bg = "Interface\\DialogFrame\\UI-DialogBox-Background" },
+    TINKER_SLATE = { name = "Tinker Slate",   r = 0.22, g = 0.42, b = 0.64, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    CHARCOAL     = { name = "Charcoal Slate", r = 0.26, g = 0.27, b = 0.30, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    WARM_NIGHT   = { name = "Warm Night",     r = 0.40, g = 0.28, b = 0.22, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    DEEP_BLUE    = { name = "Midnight Navy",  r = 0.15, g = 0.24, b = 0.48, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    DEEP_METAL   = { name = "Dark Metal",     r = 0.08, g = 0.14, b = 0.24, bg = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark" },
+    PURE_BLACK   = { name = "Pitch Black",    r = 0.00, g = 0.00, b = 0.00, bg = "Interface\\Buttons\\WHITE8X8" },
 }
 
 function Themes:GetThemeList()
