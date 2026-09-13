@@ -6,35 +6,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 :root {
-    /* Dark Metal & Electric Blue Palette */
-    --bg-deepest: #060810;
-    --bg-surface: #0c1018;
-    --bg-card: #111826;
-    --bg-card-hover: #172030;
+    /* Dark Iron & Arcane Gold Palette - Grounded in the Offhand O-H Emblem */
+    --bg-deepest: #05070d;
+    --bg-surface: #0a0e16;
+    --bg-card: #101622;
+    --bg-card-hover: #162030;
     
-    --metal-dark: #1a2232;
-    --metal-mid: #263040;
-    --metal-rim: #3a4a5e;
-    --metal-border: #253246;
+    --metal-dark: #151d2a;
+    --metal-mid: #202b3c;
+    --metal-rim: #324054;
+    --metal-border: #222d3c;
 
-    --blue-glow: #2a90e8;
+    --blue-glow: #2586ff;
     --blue-bright: #5ab8ff;
-    --blue-dim: #1a4a7a;
-    --blue-deep: #0e2240;
+    --blue-dim: #13457a;
+    --blue-deep: #081a34;
 
-    --brass-bright: #c8943a;
-    --brass-dim: #7a5a22;
+    --gold-highlight: #fbe28c;
+    --gold-bright: #f0b836;
+    --gold-mid: #d49824;
+    --gold-dark: #8f6516;
+    --gold-deep: #4a3408;
+
+    --brass-bright: #f0b836;
+    --brass-dim: #9e7016;
     --brass-border: #523e18;
 
-    --text-primary: #e8ecf0;
-    --text-secondary: #c2d4e5;
-    --text-muted: #7a96b0;
-    --text-dim: #4e6378;
+    --text-primary: #eef2f7;
+    --text-secondary: #c4d4e6;
+    --text-muted: #8096ac;
+    --text-dim: #4f6377;
 
     /* Semantic Aliases for Compatibility */
-    --wow-gold: var(--blue-glow);
-    --wow-gold-bright: var(--blue-bright);
-    --wow-gold-dark: var(--blue-dim);
+    --wow-gold: var(--gold-mid);
+    --wow-gold-bright: var(--gold-bright);
+    --wow-gold-dark: var(--gold-dark);
     --wow-gold-border: var(--metal-rim);
     --wow-gold-trim: var(--brass-dim);
     
@@ -44,9 +50,9 @@
     --wow-stone-hover: var(--bg-card-hover);
     --wow-stone-border: var(--metal-border);
 
-    --wow-red-light: #1e4a80;
-    --wow-red-mid: #0e2240;
-    --wow-red-dark: #06111e;
+    --wow-red-light: #2a4060;
+    --wow-red-mid: #142236;
+    --wow-red-dark: #0a1320;
     
     --wow-parchment: var(--text-secondary);
     --wow-parchment-muted: var(--text-muted);
@@ -143,17 +149,17 @@ code {
 }
 
 .btn-wow-red {
-    background: linear-gradient(180deg, #1e4a80 0%, #0e2240 50%, #06111e 100%);
-    border: 1px solid var(--blue-glow);
-    color: var(--blue-bright);
-    box-shadow: inset 0 1px 0 rgba(90, 184, 255, 0.3), 0 4px 14px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(180deg, #24354c 0%, #121e2d 50%, #09101a 100%);
+    border: 1.5px solid var(--gold-mid);
+    color: var(--gold-highlight);
+    box-shadow: inset 0 1px 0 rgba(251, 226, 140, 0.35), 0 4px 14px rgba(0, 0, 0, 0.7), 0 0 10px rgba(212, 152, 36, 0.25);
 }
 
 .btn-wow-red:hover {
-    background: linear-gradient(180deg, #255da1 0%, #15325c 50%, #0a1b2e 100%);
-    border-color: var(--blue-bright);
+    background: linear-gradient(180deg, #324765 0%, #1a2a40 50%, #0d1624 100%);
+    border-color: var(--gold-bright);
     color: #ffffff;
-    box-shadow: inset 0 1px 0 rgba(90, 184, 255, 0.5), 0 0 20px rgba(42, 144, 232, 0.5);
+    box-shadow: inset 0 1px 0 rgba(251, 226, 140, 0.5), 0 0 20px rgba(240, 184, 54, 0.45);
     transform: translateY(-2px);
 }
 
@@ -189,7 +195,7 @@ code {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(6, 8, 16, 0.95);
+    background: rgba(5, 7, 13, 0.95);
     border-bottom: 2px solid var(--metal-rim);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(10px);
@@ -211,13 +217,19 @@ code {
 }
 
 .brand-medallion {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 2px solid var(--blue-glow);
-    box-shadow: 0 0 12px rgba(42, 144, 232, 0.45), inset 0 0 8px rgba(0, 0, 0, 0.8);
+    width: 56px;
+    height: 38px;
+    border-radius: 6px;
+    border: 1.5px solid var(--gold-mid);
+    box-shadow: 0 0 12px rgba(42, 144, 232, 0.35), inset 0 0 6px rgba(0, 0, 0, 0.8);
     object-fit: cover;
     background: #000;
+    transition: all 0.25s ease;
+}
+
+.brand:hover .brand-medallion {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 16px rgba(240, 184, 54, 0.4);
 }
 
 .brand-text {
@@ -232,14 +244,14 @@ code {
     letter-spacing: 0.08em;
     color: var(--text-primary);
     line-height: 1.1;
-    text-shadow: 0 0 12px rgba(42, 144, 232, 0.3);
+    text-shadow: 0 0 12px rgba(240, 184, 54, 0.25);
 }
 
 .brand-subtitle {
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.1em;
-    color: var(--blue-glow);
+    color: var(--gold-bright);
     text-transform: uppercase;
 }
 
@@ -279,63 +291,67 @@ code {
     margin: 0 auto 40px;
 }
 
-/* Master Tinker Centerpiece Stage */
+/* Offhand Emblem Centerpiece Stage */
+.hero-emblem-stage,
 .hero-gnome-stage {
     position: relative;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
+.hero-emblem-aura,
 .hero-gnome-aura {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 280px;
-    height: 280px;
-    transform: translate(-50%, -60%);
-    background: radial-gradient(circle, rgba(42, 144, 232, 0.40) 0%, rgba(90, 184, 255, 0.15) 45%, transparent 70%);
-    border-radius: 50%;
-    filter: blur(24px);
+    width: 480px;
+    height: 320px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(ellipse, rgba(42, 144, 232, 0.45) 0%, rgba(212, 152, 36, 0.22) 50%, transparent 75%);
+    filter: blur(36px);
     pointer-events: none;
     z-index: 1;
 }
 
+.hero-emblem-frame,
 .hero-gnome-frame {
     position: relative;
     z-index: 2;
-    width: 190px;
-    height: 190px;
-    border-radius: 50%;
-    padding: 6px;
-    background: linear-gradient(135deg, #3a4a5e 0%, #1a2232 50%, #263040 100%);
+    max-width: 440px;
+    width: 100%;
+    border-radius: 14px;
+    padding: 5px;
+    background: linear-gradient(135deg, #d49824 0%, #202b3c 40%, #0d121c 70%, #f0b836 100%);
     box-shadow: 
         0 0 35px rgba(42, 144, 232, 0.4),
-        0 0 70px rgba(14, 34, 64, 0.5),
-        0 14px 32px rgba(0, 0, 0, 0.95);
+        0 0 45px rgba(212, 152, 36, 0.25),
+        0 16px 40px rgba(0, 0, 0, 0.95);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
+.hero-emblem-frame:hover,
 .hero-gnome-frame:hover {
-    transform: scale(1.04);
+    transform: translateY(-4px) scale(1.02);
     box-shadow: 
         0 0 50px rgba(90, 184, 255, 0.6),
-        0 0 90px rgba(42, 144, 232, 0.4),
-        0 18px 40px rgba(0, 0, 0, 0.98);
+        0 0 60px rgba(240, 184, 54, 0.45),
+        0 20px 48px rgba(0, 0, 0, 0.98);
 }
 
+.hero-emblem-img,
 .hero-gnome-img {
     width: 100%;
-    height: 100%;
-    border-radius: 50%;
+    height: auto;
+    border-radius: 10px;
     object-fit: cover;
     background: #090a0d;
-    border: 3px solid #151821;
+    border: 2px solid #151821;
     display: block;
 }
 
@@ -343,17 +359,17 @@ code {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(42, 144, 232, 0.12);
-    border: 1px solid var(--metal-rim);
-    padding: 5px 16px;
+    background: rgba(212, 152, 36, 0.12);
+    border: 1px solid var(--brass-mid);
+    padding: 6px 18px;
     border-radius: 20px;
     font-family: var(--font-warcraft);
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: var(--blue-bright);
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    color: var(--brass-bright);
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 12px rgba(212, 152, 36, 0.2);
 }
 
 .hero-title {
@@ -365,11 +381,12 @@ code {
 }
 
 .hero-title .title-accent {
-    font-size: 1.5rem;
-    letter-spacing: 0.03em;
-    color: var(--blue-bright);
+    font-size: 1.45rem;
+    letter-spacing: 0.04em;
+    color: var(--gold-bright);
     display: block;
-    margin-top: 6px;
+    margin-top: 8px;
+    text-shadow: 0 0 16px rgba(240, 184, 54, 0.3);
 }
 
 .hero-subtitle {
@@ -581,17 +598,17 @@ code {
 }
 
 .wow-card:hover {
-    border-color: var(--blue-glow);
+    border-color: var(--gold-mid);
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(42, 144, 232, 0.25);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 20px rgba(212, 152, 36, 0.25);
 }
 
 .wow-card-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     background: rgba(42, 144, 232, 0.1);
     border: 1px solid rgba(42, 144, 232, 0.25);
@@ -601,16 +618,17 @@ code {
 }
 
 .wow-card:hover .wow-card-icon {
-    background: rgba(42, 144, 232, 0.2);
-    border-color: var(--blue-glow);
-    box-shadow: 0 0 14px rgba(42, 144, 232, 0.35);
+    background: rgba(212, 152, 36, 0.15);
+    border-color: var(--brass-bright);
+    color: var(--gold-bright);
+    box-shadow: 0 0 14px rgba(240, 184, 54, 0.35);
     transform: translateY(-2px);
 }
 
 .wow-card-title {
     font-size: 1.25rem;
     margin-bottom: 10px;
-    color: var(--blue-bright);
+    color: var(--gold-bright);
 }
 
 .wow-card-desc {
@@ -789,10 +807,11 @@ code {
 }
 
 .footer-logo {
-    width: 40px;
+    width: 60px;
     height: 40px;
-    border-radius: 50%;
-    border: 2px solid var(--blue-glow);
+    border-radius: 6px;
+    border: 1.5px solid var(--brass-dim);
+    object-fit: cover;
 }
 
 .footer-info {
@@ -825,7 +844,7 @@ code {
 }
 
 .footer-nav a:hover {
-    color: var(--blue-bright);
+    color: var(--gold-bright);
 }
 
 /* ============================================================================
@@ -845,13 +864,14 @@ code {
     .showcase-annotations {
         grid-template-columns: 1fr;
     }
+    .hero-emblem-frame,
     .hero-gnome-frame {
-        width: 150px;
-        height: 150px;
+        max-width: 320px;
     }
+    .hero-emblem-aura,
     .hero-gnome-aura {
-        width: 210px;
-        height: 210px;
+        width: 300px;
+        height: 200px;
     }
     .hero-title {
         font-size: 2.6rem;
