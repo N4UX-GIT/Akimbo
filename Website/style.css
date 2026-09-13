@@ -79,11 +79,7 @@
 }
 
 body {
-    background-color: var(--bg-deepest);
-    background-image: 
-        radial-gradient(circle at 50% 0%, rgba(42, 144, 232, 0.12) 0%, transparent 55%),
-        radial-gradient(circle at 15% 45%, rgba(42, 144, 232, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 85% 75%, rgba(58, 74, 94, 0.25) 0%, transparent 50%);
+    background-color: #000000;
     color: var(--text-primary);
     font-family: var(--font-body);
     line-height: 1.6;
@@ -193,18 +189,21 @@ code {
    ============================================================================ */
 .navbar {
     position: sticky;
-    top: 0;
+    top: 10px;
     z-index: 100;
-    background: rgba(5, 7, 13, 0.95);
-    border-bottom: 2px solid var(--metal-rim);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
+    max-width: 1140px;
+    margin: 10px auto 0;
+    background: #141924;
+    border: 1.5px solid #2a364a;
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
 }
 
 .nav-container {
-    max-width: 1240px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 12px 24px;
+    padding: 10px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -277,71 +276,106 @@ code {
    Hero Section
    ============================================================================ */
 .hero {
-    padding: 60px 24px 50px;
+    padding: 30px 20px 16px;
+    text-align: center;
 }
 
 .hero-container {
-    max-width: 1240px;
+    max-width: 1140px;
     margin: 0 auto;
 }
 
 .hero-header {
     text-align: center;
     max-width: 860px;
-    margin: 0 auto 40px;
+    margin: 0 auto;
 }
 
-/* Offhand Emblem Centerpiece Stage (Floating Borderless - Aligned with Mockup) */
-.hero-emblem-stage,
-.hero-gnome-stage {
+/* Offhand Emblem Centerpiece Stage (Floating Seamlessly - Aligned with Mockup) */
+.hero-emblem-stage {
     position: relative;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 10px auto 24px;
+    margin: 0 auto 16px;
 }
 
-.hero-emblem-aura,
-.hero-gnome-aura {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 520px;
-    height: 340px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(ellipse, rgba(42, 144, 232, 0.40) 0%, rgba(212, 152, 36, 0.20) 45%, transparent 70%);
-    filter: blur(40px);
-    pointer-events: none;
-    z-index: 1;
+.hero-emblem-aura {
+    display: none;
 }
 
-.hero-emblem-floating,
-.hero-emblem-frame,
-.hero-gnome-frame {
+.hero-emblem-floating {
     position: relative;
     z-index: 2;
-    max-width: 480px;
+    max-width: 440px;
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 24px rgba(42, 144, 232, 0.3));
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hero-emblem-floating:hover,
-.hero-emblem-frame:hover,
-.hero-gnome-frame:hover {
+.hero-emblem-floating:hover {
     transform: translateY(-4px) scale(1.02);
-    filter: drop-shadow(0 20px 48px rgba(0, 0, 0, 0.98)) drop-shadow(0 0 36px rgba(90, 184, 255, 0.5));
 }
 
-.hero-emblem-img,
-.hero-gnome-img {
+.hero-emblem-img {
     width: 100%;
     height: auto;
     display: block;
+    mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 50%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, black 50%, transparent 95%);
+}
+
+.hero-title {
+    font-family: var(--font-warcraft);
+    font-size: 3.4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: 0.12em;
+    margin: 14px 0 6px;
+    color: #ffffff;
+    text-shadow: 0 0 24px rgba(240, 184, 54, 0.35);
+}
+
+.hero-subtitle {
+    font-family: var(--font-warcraft);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--gold-bright);
+    text-transform: uppercase;
+    margin: 0 auto 28px;
+    text-shadow: 0 0 16px rgba(240, 184, 54, 0.4);
+}
+
+/* ============================================================================
+   Unified Main Content Deck (Wireframe Mockup Layout)
+   ============================================================================ */
+.content-deck {
+    max-width: 1140px;
+    margin: 0 auto 60px;
+    padding: 36px 32px 50px;
+    background: #141924;
+    border: 1.5px solid #2a364a;
+    border-radius: var(--radius-md);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+}
+
+.deck-intro-banner {
+    text-align: center;
+    padding-bottom: 36px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid rgba(50, 64, 84, 0.45);
+}
+
+.deck-intro-text {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 820px;
+    margin: 16px auto 24px;
 }
 
 .hero-badge {
@@ -357,32 +391,8 @@ code {
     font-weight: 700;
     letter-spacing: 0.08em;
     color: var(--brass-bright);
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 12px rgba(212, 152, 36, 0.2);
-}
-
-.hero-title {
-    font-size: 3.8rem;
-    line-height: 1.1;
-    letter-spacing: 0.08em;
     margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-.hero-title .title-accent {
-    font-size: 1.45rem;
-    letter-spacing: 0.04em;
-    color: var(--gold-bright);
-    display: block;
-    margin-top: 8px;
-    text-shadow: 0 0 16px rgba(240, 184, 54, 0.3);
-}
-
-.hero-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 12px rgba(212, 152, 36, 0.2);
 }
 
 .hero-actions {
@@ -412,22 +422,6 @@ code {
 .hero-stats-bar svg {
     color: var(--blue-bright);
     flex-shrink: 0;
-}
-
-/* ============================================================================
-   Unified Main Content Deck (Wireframe Mockup Layout)
-   ============================================================================ */
-.content-deck {
-    max-width: 1240px;
-    margin: 15px auto 80px;
-    padding: 40px 36px 60px;
-    background: linear-gradient(180deg, rgba(16, 22, 34, 0.96) 0%, rgba(10, 14, 22, 0.98) 100%);
-    border: 2px solid var(--metal-rim);
-    border-radius: var(--radius-lg);
-    box-shadow: 
-        0 24px 60px rgba(0, 0, 0, 0.95),
-        0 0 35px rgba(42, 144, 232, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ============================================================================
@@ -802,20 +796,23 @@ code {
    Footer
    ============================================================================ */
 .footer {
-    background: var(--bg-deepest);
-    border-top: 2px solid var(--metal-rim);
-    padding: 36px 24px;
-    margin-top: 60px;
+    max-width: 680px;
+    margin: 20px auto 40px;
+    background: #141924;
+    border: 1.5px solid #2a364a;
+    border-radius: var(--radius-sm);
+    padding: 14px 24px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
 }
 
 .footer-container {
-    max-width: 1240px;
+    max-width: 100%;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 16px;
 }
 
 .footer-brand {
