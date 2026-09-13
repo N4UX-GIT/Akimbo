@@ -1,6 +1,7 @@
 # ==============================================================================
 # Akimbo Companion: Multi-Monitor Desktop Controller & Background Watcher
 # Native Windows GUI with System Tray, Auto-Spanning, and Addon Validation
+# Classic Warcraft Theme
 # ==============================================================================
 
 Add-Type -AssemblyName System.Windows.Forms
@@ -8,165 +9,291 @@ Add-Type -AssemblyName System.Drawing
 
 . (Join-Path $PSScriptRoot 'Akimbo-Window.ps1')
 
-# Theme Colors
-$cBg       = [System.Drawing.Color]::FromArgb(18, 20, 24)       # Deep Obsidian
-$cCard     = [System.Drawing.Color]::FromArgb(26, 29, 36)       # Dark Slate Card
-$cBorder   = [System.Drawing.Color]::FromArgb(44, 49, 60)       # Border Outline
-$cText     = [System.Drawing.Color]::FromArgb(235, 240, 248)    # Crisp Off-White
-$cMuted    = [System.Drawing.Color]::FromArgb(135, 145, 160)    # Subdued Gray
-$cCyan     = [System.Drawing.Color]::FromArgb(0, 204, 255)      # Akimbo Cyan
-$cGreen    = [System.Drawing.Color]::FromArgb(0, 230, 118)      # Emerald Success
-$cRed      = [System.Drawing.Color]::FromArgb(255, 82, 82)      # Crimson Alert
-$cYellow   = [System.Drawing.Color]::FromArgb(255, 215, 64)     # Amber Warning
+# ==============================================================================
+# Suppress all PowerShell terminal windows
+# AkimboNative is already available from Akimbo-Window.ps1
+# ==============================================================================
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class AkimboConsole {
+    [DllImport("kernel32.dll")] public static extern IntPtr GetConsoleWindow();
+    [DllImport("user32.dll")]   public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+}
+"@
 
-# Main Application Window
+# Hide our own console window immediately
+$consoleHwnd = [AkimboConsole]::GetConsoleWindow()
+if ($consoleHwnd -ne [IntPtr]::Zero) {
+    [void][AkimboConsole]::ShowWindow($consoleHwnd, 0)
+}
+
+# Hide any other PowerShell terminal windows (but not our companion GUI)
+$myPid = [System.Diagnostics.Process]::GetCurrentProcess().Id
+$psProcs = @(Get-Process -Name 'powershell','pwsh' -ErrorAction SilentlyContinue |
+             Where-Object { $_.Id -ne $myPid -and $_.MainWindowHandle -ne [IntPtr]::Zero })
+foreach ($p in $psProcs) {
+    [void][AkimboNative]::ShowWindow($p.MainWindowHandle, 0)
+}
+
+# ==============================================================================
+# Classic Warcraft Color Palette
+# ==============================================================================
+$cBg           = [System.Drawing.Color]::FromArgb(22, 18, 12)
+$cCard         = [System.Drawing.Color]::FromArgb(36, 29, 18)
+$cBorder       = [System.Drawing.Color]::FromArgb(160, 130, 60)
+$cBorderDim    = [System.Drawing.Color]::FromArgb(90, 74, 36)
+$cText         = [System.Drawing.Color]::FromArgb(240, 225, 185)
+$cMuted        = [System.Drawing.Color]::FromArgb(155, 140, 108)
+$cGold         = [System.Drawing.Color]::FromArgb(255, 210, 64)
+$cGreen        = [System.Drawing.Color]::FromArgb(100, 210, 90)
+$cRed          = [System.Drawing.Color]::FromArgb(210, 70, 60)
+$cYellow       = [System.Drawing.Color]::FromArgb(225, 185, 60)
+$cBtnBg        = [System.Drawing.Color]::FromArgb(60, 48, 28)
+$cBtnDanger    = [System.Drawing.Color]::FromArgb(60, 28, 24)
+$cLogBg        = [System.Drawing.Color]::FromArgb(14, 11, 7)
+$cLogText      = [System.Drawing.Color]::FromArgb(185, 175, 140)
+
+# ==============================================================================
+# Helper: Styled Button with gold border
+# ==============================================================================
+function New-StyledButton {
+    param($text, $x, $y, $w, $h, $bgColor, $textColor, $borderColor)
+    $btn = New-Object System.Windows.Forms.Button
+    $btn.Text = $text
+    $btn.Location = New-Object System.Drawing.Point($x, $y)
+    $btn.Size = New-Object System.Drawing.Size($w, $h)
+    $btn.FlatStyle = "Flat"
+    $btn.FlatAppearance.BorderSize = 1
+    $btn.FlatAppearance.BorderColor = if ($borderColor) { $borderColor } else { $cBorder }
+    $btn.BackColor = $bgColor
+    $btn.ForeColor = $textColor
+    $btn.Font = New-Object System.Drawing.Font("Georgia", 9, [System.Drawing.FontStyle]::Bold)
+    $btn.Cursor = [System.Windows.Forms.Cursors]::Hand
+    return $btn
+}
+
+# Helper: card panel with gold border drawn via Paint
+function New-CardPanel {
+    param($x, $y, $w, $h, $title)
+    $panel = New-Object System.Windows.Forms.Panel
+    $panel.Location = New-Object System.Drawing.Point($x, $y)
+    $panel.Size = New-Object System.Drawing.Size($w, $h)
+    $panel.BackColor = $cCard
+
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = "  $title"
+    $lbl.Location = New-Object System.Drawing.Point(0, 4)
+    $lbl.Size = New-Object System.Drawing.Size($w, 20)
+    $lbl.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
+    $lbl.ForeColor = $cGold
+    $panel.Controls.Add($lbl)
+
+    $panel.add_Paint({
+        param($s, $e)
+        $g = $e.Graphics
+        $pen = New-Object System.Drawing.Pen($cBorder, 1)
+        $g.DrawRectangle($pen, 0, 0, $s.ClientSize.Width - 1, $s.ClientSize.Height - 1)
+        $pen.Dispose()
+        $penDim = New-Object System.Drawing.Pen($cBorderDim, 1)
+        $g.DrawLine($penDim, 1, 24, $s.ClientSize.Width - 2, 24)
+        $penDim.Dispose()
+    })
+    return $panel
+}
+
+# ==============================================================================
+# Main Window
+# ==============================================================================
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Akimbo Dual Monitor Companion"
-$form.Size = New-Object System.Drawing.Size(520, 560)
+$form.Text = "Akimbo Companion"
+$form.Size = New-Object System.Drawing.Size(524, 628)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
 $form.MaximizeBox = $false
 $form.BackColor = $cBg
 $form.ForeColor = $cText
 
-# Helper: Create Custom Button
-function New-StyledButton {
-    param($text, $x, $y, $w, $h, $bgColor, $textColor)
-    $btn = New-Object System.Windows.Forms.Button
-    $btn.Text = $text
-    $btn.Location = New-Object System.Drawing.Point($x, $y)
-    $btn.Size = New-Object System.Drawing.Size($w, $h)
-    $btn.FlatStyle = "Flat"
-    $btn.FlatAppearance.BorderSize = 0
-    $btn.BackColor = $bgColor
-    $btn.ForeColor = $textColor
-    $btn.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
-    $btn.Cursor = [System.Windows.Forms.Cursors]::Hand
-    return $btn
-}
+# ==============================================================================
+# HEADER — Logo + Title
+# ==============================================================================
+$headerPanel = New-Object System.Windows.Forms.Panel
+$headerPanel.Location = New-Object System.Drawing.Point(0, 0)
+$headerPanel.Size = New-Object System.Drawing.Size(524, 90)
+$headerPanel.BackColor = [System.Drawing.Color]::FromArgb(28, 22, 12)
+$form.Controls.Add($headerPanel)
 
-# Header Banner
+$headerPanel.add_Paint({
+    param($s, $e)
+    $pen = New-Object System.Drawing.Pen($cBorder, 2)
+    $e.Graphics.DrawLine($pen, 0, $s.Height - 1, $s.Width, $s.Height - 1)
+    $pen.Dispose()
+})
+
+# Logo image
+$logoPicBox = New-Object System.Windows.Forms.PictureBox
+$logoPicBox.Location = New-Object System.Drawing.Point(8, 5)
+$logoPicBox.Size = New-Object System.Drawing.Size(80, 80)
+$logoPicBox.SizeMode = "Zoom"
+$logoPicBox.BackColor = [System.Drawing.Color]::Transparent
+
+$logoCandidates = @(
+    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.jpg"),
+    (Join-Path $PSScriptRoot "..\Media\akimbo-logo.png"),
+    "C:\Users\NAUX\.gemini\antigravity\brain\937603db-0268-4223-88ae-effc8cc5441c\.user_uploaded\media_1789279358760.jpg"
+)
+foreach ($path in $logoCandidates) {
+    if (Test-Path $path -ErrorAction SilentlyContinue) {
+        try { $logoPicBox.Image = [System.Drawing.Image]::FromFile($path); break } catch { }
+    }
+}
+$headerPanel.Controls.Add($logoPicBox)
+
 $titleLabel = New-Object System.Windows.Forms.Label
-$titleLabel.Text = "AKIMBO COMPANION"
-$titleLabel.Location = New-Object System.Drawing.Point(20, 16)
-$titleLabel.Size = New-Object System.Drawing.Size(460, 26)
-$titleLabel.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
-$titleLabel.ForeColor = $cCyan
-$form.Controls.Add($titleLabel)
+$titleLabel.Text = "AKIMBO"
+$titleLabel.Location = New-Object System.Drawing.Point(96, 10)
+$titleLabel.Size = New-Object System.Drawing.Size(400, 36)
+$titleLabel.Font = New-Object System.Drawing.Font("Georgia", 22, [System.Drawing.FontStyle]::Bold)
+$titleLabel.ForeColor = $cGold
+$titleLabel.BackColor = [System.Drawing.Color]::Transparent
+$headerPanel.Controls.Add($titleLabel)
 
 $subLabel = New-Object System.Windows.Forms.Label
-$subLabel.Text = "Dual-Monitor Multi-Display Controller for World of Warcraft"
-$subLabel.Location = New-Object System.Drawing.Point(22, 42)
-$subLabel.Size = New-Object System.Drawing.Size(460, 18)
+$subLabel.Text = "Dual-Monitor Companion for World of Warcraft"
+$subLabel.Location = New-Object System.Drawing.Point(98, 50)
+$subLabel.Size = New-Object System.Drawing.Size(400, 18)
 $subLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8.5)
 $subLabel.ForeColor = $cMuted
-$form.Controls.Add($subLabel)
+$subLabel.BackColor = [System.Drawing.Color]::Transparent
+$headerPanel.Controls.Add($subLabel)
 
-# Status Group Card
-$statusPanel = New-Object System.Windows.Forms.Panel
-$statusPanel.Location = New-Object System.Drawing.Point(20, 68)
-$statusPanel.Size = New-Object System.Drawing.Size(464, 110)
-$statusPanel.BackColor = $cCard
-$statusPanel.BorderStyle = "FixedSingle"
+$versionLabel = New-Object System.Windows.Forms.Label
+$versionLabel.Text = "v1.2"
+$versionLabel.Location = New-Object System.Drawing.Point(98, 68)
+$versionLabel.Size = New-Object System.Drawing.Size(100, 14)
+$versionLabel.Font = New-Object System.Drawing.Font("Segoe UI", 7.5, [System.Drawing.FontStyle]::Italic)
+$versionLabel.ForeColor = $cMuted
+$versionLabel.BackColor = [System.Drawing.Color]::Transparent
+$headerPanel.Controls.Add($versionLabel)
+
+# ==============================================================================
+# STATUS CARD
+# ==============================================================================
+$statusPanel = New-CardPanel -x 16 -y 102 -w 490 -h 118 -title "System Status"
 $form.Controls.Add($statusPanel)
 
 $lblWowStatus = New-Object System.Windows.Forms.Label
-$lblWowStatus.Text = "WoW Process: Checking..."
-$lblWowStatus.Location = New-Object System.Drawing.Point(16, 12)
-$lblWowStatus.Size = New-Object System.Drawing.Size(430, 20)
-$lblWowStatus.Font = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
+$lblWowStatus.Text = "  WoW Process: Checking..."
+$lblWowStatus.Location = New-Object System.Drawing.Point(0, 30)
+$lblWowStatus.Size = New-Object System.Drawing.Size(490, 20)
+$lblWowStatus.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $lblWowStatus.ForeColor = $cMuted
 $statusPanel.Controls.Add($lblWowStatus)
 
 $lblAddonStatus = New-Object System.Windows.Forms.Label
-$lblAddonStatus.Text = "Akimbo Addon: Checking..."
-$lblAddonStatus.Location = New-Object System.Drawing.Point(16, 36)
-$lblAddonStatus.Size = New-Object System.Drawing.Size(430, 20)
-$lblAddonStatus.Font = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
+$lblAddonStatus.Text = "  Akimbo Addon: Checking..."
+$lblAddonStatus.Location = New-Object System.Drawing.Point(0, 54)
+$lblAddonStatus.Size = New-Object System.Drawing.Size(490, 20)
+$lblAddonStatus.Font = New-Object System.Drawing.Font("Segoe UI", 9, [System.Drawing.FontStyle]::Bold)
 $lblAddonStatus.ForeColor = $cMuted
 $statusPanel.Controls.Add($lblAddonStatus)
 
 $lblDisplayInfo = New-Object System.Windows.Forms.Label
-$lblDisplayInfo.Text = "Virtual Desktop: Checking..."
-$lblDisplayInfo.Location = New-Object System.Drawing.Point(16, 60)
-$lblDisplayInfo.Size = New-Object System.Drawing.Size(430, 20)
-$lblDisplayInfo.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+$lblDisplayInfo.Text = "  Virtual Desktop: Checking..."
+$lblDisplayInfo.Location = New-Object System.Drawing.Point(0, 78)
+$lblDisplayInfo.Size = New-Object System.Drawing.Size(490, 18)
+$lblDisplayInfo.Font = New-Object System.Drawing.Font("Segoe UI", 8.5)
 $lblDisplayInfo.ForeColor = $cMuted
 $statusPanel.Controls.Add($lblDisplayInfo)
 
 $lblAddonReason = New-Object System.Windows.Forms.Label
-$lblAddonReason.Text = "Live addon state cannot be verified by the companion."
-$lblAddonReason.Location = New-Object System.Drawing.Point(16, 82)
-$lblAddonReason.Size = New-Object System.Drawing.Size(430, 18)
-$lblAddonReason.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Italic)
+$lblAddonReason.Text = ""
+$lblAddonReason.Location = New-Object System.Drawing.Point(0, 98)
+$lblAddonReason.Size = New-Object System.Drawing.Size(490, 16)
+$lblAddonReason.Font = New-Object System.Drawing.Font("Segoe UI", 7.5, [System.Drawing.FontStyle]::Italic)
 $lblAddonReason.ForeColor = $cYellow
 $statusPanel.Controls.Add($lblAddonReason)
 
-# Auto-Span Toggle Switch
-$chkAutoSpan = New-Object System.Windows.Forms.CheckBox
-$chkAutoSpan.Text = "Enable Automatic Spanning on Game Launch"
-$chkAutoSpan.Location = New-Object System.Drawing.Point(22, 190)
-$chkAutoSpan.Size = New-Object System.Drawing.Size(460, 24)
-$chkAutoSpan.Font = New-Object System.Drawing.Font("Segoe UI", 9.5, [System.Drawing.FontStyle]::Bold)
-$chkAutoSpan.ForeColor = $cText
-$chkAutoSpan.Checked = $true
-$form.Controls.Add($chkAutoSpan)
+# ==============================================================================
+# CONFIGURATION CARD
+# ==============================================================================
+$configPanel = New-CardPanel -x 16 -y 230 -w 490 -h 54 -title "Configuration"
+$form.Controls.Add($configPanel)
 
-# Action Buttons
-$btnSpanNow = New-StyledButton -text "Span WoW Window Now" -x 20 -y 224 -w 226 -h 38 -bgColor ([System.Drawing.Color]::FromArgb(0, 130, 200)) -textColor [System.Drawing.Color]::White
+$chkAutoSpan = New-Object System.Windows.Forms.CheckBox
+$chkAutoSpan.Text = "Automatically span WoW window on game launch"
+$chkAutoSpan.Location = New-Object System.Drawing.Point(10, 28)
+$chkAutoSpan.Size = New-Object System.Drawing.Size(460, 22)
+$chkAutoSpan.Font = New-Object System.Drawing.Font("Segoe UI", 9)
+$chkAutoSpan.ForeColor = $cText
+$chkAutoSpan.BackColor = [System.Drawing.Color]::Transparent
+$chkAutoSpan.Checked = $true
+$configPanel.Controls.Add($chkAutoSpan)
+
+# ==============================================================================
+# ACTION BUTTONS
+# ==============================================================================
+$btnSpanNow = New-StyledButton -text "Span WoW Window Now" -x 16 -y 296 -w 238 -h 36 `
+    -bgColor $cBtnBg -textColor $cGold -borderColor $cBorder
 $form.Controls.Add($btnSpanNow)
 
-$btnToggleWatch = New-StyledButton -text "Pause Monitoring" -x 258 -y 224 -w 226 -h 38 -bgColor ([System.Drawing.Color]::FromArgb(50, 56, 70)) -textColor $cText
+$btnToggleWatch = New-StyledButton -text "Pause Monitoring" -x 262 -y 296 -w 244 -h 36 `
+    -bgColor $cBtnBg -textColor $cText -borderColor $cBorderDim
 $form.Controls.Add($btnToggleWatch)
 
-# Activity Log Header
-$logHeader = New-Object System.Windows.Forms.Label
-$logHeader.Text = "ACTIVITY LOG"
-$logHeader.Location = New-Object System.Drawing.Point(22, 274)
-$logHeader.Size = New-Object System.Drawing.Size(460, 18)
-$logHeader.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
-$logHeader.ForeColor = $cMuted
-$form.Controls.Add($logHeader)
+# ==============================================================================
+# ACTIVITY LOG CARD
+# ==============================================================================
+$logPanel = New-CardPanel -x 16 -y 344 -w 490 -h 200 -title "Activity Log"
+$form.Controls.Add($logPanel)
 
-# Activity Log ListBox
 $logBox = New-Object System.Windows.Forms.ListBox
-$logBox.Location = New-Object System.Drawing.Point(20, 296)
-$logBox.Size = New-Object System.Drawing.Size(464, 160)
-$logBox.BackColor = [System.Drawing.Color]::FromArgb(14, 15, 18)
-$logBox.ForeColor = [System.Drawing.Color]::FromArgb(200, 210, 225)
-$logBox.BorderStyle = "FixedSingle"
+$logBox.Location = New-Object System.Drawing.Point(4, 28)
+$logBox.Size = New-Object System.Drawing.Size(482, 166)
+$logBox.BackColor = $cLogBg
+$logBox.ForeColor = $cLogText
+$logBox.BorderStyle = "None"
 $logBox.Font = New-Object System.Drawing.Font("Consolas", 8.5)
-$form.Controls.Add($logBox)
+$logPanel.Controls.Add($logBox)
 
-# Bottom Status Footer
-$btnMinimize = New-StyledButton -text "Minimize to Tray" -x 20 -y 468 -w 150 -h 32 -bgColor ([System.Drawing.Color]::FromArgb(35, 40, 50)) -textColor $cMuted
+# ==============================================================================
+# FOOTER BUTTONS
+# ==============================================================================
+$btnMinimize = New-StyledButton -text "Minimize to Tray" -x 16 -y 556 -w 152 -h 30 `
+    -bgColor $cBtnBg -textColor $cMuted -borderColor $cBorderDim
 $form.Controls.Add($btnMinimize)
 
-$btnExit = New-StyledButton -text "Exit Companion" -x 334 -y 468 -w 150 -h 32 -bgColor ([System.Drawing.Color]::FromArgb(40, 25, 25)) -textColor $cRed
+$btnExit = New-StyledButton -text "Exit Companion" -x 356 -y 556 -w 152 -h 30 `
+    -bgColor $cBtnDanger -textColor $cRed `
+    -borderColor ([System.Drawing.Color]::FromArgb(120, 50, 40))
 $form.Controls.Add($btnExit)
 
-# Logging Helper
+# ==============================================================================
+# LOGGING HELPER
+# ==============================================================================
 function Add-Log {
-    param($msg, $color)
+    param($msg)
     $time = (Get-Date).ToString("HH:mm:ss")
-    $entry = "[$time] $msg"
-    $logBox.Items.Insert(0, $entry)
+    $logBox.Items.Insert(0, "[$time] $msg")
     while ($logBox.Items.Count -gt 100) {
         $logBox.Items.RemoveAt($logBox.Items.Count - 1)
     }
 }
 
 # ==============================================================================
-# System Tray Icon & Context Menu
+# SYSTEM TRAY ICON
 # ==============================================================================
 $trayIcon = New-Object System.Windows.Forms.NotifyIcon
 $trayIcon.Text = "Akimbo Companion"
 $trayIcon.Visible = $true
 
-# Generate a clean icon programmatically
 $bmp = New-Object System.Drawing.Bitmap 16, 16
 $g = [System.Drawing.Graphics]::FromImage($bmp)
-$g.Clear([System.Drawing.Color]::FromArgb(0, 204, 255))
+$g.Clear([System.Drawing.Color]::FromArgb(22, 18, 12))
+$brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(255, 210, 64))
+$fontIcon = New-Object System.Drawing.Font("Georgia", 9, [System.Drawing.FontStyle]::Bold)
+$g.DrawString("A", $fontIcon, $brush, 1, 0)
+$g.Dispose(); $brush.Dispose(); $fontIcon.Dispose()
 $hIcon = $bmp.GetHicon()
 $trayIcon.Icon = [System.Drawing.Icon]::FromHandle($hIcon)
 
@@ -178,35 +305,28 @@ $itemAuto = $trayMenu.Items.Add("Auto-Span Enabled")
 $itemAuto.Checked = $true
 $trayMenu.Items.Add("-")
 $itemExit = $trayMenu.Items.Add("Exit")
-
 $trayIcon.ContextMenuStrip = $trayMenu
 
 $trayIcon.add_DoubleClick({
-    $form.Show()
-    $form.WindowState = "Normal"
-    $form.Activate()
+    $form.Show(); $form.WindowState = "Normal"; $form.Activate()
 })
-
 $itemOpen.add_Click({
-    $form.Show()
-    $form.WindowState = "Normal"
-    $form.Activate()
+    $form.Show(); $form.WindowState = "Normal"; $form.Activate()
 })
-
 $itemAuto.add_Click({
     $chkAutoSpan.Checked = -not $chkAutoSpan.Checked
     $itemAuto.Checked = $chkAutoSpan.Checked
 })
 
 # ==============================================================================
-# Addon Validation & Process Inspection Logic
+# SPAN LOGIC
 # ==============================================================================
 function Invoke-SpanWindow {
     param([bool]$manual = $false)
     try {
         $bounds = Invoke-AkimboSpan (Get-WoWProcess)
         Add-Log "Spanned $($bounds.Width)x$($bounds.Height). Calibrate with /akimbo wizard."
-        $trayIcon.ShowBalloonTip(3000, "Akimbo Spanned", "Window spanned. Confirm Akimbo is enabled; use /akimbo wizard to calibrate.", "Info")
+        $trayIcon.ShowBalloonTip(3000, "Akimbo Spanned", "Window spanned. Use /akimbo wizard to calibrate.", "Info")
         return $true
     } catch {
         Add-Log $_.Exception.Message
@@ -218,129 +338,120 @@ function Invoke-SpanWindow {
 }
 
 # ==============================================================================
-# Background Watcher Engine (Timer)
+# BACKGROUND WATCHER TIMER
 # ==============================================================================
 $isMonitoring = $true
-$spannedPids = @{}
-$retryAfter = @{}
+$spannedPids  = @{}
+$retryAfter   = @{}
 
 $timer = New-Object System.Windows.Forms.Timer
-$timer.Interval = 2000 # Poll every 2 seconds
+$timer.Interval = 2000
 
 $timer.add_Tick({
     try {
         $vs = Get-AkimboDesktopBounds
-        $lblDisplayInfo.Text = "Virtual Desktop: $($vs.Width) x $($vs.Height) px (X: $($vs.X), Y: $($vs.Y))"
-    } catch { $lblDisplayInfo.Text = "Virtual Desktop: physical coordinates unavailable" }
+        $lblDisplayInfo.Text = "  Virtual Desktop: $($vs.Width) x $($vs.Height) px  (Offset X:$($vs.X), Y:$($vs.Y))"
+    } catch {
+        $lblDisplayInfo.Text = "  Virtual Desktop: physical coordinates unavailable"
+    }
 
     $proc = Get-WoWProcess
-
     if ($proc) {
-        $lblWowStatus.Text = "WoW Process: RUNNING ($($proc.ProcessName) - PID: $($proc.Id))"
+        $lblWowStatus.Text = "  ● WoW Running  ($($proc.ProcessName)  PID: $($proc.Id))"
         $lblWowStatus.ForeColor = $cGreen
 
         $status = Test-AkimboAddonStatus -proc $proc
-
         if ($status.Installed) {
-            $lblAddonStatus.Text = "Akimbo Addon: INSTALLED (enable in WoW)"
+            $lblAddonStatus.Text = "  ● Akimbo Addon: INSTALLED"
             $lblAddonStatus.ForeColor = $cGreen
-            $lblAddonReason.Text = "Confirm Akimbo is enabled in the current WoW session."
+            $lblAddonReason.Text = "  Confirm Akimbo is enabled in the current WoW session."
         } else {
-            $lblAddonStatus.Text = "Akimbo Addon: NOT VERIFIED"
+            $lblAddonStatus.Text = "  ○ Akimbo Addon: NOT VERIFIED"
             $lblAddonStatus.ForeColor = $cRed
-            $lblAddonReason.Text = $status.Reason
+            $lblAddonReason.Text = "  $($status.Reason)"
         }
 
-        # Auto-Spanning Trigger
         if ($isMonitoring -and $chkAutoSpan.Checked -and $status.Installed) {
             if (-not $spannedPids.ContainsKey($proc.Id) -and
                 (-not $retryAfter.ContainsKey($proc.Id) -or (Get-Date) -ge $retryAfter[$proc.Id])) {
                 Add-Log "New WoW launch detected (PID: $($proc.Id)). Preparing auto-span..."
                 $retryAfter[$proc.Id] = (Get-Date).AddSeconds(10)
-                if (Invoke-SpanWindow -manual $false) {
-                    $spannedPids[$proc.Id] = $true
-                }
+                if (Invoke-SpanWindow -manual $false) { $spannedPids[$proc.Id] = $true }
             }
         }
     } else {
-        $lblWowStatus.Text = "WoW Process: Run exactly one client"
+        $lblWowStatus.Text = "  ○ WoW Process: Not running"
         $lblWowStatus.ForeColor = $cMuted
-        $lblAddonStatus.Text = "Akimbo Addon: Waiting for WoW..."
+        $lblAddonStatus.Text = "  ○ Akimbo Addon: Waiting for WoW..."
         $lblAddonStatus.ForeColor = $cMuted
         $lblAddonReason.Text = ""
     }
 
-    # Clean dead PIDs
     $keys = @($spannedPids.Keys)
     foreach ($k in $keys) {
-        $p = Get-Process -Id $k -ErrorAction SilentlyContinue
-        if (-not $p) {
-            $spannedPids.Remove($k)
-            $retryAfter.Remove($k)
+        if (-not (Get-Process -Id $k -ErrorAction SilentlyContinue)) {
+            $spannedPids.Remove($k); $retryAfter.Remove($k)
             Add-Log "WoW process (PID: $k) closed."
         }
     }
 })
 
-# UI Event Handlers
-$btnSpanNow.add_Click({
-    Invoke-SpanWindow -manual $true
-})
+# ==============================================================================
+# UI EVENT HANDLERS
+# ==============================================================================
+$btnSpanNow.add_Click({ Invoke-SpanWindow -manual $true })
 
 $btnToggleWatch.add_Click({
     $isMonitoring = -not $isMonitoring
     if ($isMonitoring) {
         $btnToggleWatch.Text = "Pause Monitoring"
-        $btnToggleWatch.BackColor = [System.Drawing.Color]::FromArgb(50, 56, 70)
+        $btnToggleWatch.ForeColor = $cText
         Add-Log "Background auto-watcher resumed."
     } else {
         $btnToggleWatch.Text = "Resume Monitoring"
-        $btnToggleWatch.BackColor = [System.Drawing.Color]::FromArgb(90, 70, 20)
+        $btnToggleWatch.ForeColor = $cYellow
         Add-Log "Background auto-watcher PAUSED by user."
     }
 })
 
 $chkAutoSpan.add_CheckedChanged({
     $itemAuto.Checked = $chkAutoSpan.Checked
-    Add-Log "Auto-Span on launch set to: $($chkAutoSpan.Checked)"
+    Add-Log "Auto-Span on launch: $($chkAutoSpan.Checked)"
 })
 
 $btnMinimize.add_Click({
     $form.Hide()
-    $trayIcon.ShowBalloonTip(2000, "Akimbo Running in Tray", "Akimbo Companion is monitoring in the background. Double-click the tray icon to restore.", "Info")
+    $trayIcon.ShowBalloonTip(2000, "Akimbo Running in Tray",
+        "Monitoring in background. Double-click tray icon to restore.", "Info")
 })
 
 $btnExit.add_Click({
-    $timer.Stop()
-    $trayIcon.Visible = $false
-    $form.Close()
-    [System.Windows.Forms.Application]::Exit()
+    $timer.Stop(); $trayIcon.Visible = $false
+    $form.Close(); [System.Windows.Forms.Application]::Exit()
 })
 
-$itemSpan.add_Click({
-    Invoke-SpanWindow -manual $true
-})
+$itemSpan.add_Click({ Invoke-SpanWindow -manual $true })
 
 $itemExit.add_Click({
-    $timer.Stop()
-    $trayIcon.Visible = $false
-    $form.Close()
-    [System.Windows.Forms.Application]::Exit()
+    $timer.Stop(); $trayIcon.Visible = $false
+    $form.Close(); [System.Windows.Forms.Application]::Exit()
 })
 
-# Intercept Form X button to minimize to tray instead of quitting
 $form.add_FormClosing({
     param($sender, $e)
     if ($e.CloseReason -eq [System.Windows.Forms.CloseReason]::UserClosing) {
         $e.Cancel = $true
         $form.Hide()
-        $trayIcon.ShowBalloonTip(1500, "Akimbo Minimized", "Running in System Tray. Right-click or double-click to control.", "Info")
+        $trayIcon.ShowBalloonTip(1500, "Akimbo Minimized",
+            "Running in System Tray. Right-click or double-click to control.", "Info")
     }
 })
 
-# Start application
-Add-Log "Akimbo Companion v1.1 initialized."
-Add-Log "Monitoring. Enable Akimbo in WoW; calibrate with /akimbo wizard."
+# ==============================================================================
+# LAUNCH
+# ==============================================================================
+Add-Log "Akimbo Companion v1.2 initialized."
+Add-Log "Monitoring active. Enable Akimbo in WoW; calibrate with /akimbo wizard."
 $timer.Start()
 
 [System.Windows.Forms.Application]::Run($form)
