@@ -40,6 +40,10 @@ function Options:DetectTopology()
 
     local ar = physW / math.max(physH, 1)
 
+    local function Near(v, target, tol)
+        return math.abs(v - target) <= (tol or 100)
+    end
+
     local info = {
         physWidth = physW,
         physHeight = physH,
@@ -52,34 +56,163 @@ function Options:DetectTopology()
         description = "Single Display",
     }
 
-    if physW >= 2800 and physH >= 1800 and ar < 2.0 and ar > 1.3 then
+    -- ------------------------------------------------------------------------
+    -- 1. Specific High-Confidence Multi-Monitor Topologies
+    -- ------------------------------------------------------------------------
+    if Near(physW, 5360) and Near(physH, 1440) then
+        -- 3440x1440 Ultrawide + 1920x1080 Landscape (5360x1440)
         info.isSpanned = true
-        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-        info.recommendedDeckRatio = 0.36
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.358 -- 1920 / 5360 = ~35.8% (or 3440 / 5360 = 64.2% if primary left)
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "21_9"
+        info.description = string.format("Ultrawide 21:9 (3440p) + 1080p Landscape (%dx%d)", physW, physH)
+
+    elseif Near(physW, 6000) and Near(physH, 1440) then
+        -- 3440x1440 Ultrawide + 2560x1440 Landscape (6000x1440)
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.427 -- 2560 / 6000 = ~42.7%
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "21_9"
+        info.description = string.format("Ultrawide 21:9 (3440p) + 1440p Landscape (%dx%d)", physW, physH)
+
+    elseif Near(physW, 4480) and Near(physH, 1080) then
+        -- 2560x1080 Ultrawide + 1920x1080 Landscape (4480x1080)
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.429 -- 1920 / 4480 = ~42.9%
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "21_9"
+        info.description = string.format("Ultrawide 21:9 (2560p) + 1080p Landscape (%dx%d)", physW, physH)
+
+    elseif Near(physW, 4480) and Near(physH, 1440) then
+        -- 2560x1440 Landscape + 1920x1080 Landscape (4480x1440)
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.429 -- 1920 / 4480 = ~42.9%
         info.recommendedPosition = "RIGHT"
         info.recommendedAR = "16_9"
+        info.description = string.format("1440p Gaming + 1080p Landscape (%dx%d)", physW, physH)
+
+    elseif Near(physW, 6400) and Near(physH, 2160) then
+        -- 3840x2160 (4K) + 2560x1440 (1440p) = 6400x2160
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.400 -- 2560 / 6400
+        info.recommendedPosition = "RIGHT"
+        info.recommendedAR = "16_9"
+        info.description = string.format("4K Gaming + 1440p Landscape (%dx%d)", physW, physH)
+
+    elseif Near(physW, 7680) and Near(physH, 2160) then
+        -- Dual 4K (3840 + 3840 = 7680x2160)
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.50
+        info.recommendedPosition = "LEFT"
+        info.recommendedAR = "16_9"
+        info.description = string.format("Dual 4K Landscape (7680x2160)")
+
+    elseif Near(physW, 5120) and Near(physH, 1440) then
+        -- Dual 1440p (2560 + 2560 = 5120x1440) or Super-Ultrawide 32:9
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.50
+        info.recommendedPosition = "LEFT"
+        info.recommendedAR = "16_9"
+        info.description = string.format("Dual 1440p Landscape (5120x1440)")
+
+    elseif Near(physW, 3840) and Near(physH, 1080) then
+        -- Dual 1080p (1920 + 1920 = 3840x1080)
+        info.isSpanned = true
+        info.recommendedPreset = "LANDSCAPE_DUAL"
+        info.recommendedDeckRatio = 0.50
+        info.recommendedPosition = "LEFT"
+        info.recommendedAR = "16_9"
+        info.description = string.format("Dual 1080p Landscape (3840x1080)")
+
+    elseif Near(physW, 4880) and Near(physH, 2560) then
+        -- Portrait 1440p (1440x2560) + Ultrawide 3440x1440p (4880x2560)
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.295 -- 1440 / 4880
+        info.recommendedAR = "21_9"
+        info.description = string.format("Portrait 1440p + Ultrawide 21:9 (%dx%d)", physW, physH)
+
+    elseif Near(physW, 4520) and Near(physH, 1920) then
+        -- Portrait 1080p (1080x1920) + Ultrawide 3440x1440p (4520x1920)
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.239 -- 1080 / 4520
+        info.recommendedAR = "21_9"
+        info.description = string.format("Portrait 1080p + Ultrawide 21:9 (%dx%d)", physW, physH)
+
+    elseif Near(physW, 4000) and Near(physH, 2560) then
+        -- Portrait 1440p (1440x2560) + Landscape 1440p (2560x1440) = 4000x2560
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.360 -- 1440 / 4000
+        info.recommendedAR = "16_9"
+        info.description = string.format("Mixed Portrait (1440p) + Landscape (1440p) (%dx%d)", physW, physH)
+
+    elseif Near(physW, 3640) and Near(physH, 1920) then
+        -- Portrait 1080p (1080x1920) + Landscape 1440p (2560x1440) = 3640x1920
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.297 -- 1080 / 3640
+        info.recommendedAR = "16_9"
+        info.description = string.format("Mixed Portrait (1080p) + Landscape (1440p) (%dx%d)", physW, physH)
+
+    elseif Near(physW, 3000) and Near(physH, 1920) then
+        -- Portrait 1080p (1080x1920) + Landscape 1080p (1920x1080) = 3000x1920
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.360 -- 1080 / 3000
+        info.recommendedAR = "16_9"
+        info.description = string.format("Mixed Portrait (1080p) + Landscape (1080p) (%dx%d)", physW, physH)
+
+    -- ------------------------------------------------------------------------
+    -- 2. Fallback Heuristics by Aspect Ratio & Geometry
+    -- ------------------------------------------------------------------------
+    elseif physH >= 1800 and physW >= 2800 and ar < 2.6 then
+        -- General Mixed Portrait + Landscape
+        info.isSpanned = true
+        info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        info.recommendedPosition = "RIGHT"
+        info.recommendedDeckRatio = 0.36
+        info.recommendedAR = "16_9"
         info.description = string.format("Mixed Portrait + Landscape (%dx%d)", physW, physH)
+
     elseif ar >= 3.0 then
+        -- Generic dual landscape side-by-side
         info.isSpanned = true
         info.recommendedPreset = "LANDSCAPE_DUAL"
         info.recommendedDeckRatio = 0.50
         info.recommendedPosition = "LEFT"
         info.recommendedAR = "16_9"
         info.description = string.format("Dual Landscape Side-by-Side (%dx%d)", physW, physH)
+
     elseif ar >= 2.0 then
+        -- Ultrawide single display spanned
         info.isSpanned = true
         info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
         info.recommendedDeckRatio = 0.36
         info.recommendedPosition = "RIGHT"
         info.recommendedAR = "21_9"
         info.description = string.format("Ultrawide Spanned (%dx%d)", physW, physH)
+
     else
         info.isSpanned = false
         info.recommendedPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
         info.recommendedDeckRatio = 0.36
         info.recommendedPosition = "RIGHT"
         info.recommendedAR = "16_9"
-        info.description = string.format("Windowed (%dx%d)", physW, physH)
+        info.description = string.format("Single Display (%dx%d)", physW, physH)
     end
 
     return info

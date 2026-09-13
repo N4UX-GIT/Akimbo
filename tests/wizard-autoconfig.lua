@@ -167,6 +167,86 @@ local infoDual = addon.Options:DetectTopology()
 assert(infoDual.isSpanned == true, "3840x1080 must be detected as spanned")
 assert(infoDual.recommendedPreset == "LANDSCAPE_DUAL", "Dual 1080p must recommend LANDSCAPE_DUAL")
 assert(math.abs(infoDual.recommendedDeckRatio - 0.50) < 0.001, "Dual 1080p must recommend 50% seam")
+assert(infoDual.recommendedAR == "16_9", "Dual 1080p must recommend 16:9 AR")
+
+-- Test 5360x1440 (3440x1440 Ultrawide + 1920x1080 Landscape)
+GetPhysicalScreenSize = function() return 5360, 1440 end
+local infoUW1080 = addon.Options:DetectTopology()
+assert(infoUW1080.isSpanned == true, "5360x1440 must be detected as spanned")
+assert(infoUW1080.recommendedPreset == "LANDSCAPE_DUAL", "5360x1440 must recommend LANDSCAPE_DUAL")
+assert(math.abs(infoUW1080.recommendedDeckRatio - 0.358) < 0.002, "5360x1440 must recommend ~35.8% seam")
+assert(infoUW1080.recommendedAR == "21_9", "5360x1440 must recommend 21:9 AR")
+assert(infoUW1080.recommendedPosition == "RIGHT", "5360x1440 must default primary monitor RIGHT")
+
+-- Test 6000x1440 (3440x1440 Ultrawide + 2560x1440 Landscape)
+GetPhysicalScreenSize = function() return 6000, 1440 end
+local infoUW1440 = addon.Options:DetectTopology()
+assert(infoUW1440.isSpanned == true, "6000x1440 must be detected as spanned")
+assert(math.abs(infoUW1440.recommendedDeckRatio - 0.427) < 0.002, "6000x1440 must recommend ~42.7% seam")
+assert(infoUW1440.recommendedAR == "21_9", "6000x1440 must recommend 21:9 AR")
+
+-- Test 4480x1440 (2560x1440 Landscape + 1920x1080 Landscape)
+GetPhysicalScreenSize = function() return 4480, 1440 end
+local infoMixedLand = addon.Options:DetectTopology()
+assert(infoMixedLand.isSpanned == true, "4480x1440 must be detected as spanned")
+assert(math.abs(infoMixedLand.recommendedDeckRatio - 0.429) < 0.002, "4480x1440 must recommend ~42.9% seam")
+assert(infoMixedLand.recommendedAR == "16_9", "4480x1440 must recommend 16:9 AR")
+
+-- Test 4480x1080 (2560x1080 Ultrawide + 1920x1080 Landscape)
+GetPhysicalScreenSize = function() return 4480, 1080 end
+local infoUW1080p = addon.Options:DetectTopology()
+assert(infoUW1080p.isSpanned == true, "4480x1080 must be detected as spanned")
+assert(math.abs(infoUW1080p.recommendedDeckRatio - 0.429) < 0.002, "4480x1080 must recommend ~42.9% seam")
+assert(infoUW1080p.recommendedAR == "21_9", "4480x1080 must recommend 21:9 AR")
+
+-- Test 4880x2560 (Portrait 1440p + Ultrawide 3440x1440)
+GetPhysicalScreenSize = function() return 4880, 2560 end
+local infoPortUW1440 = addon.Options:DetectTopology()
+assert(infoPortUW1440.isSpanned == true, "4880x2560 must be detected as spanned")
+assert(math.abs(infoPortUW1440.recommendedDeckRatio - 0.295) < 0.002, "4880x2560 must recommend ~29.5% seam")
+assert(infoPortUW1440.recommendedAR == "21_9", "4880x2560 must recommend 21:9 AR")
+
+-- Test 4520x1920 (Portrait 1080p + Ultrawide 3440x1440)
+GetPhysicalScreenSize = function() return 4520, 1920 end
+local infoPortUW1080 = addon.Options:DetectTopology()
+assert(infoPortUW1080.isSpanned == true, "4520x1920 must be detected as spanned")
+assert(math.abs(infoPortUW1080.recommendedDeckRatio - 0.239) < 0.002, "4520x1920 must recommend ~23.9% seam")
+assert(infoPortUW1080.recommendedAR == "21_9", "4520x1920 must recommend 21:9 AR")
+
+-- Test 3640x1920 (Portrait 1080p + Landscape 1440p)
+GetPhysicalScreenSize = function() return 3640, 1920 end
+local infoPort1080_1440 = addon.Options:DetectTopology()
+assert(infoPort1080_1440.isSpanned == true, "3640x1920 must be detected as spanned")
+assert(math.abs(infoPort1080_1440.recommendedDeckRatio - 0.297) < 0.002, "3640x1920 must recommend ~29.7% seam")
+assert(infoPort1080_1440.recommendedAR == "16_9", "3640x1920 must recommend 16:9 AR")
+
+-- Test 3000x1920 (Portrait 1080p + Landscape 1080p)
+GetPhysicalScreenSize = function() return 3000, 1920 end
+local infoPort1080_1080 = addon.Options:DetectTopology()
+assert(infoPort1080_1080.isSpanned == true, "3000x1920 must be detected as spanned")
+assert(math.abs(infoPort1080_1080.recommendedDeckRatio - 0.360) < 0.002, "3000x1920 must recommend ~36.0% seam")
+assert(infoPort1080_1080.recommendedAR == "16_9", "3000x1920 must recommend 16:9 AR")
+
+-- Test 5120x1440 (Dual 1440p)
+GetPhysicalScreenSize = function() return 5120, 1440 end
+local infoDual1440 = addon.Options:DetectTopology()
+assert(infoDual1440.isSpanned == true, "5120x1440 must be detected as spanned")
+assert(math.abs(infoDual1440.recommendedDeckRatio - 0.50) < 0.001, "5120x1440 must recommend 50% seam")
+assert(infoDual1440.recommendedAR == "16_9", "5120x1440 must recommend 16:9 AR")
+
+-- Test 7680x2160 (Dual 4K)
+GetPhysicalScreenSize = function() return 7680, 2160 end
+local infoDual4K = addon.Options:DetectTopology()
+assert(infoDual4K.isSpanned == true, "7680x2160 must be detected as spanned")
+assert(math.abs(infoDual4K.recommendedDeckRatio - 0.50) < 0.001, "7680x2160 must recommend 50% seam")
+assert(infoDual4K.recommendedAR == "16_9", "7680x2160 must recommend 16:9 AR")
+
+-- Test 6400x2160 (4K + 1440p)
+GetPhysicalScreenSize = function() return 6400, 2160 end
+local info4K_1440 = addon.Options:DetectTopology()
+assert(info4K_1440.isSpanned == true, "6400x2160 must be detected as spanned")
+assert(math.abs(info4K_1440.recommendedDeckRatio - 0.400) < 0.002, "6400x2160 must recommend ~40.0% seam")
+assert(info4K_1440.recommendedAR == "16_9", "6400x2160 must recommend 16:9 AR")
 
 -- Reset back to 4000x2560
 GetPhysicalScreenSize = function() return 4000, 2560 end
