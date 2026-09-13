@@ -9,16 +9,16 @@ CreateFrame = function()
 end
 InCombatLockdown = function() return combat end
 SlashCmdList = {}
-assert(loadfile("Core/Init.lua"))("Akimbo", addon)
-assert(loadfile("Core/Config.lua"))("Akimbo", addon)
+assert(loadfile("Core/Init.lua"))("Offhand", addon)
+assert(loadfile("Core/Config.lua"))("Offhand", addon)
 local messages = {}
 addon.Print = function(_, message) messages[#messages + 1] = message end
 
-AkimboDB = { deckWidthRatio = 0.55, hudScale = 0.85 }
+OffhandDB = { deckWidthRatio = 0.55, hudScale = 0.85 }
 addon:InitializeConfig()
 assert(addon.db.deckWidthRatio == 0.55, "migration changed seam")
 assert(addon.db.hudScale == 0.85, "migration changed HUD scale")
-AkimboDB = "invalid"
+OffhandDB = "invalid"
 addon:InitializeConfig()
 local defaultSeam = addon.db.deckWidthRatio
 local defaultHeight = addon.db.gameHeightRatio

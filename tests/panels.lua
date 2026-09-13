@@ -55,7 +55,7 @@ SpellBookFrame=frame("SpellBookFrame",384,512,1500,1800)
 FriendsFrame=frame("FriendsFrame",384,512,1800,1900)
 GameMenuFrame=frame("GameMenuFrame",200,450,3800,0)
 WorldMapFrame=frame("WorldMapFrame",1000,700,2000,1800)
-assert(loadfile("Modules/CharacterDock.lua"))("Akimbo",addon)
+assert(loadfile("Modules/CharacterDock.lua"))("Offhand",addon)
 local tickerRegistered=false
 local timers={}
 C_Timer={NewTicker=function() tickerRegistered=true; return {} end,
@@ -83,9 +83,9 @@ combat=true;SpellBookFrame.y=1900
 addon.Panels:Place(SpellBookFrame);addon.Panels:Place(FriendsFrame)
 assert(#queue==1 and SpellBookFrame.y==1900)
 combat=false;queue[1]();inside(SpellBookFrame,1440,6,4000,1446)
-SpellBookFrame._akimboDragging=true;SpellBookFrame.y=1900
+SpellBookFrame._OffhandDragging=true;SpellBookFrame.y=1900
 addon.Panels:Place(SpellBookFrame);assert(SpellBookFrame.y==1900)
-SpellBookFrame._akimboDragging=false
+SpellBookFrame._OffhandDragging=false
 addon.db.primaryPosition="LEFT";m.gameLeft=0;m.gameRight=2560
 addon.Panels:Place(WorldMapFrame);inside(WorldMapFrame,2560,0,4000,2560)
 print("PASS: panel opening metadata, scale, invisible-gap rescue, deck dragging, combat, left primary")
@@ -101,7 +101,7 @@ addon.Panels:Place(SpellBookFrame)
 assert(math.abs(SpellBookFrame.x-1900)<0.01 and math.abs(SpellBookFrame.y-400)<0.01)
 -- Simulated reload: the saved table is retained but frame position is reset.
 SpellBookFrame.x=30;SpellBookFrame.y=1900
-assert(loadfile("Modules/CharacterDock.lua"))("Akimbo",addon)
+assert(loadfile("Modules/CharacterDock.lua"))("Offhand",addon)
 addon.Panels:Place(SpellBookFrame)
 assert(math.abs(SpellBookFrame.x-1900)<0.01 and math.abs(SpellBookFrame.y-400)<0.01)
 RiF_MainWindow=frame("RiF_MainWindow",750,550,2000,1800)

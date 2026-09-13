@@ -21,7 +21,7 @@ local addon = {
         savedMainPositions = {},
     }
 }
-_G.Akimbo = addon
+_G.Offhand = addon
 
 UIParent = {
     GetWidth = function() return 4000 end,
@@ -165,10 +165,10 @@ addon.Viewport = { GetMetrics = function() return metrics end }
 addon.Print = function() end
 addon.ApplyFullLayout = function() end
 
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
-assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
-assert(loadfile("UI/Options.lua"))("Akimbo", addon)
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
+assert(loadfile("UI/Themes.lua"))("Offhand", addon)
+assert(loadfile("UI/Options.lua"))("Offhand", addon)
 addon.SeamRedirect:HookFrames()
 
 -- TEST 1: Method vs Function call resilience on RestoreWorkspacePosition

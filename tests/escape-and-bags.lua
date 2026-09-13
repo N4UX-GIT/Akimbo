@@ -234,9 +234,9 @@ function ToggleGameMenu(clicked)
     end
 end
 
--- Load Akimbo files
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
+-- Load Offhand files
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
 
 -- Initialize Canvas and SeamRedirect
 addon.Canvas:EnableFreeDragging()
@@ -287,7 +287,7 @@ local cp = CharacterFrame.points[#CharacterFrame.points]
 assert(cp[1] == "BOTTOMLEFT" and cp[4] == 100 and cp[5] == 200, "CharacterFrame must restore saved position")
 
 -- Verify elevated drag handle exists for CharacterFrame and panels
-assert(CharacterFrame._akimboHandle ~= nil, "CharacterFrame must have an elevated title drag handle")
+assert(CharacterFrame._OffhandHandle ~= nil, "CharacterFrame must have an elevated title drag handle")
 
 -- TEST 5: Pressing Escape while CharacterFrame is on workspace DOES NOT close CharacterFrame
 ToggleGameMenu()

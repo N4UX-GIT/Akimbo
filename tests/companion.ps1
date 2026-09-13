@@ -30,7 +30,7 @@ public static class OffhandNative {
 . (Join-Path $PSScriptRoot '..\Companion\Offhand-Window.ps1')
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 # Simulate installation files without reading or changing a real client's files.
-function Test-Path { param($LiteralPath,$PathType) return ($LiteralPath.EndsWith('Offhand_Vanilla.toc') -or $LiteralPath.EndsWith('Akimbo_Vanilla.toc')) }
+function Test-Path { param($LiteralPath,$PathType) return ($LiteralPath.EndsWith('Offhand_Vanilla.toc') -or $LiteralPath.EndsWith('Offhand_Vanilla.toc')) }
 $fake = [pscustomobject]@{Id=42;MainWindowHandle=[IntPtr]99;MainModule=@{FileName='C:\OffhandTest\WowClassic.exe'}}
 $fake | Add-Member ScriptMethod Refresh {}
 $status = Test-OffhandAddonStatus $fake

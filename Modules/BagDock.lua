@@ -1,14 +1,12 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     Modules/BagDock.lua: Container and inventory management for secondary workspace
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 
 local BagDock = {}
 Offhand.modules.BagDock = BagDock
-Akimbo.modules.BagDock = BagDock
 
 function BagDock:Initialize()
     -- Hook container frames to remove screen clamping so they can be dragged freely to the secondary monitor

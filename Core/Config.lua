@@ -5,8 +5,6 @@
 
 local _, Offhand = ...
 _G.Offhand = Offhand
-_G.Akimbo = Offhand
-local Akimbo = Offhand
 
 local defaultSettings = {
     enabled = true,
@@ -55,28 +53,8 @@ local function CopyDefaults(src, dst)
 end
 
 function Offhand:InitializeConfig()
-    -- Reset if legacy global is explicitly set to invalid non-table
-    if AkimboDB ~= nil and type(AkimboDB) ~= "table" then
-        OffhandDB = nil
-    end
-    if AkimboCharDB ~= nil and type(AkimboCharDB) ~= "table" then
-        OffhandCharDB = nil
-    end
-
-    -- Seamless migration from AkimboDB / AkimboCharDB
-    if type(OffhandDB) ~= "table" and type(AkimboDB) == "table" then
-        OffhandDB = AkimboDB
-    end
-    if type(OffhandCharDB) ~= "table" and type(AkimboCharDB) == "table" then
-        OffhandCharDB = AkimboCharDB
-    end
-
     if type(OffhandDB) ~= "table" then OffhandDB = {} end
     if type(OffhandCharDB) ~= "table" then OffhandCharDB = {} end
-
-    -- Keep AkimboDB aliased for backward compatibility
-    AkimboDB = OffhandDB
-    AkimboCharDB = OffhandCharDB
 
     -- Migrate legacy flat config to Profiles
     if type(OffhandDB.profiles) ~= "table" then
@@ -97,7 +75,6 @@ function Offhand:InitializeConfig()
     end
 
     Offhand.db = OffhandDB.profiles[current]
-    Akimbo.db = Offhand.db
 
     -- Auto-migrate to vertical portrait setup if preset is unset or old default
     if not Offhand.db.layoutPreset or Offhand.db.layoutPreset == "AUTO" then
@@ -133,7 +110,6 @@ function Offhand:SetProfile(name)
     end
     OffhandCharDB.activeProfile = name
     Offhand.db = OffhandDB.profiles[name]
-    Akimbo.db = Offhand.db
     CopyDefaults(defaultSettings, Offhand.db)
     
     local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
@@ -180,7 +156,6 @@ function Offhand:CopyProfile(sourceName)
     end
     
     Offhand.db = OffhandDB.profiles[dest]
-    Akimbo.db = Offhand.db
     CopyDefaults(defaultSettings, Offhand.db)
     Offhand:ApplyFullLayout()
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end
@@ -193,7 +168,6 @@ function Offhand:ResetConfig()
     local current = (OffhandCharDB and OffhandCharDB.activeProfile) or "Default"
     OffhandDB.profiles[current] = CopyDefaults(defaultSettings, {})
     Offhand.db = OffhandDB.profiles[current]
-    Akimbo.db = Offhand.db
     
     Offhand:ApplyFullLayout()
     if self.Options and self.Options.RefreshPanel then self.Options:RefreshPanel() end

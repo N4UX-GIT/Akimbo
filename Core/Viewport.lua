@@ -1,9 +1,7 @@
 -- Calculate in physical pixels, then convert into UIParent units.
 local _, Offhand = ...
-local Akimbo = Offhand
 local Viewport = {}
 Offhand.Viewport = Viewport
-Akimbo.Viewport = Viewport
 
 local function Number(value, fallback, low, high)
     value = tonumber(value)
@@ -21,7 +19,7 @@ function Viewport:GetMetrics()
     local sw, sh = UIParent:GetWidth(), UIParent:GetHeight()
     local pw, ph = GetPhysicalScreenSize()
     if not pw or pw <= 0 or not ph or ph <= 0 then pw, ph = sw, sh end
-    local db = Akimbo.db
+    local db = Offhand.db
     local preset = db.layoutPreset or "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
     local ratio = Number(db.deckWidthRatio, preset == "LANDSCAPE_DUAL" and 0.5 or 0.36, 0.15, 0.80)
     local deck = math.floor(pw * ratio + 0.5)
@@ -58,7 +56,7 @@ end
 -- This is the sole scale owner. Never call it from HUD/frame-position hooks.
 function Viewport:ApplyGlobalScale()
     if InCombatLockdown() or self.scaling then return end
-    local db=Akimbo.db
+    local db=Offhand.db
     if not db then return end
     if not db.enabled then
         if self.originalScale then
@@ -83,13 +81,13 @@ function Viewport:ApplyGlobalScale()
 end
 
 function Viewport:IsDualActive()
-    return Akimbo.db and Akimbo.db.enabled
+    return Offhand.db and Offhand.db.enabled
 end
 
 function Viewport:CaptureDiagnostics()
     local m = self:GetMetrics()
     local snapshot = { metrics = m, frames = {} }
-    for _, name in ipairs({"WorldFrame", "OffhandCanvasFrame", "AkimboCanvasFrame", "MainMenuBar",
+    for _, name in ipairs({"WorldFrame", "OffhandCanvasFrame", "MainMenuBar",
         "MainActionBar", "ActionButton1", "PlayerFrame", "MinimapCluster"}) do
         local frame = _G[name]
         if frame then
@@ -106,27 +104,27 @@ function Viewport:CaptureDiagnostics()
         and math.abs(world.y - m.gamePixelBottom) < 1
         and math.abs(world.width - m.gamePixelWidth) < 1
         and math.abs(world.height - m.gamePixelHeight) < 1 or false
-    Akimbo.db.lastGeometryCheck = snapshot
+    Offhand.db.lastGeometryCheck = snapshot
     return snapshot
 end
 
 function Viewport:Apply()
     if InCombatLockdown() then
-        Akimbo:RunOrQueueCombat(function() Viewport:Apply() end)
+        Offhand:RunOrQueueCombat(function() Viewport:Apply() end)
         return
     end
-    if not Akimbo.db.enabled then self:Reset(); return end
+    if not Offhand.db.enabled then self:Reset(); return end
     local m = self:GetMetrics()
     WorldFrame:ClearAllPoints()
     self:SetPoint(WorldFrame, "BOTTOMLEFT", "BOTTOMLEFT", m.gameLeft, m.gameBottom)
     self:SetPoint(WorldFrame, "TOPRIGHT", "BOTTOMLEFT", m.gameRight, m.gameTop)
-    Akimbo:Debug("Viewport: %dx%d pixels at (%d, %d).", m.gamePixelWidth,
+    Offhand:Debug("Viewport: %dx%d pixels at (%d, %d).", m.gamePixelWidth,
         m.gamePixelHeight, m.gamePixelLeft, m.gamePixelBottom)
 end
 
 function Viewport:Reset()
     if InCombatLockdown() then
-        Akimbo:RunOrQueueCombat(function() Viewport:Reset() end)
+        Offhand:RunOrQueueCombat(function() Viewport:Reset() end)
         return
     end
     WorldFrame:ClearAllPoints()
@@ -135,5 +133,3 @@ end
 
 function Offhand:InitializeViewport() end
 function Offhand:UpdateViewport() Viewport:Apply() end
-function Akimbo:InitializeViewport() end
-function Akimbo:UpdateViewport() Viewport:Apply() end

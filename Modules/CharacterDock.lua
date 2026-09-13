@@ -1,13 +1,10 @@
 -- Keep standard panels inside a physically visible monitor rectangle.
 -- Leave UIPanelWindows intact so Blizzard's opening/closing logic still works.
 local _, Offhand = ...
-local Akimbo = Offhand
-local L = Offhand.L or Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
 local Panels = {}
 Offhand.modules.CharacterDock = Panels
 Offhand.Panels = Panels
-Akimbo.modules.CharacterDock = Panels
-Akimbo.Panels = Panels
 local hooked, attempted, placing, queued = {}, {}, false, false
 local pending = {}
 local function IsTooltip(frame)
@@ -43,46 +40,46 @@ local function Inside(x,y,w,h,r)
 end
 
 function Panels:SavePosition(frame)
-    if not Akimbo.db or not Akimbo.db.enabled or not Accessible(frame) or not frame:GetName() then return end
+    if not Offhand.db or not Offhand.db.enabled or not Accessible(frame) or not frame:GetName() then return end
     if IsTooltip(frame) then return end
     local x,y,w,h=frame:GetRect()
     if not x then return end
-    local m=Akimbo.Viewport:GetMetrics()
+    local m=Offhand.Viewport:GetMetrics()
     local factor=frame:GetEffectiveScale()/UIParent:GetEffectiveScale()
     x,y,w,h=x*factor,y*factor,w*factor,h*factor
-    local deckLeft=Akimbo.db.primaryPosition=="LEFT" and m.gameRight+m.bezel or 0
+    local deckLeft=Offhand.db.primaryPosition=="LEFT" and m.gameRight+m.bezel or 0
     local inDeck=x+w/2>=deckLeft and x+w/2<=deckLeft+m.deckWidth
     local left,top,width,height=m.gameLeft,m.gameTop,m.gameWidth,m.gameHeight
     if inDeck then left,top,width,height=deckLeft,m.screenHeight,m.deckWidth,m.screenHeight end
-    Akimbo.db.panelPositions=Akimbo.db.panelPositions or {}
-    Akimbo.db.panelPositions[frame:GetName()]={monitor=inDeck and "DECK" or "GAME",
+    Offhand.db.panelPositions=Offhand.db.panelPositions or {}
+    Offhand.db.panelPositions[frame:GetName()]={monitor=inDeck and "DECK" or "GAME",
         x=(x-left)/width,y=(top-y-h)/height}
 end
 
 function Panels:Place(frame)
-    if Akimbo.SeamRedirect and Akimbo.SeamRedirect:IsManagedFrame(frame) then return end
-    if placing or not Accessible(frame) or not frame:IsShown() or frame._akimboDragging
-        or not Akimbo.db or not Akimbo.db.enabled then return end
+    if Offhand.SeamRedirect and Offhand.SeamRedirect:IsManagedFrame(frame) then return end
+    if placing or not Accessible(frame) or not frame:IsShown() or frame._OffhandDragging
+        or not Offhand.db or not Offhand.db.enabled then return end
     if InCombatLockdown() then
         if not queued then
             queued = true
-            Akimbo:RunOrQueueCombat(function() queued=false; Panels:ApplyLayout() end)
+            Offhand:RunOrQueueCombat(function() queued=false; Panels:ApplyLayout() end)
         end
         return
     end
     placing=true
     local ok,err=pcall(function()
-        local m=Akimbo.Viewport:GetMetrics()
+        local m=Offhand.Viewport:GetMetrics()
         local game={left=m.gameLeft,bottom=m.gameBottom,right=m.gameRight,top=m.gameTop}
-        local deckLeft=Akimbo.db.primaryPosition=="LEFT" and m.gameRight+m.bezel or 0
+        local deckLeft=Offhand.db.primaryPosition=="LEFT" and m.gameRight+m.bezel or 0
         local deck={left=deckLeft,bottom=0,right=deckLeft+m.deckWidth,top=m.screenHeight}
         local name=frame:GetName() or ""
         local tooltip=IsTooltip(frame)
         local isBag=name:match("^ContainerFrame%d+$") ~= nil or name=="ContainerFrameCombinedBags"
-        local saved=not tooltip and Akimbo.db.panelPositions and Akimbo.db.panelPositions[name]
-        local target=((frame==WorldMapFrame and Akimbo.db.dockMap)
-            or (frame==CharacterFrame and Akimbo.db.dockCharacter)
-            or (isBag and Akimbo.db.dockBags)) and deck or game
+        local saved=not tooltip and Offhand.db.panelPositions and Offhand.db.panelPositions[name]
+        local target=((frame==WorldMapFrame and Offhand.db.dockMap)
+            or (frame==CharacterFrame and Offhand.db.dockCharacter)
+            or (isBag and Offhand.db.dockBags)) and deck or game
         local x,y,w,h=frame:GetRect()
         local factor=frame:GetEffectiveScale()/UIParent:GetEffectiveScale()
         if x then x,y,w,h=x*factor,y*factor,w*factor,h*factor end
@@ -142,13 +139,13 @@ function Panels:Place(frame)
         if isBag then
             -- Blizzard replaces BOTTOMRIGHT without clearing existing anchors.
             -- Use that same anchor, so reopen cannot add a second size constraint.
-            Akimbo.Viewport:SetPoint(frame,"BOTTOMRIGHT","BOTTOMLEFT",left+width*scale,top-height*scale)
+            Offhand.Viewport:SetPoint(frame,"BOTTOMRIGHT","BOTTOMLEFT",left+width*scale,top-height*scale)
         else
-            Akimbo.Viewport:SetPoint(frame,"TOPLEFT","BOTTOMLEFT",left,top)
+            Offhand.Viewport:SetPoint(frame,"TOPLEFT","BOTTOMLEFT",left,top)
         end
     end)
     placing=false
-    if not ok then Akimbo:Print(L["MSG_PANEL_LAYOUT_ERROR"], tostring(err)) end
+    if not ok then Offhand:Print(L["MSG_PANEL_LAYOUT_ERROR"], tostring(err)) end
 end
 
 -- SetPoint may be one of several anchors in a Blizzard layout transaction.
@@ -171,10 +168,10 @@ function Panels:Discover()
         frame:HookScript("OnShow",Place)
         frame:HookScript("OnSizeChanged",Place)
         if frame.StartMoving and frame.StopMovingOrSizing then
-            hooksecurefunc(frame,"StartMoving",function() if hooked[frame] then frame._akimboDragging=true end end)
+            hooksecurefunc(frame,"StartMoving",function() if hooked[frame] then frame._OffhandDragging=true end end)
             hooksecurefunc(frame,"StopMovingOrSizing",function()
-                if hooked[frame] and frame._akimboDragging then
-                    frame._akimboDragging=false
+                if hooked[frame] and frame._OffhandDragging then
+                    frame._OffhandDragging=false
                     Panels:SavePosition(frame)
                     Panels:Place(frame)
                 end
@@ -193,7 +190,7 @@ function Panels:Discover()
                 if not Accessible(frame) then return end
                 local tooltip=frame.IsObjectType and frame:IsObjectType("GameTooltip")
                 local window=frame.IsMovable and frame:IsMovable()
-                local managed=Akimbo.SeamRedirect and Akimbo.SeamRedirect:IsManagedFrame(frame)
+                local managed=Offhand.SeamRedirect and Offhand.SeamRedirect:IsManagedFrame(frame)
                 if (tooltip or window) and not managed then Hook(frame) end
             end)
         end
@@ -204,7 +201,7 @@ function Panels:Initialize()
     self:Discover()
     if C_Timer and C_Timer.NewTicker then
         self.discoveryTicker=C_Timer.NewTicker(1,function()
-            if Akimbo.db and Akimbo.db.enabled then Panels:ApplyLayout() end
+            if Offhand.db and Offhand.db.enabled then Panels:ApplyLayout() end
         end)
     end
     local events=CreateFrame("Frame")

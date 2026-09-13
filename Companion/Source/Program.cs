@@ -217,8 +217,7 @@ namespace Offhand.Companion
                 // Fallback to disk asset if running unpackaged
                 string[] diskFallbacks = new string[] {
                     Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\offhand-logo.png"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-logo.png"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\akimbo-logo.png")
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-logo.png")
                 };
                 foreach (string path in diskFallbacks)
                 {
@@ -643,8 +642,7 @@ namespace Offhand.Companion
                 }
 
                 string addonDir = Path.Combine(result.WowDir, @"Interface\AddOns\Offhand");
-                string legacyDir = Path.Combine(result.WowDir, @"Interface\AddOns\Akimbo");
-                string[] manifests = new string[] { "Offhand.toc", "Offhand_Vanilla.toc", "Akimbo.toc", "Akimbo_Vanilla.toc" };
+                string[] manifests = new string[] { "Offhand.toc", "Offhand_Vanilla.toc" };
                 
                 bool exists = false;
                 if (Directory.Exists(addonDir))
@@ -652,13 +650,6 @@ namespace Offhand.Companion
                     foreach (string m in manifests)
                     {
                         if (File.Exists(Path.Combine(addonDir, m))) { exists = true; break; }
-                    }
-                }
-                if (!exists && Directory.Exists(legacyDir))
-                {
-                    foreach (string m in manifests)
-                    {
-                        if (File.Exists(Path.Combine(legacyDir, m))) { exists = true; break; }
                     }
                 }
 

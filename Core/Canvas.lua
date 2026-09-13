@@ -4,11 +4,9 @@
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 
 local Canvas = {}
 Offhand.Canvas = Canvas
-Akimbo.Canvas = Canvas
 
 local rootCanvas
 
@@ -17,8 +15,7 @@ function Canvas:CreateFrames()
 
     -- Root Canvas (covers the secondary monitor as an open, unsegmented free workspace)
     rootCanvas = CreateFrame("Frame", "OffhandCanvasFrame", UIParent, "BackdropTemplate")
-    _G.AkimboCanvasFrame = rootCanvas
-    rootCanvas:SetFrameStrata("BACKGROUND")
+        rootCanvas:SetFrameStrata("BACKGROUND")
     rootCanvas:SetFrameLevel(1)
 
     -- Dedicated solid background texture for guaranteed vibrant color visibility
@@ -30,15 +27,14 @@ function Canvas:CreateFrames()
     end
 
     Offhand.canvas = rootCanvas
-    Akimbo.canvas = rootCanvas
 end
 
 function Canvas:UpdateLayout()
     if not rootCanvas then self:CreateFrames() end
 
-    local metrics = Akimbo.Viewport:GetMetrics()
+    local metrics = Offhand.Viewport:GetMetrics()
 
-    if not metrics.isSpanned or not Akimbo.db.enabled then
+    if not metrics.isSpanned or not Offhand.db.enabled then
         rootCanvas:Hide()
         return
     end
@@ -46,7 +42,7 @@ function Canvas:UpdateLayout()
     rootCanvas:Show()
     rootCanvas:ClearAllPoints()
 
-    local isPortraitDeck = Akimbo.db.primaryPosition ~= "LEFT"
+    local isPortraitDeck = Offhand.db.primaryPosition ~= "LEFT"
 
     if isPortraitDeck then
         -- Secondary monitor (free space workspace) is on the LEFT
@@ -60,8 +56,8 @@ function Canvas:UpdateLayout()
     end
 
     -- Apply clean, dark backdrop theme to the workspace
-    if Akimbo.Themes and Akimbo.Themes.ApplyCanvasTheme then
-        Akimbo.Themes:ApplyCanvasTheme(rootCanvas)
+    if Offhand.Themes and Offhand.Themes.ApplyCanvasTheme then
+        Offhand.Themes:ApplyCanvasTheme(rootCanvas)
     end
 
     -- Enable free dragging for standard Blizzard frames so the player can move them anywhere on the workspace
@@ -111,7 +107,7 @@ function Canvas:UpdateMapMovementBehavior()
     if not map then return end
     if HasLeatrixMaps() then return end
 
-    if Akimbo.db and Akimbo.db.enabled and Akimbo.db.preventMapCloseOnMove then
+    if Offhand.db and Offhand.db.enabled and Offhand.db.preventMapCloseOnMove then
         pcall(function() map:UnregisterEvent("PLAYER_STARTED_MOVING") end)
     else
         pcall(function() map:RegisterEvent("PLAYER_STARTED_MOVING") end)
@@ -119,18 +115,18 @@ function Canvas:UpdateMapMovementBehavior()
 end
 
 function Canvas:UpdatePersistenceBehavior()
-    if not Akimbo.db then return end
-    local shouldPersist = (Akimbo.db.persistentWorkspacePanels ~= false)
+    if not Offhand.db then return end
+    local shouldPersist = (Offhand.db.persistentWorkspacePanels ~= false)
     if WorldMapFrame then
-        local isWs = (Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(WorldMapFrame)
+        local isWs = (Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(WorldMapFrame)
         if isWs and shouldPersist then
             UnregisterSpecialFrame("WorldMapFrame")
         else
             RegisterSpecialFrame("WorldMapFrame")
         end
     end
-    if Akimbo.db.savedWorkspacePositions then
-        for name, _ in pairs(Akimbo.db.savedWorkspacePositions) do
+    if Offhand.db.savedWorkspacePositions then
+        for name, _ in pairs(Offhand.db.savedWorkspacePositions) do
             local frame = _G[name]
             if frame then
                 if shouldPersist then
@@ -145,9 +141,9 @@ end
 
 function Canvas:ConfigureWorldMap()
     local map = WorldMapFrame
-    if not map or HasLeatrixMaps() or not Akimbo.db or not Akimbo.db.enabled then return end
+    if not map or HasLeatrixMaps() or not Offhand.db or not Offhand.db.enabled then return end
 
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if not m or not m.isSpanned then return end
 
     -- Enable proper parent scaling so the map scales consistently with UIParent
@@ -169,12 +165,12 @@ function Canvas:ConfigureWorldMap()
     DemodalizePanel(map)
 
     -- Hook Blizzard's built-in title button drag handlers
-    if WorldMapTitleButton and not WorldMapTitleButton._akimboHooked then
-        WorldMapTitleButton._akimboHooked = true
+    if WorldMapTitleButton and not WorldMapTitleButton._OffhandHooked then
+        WorldMapTitleButton._OffhandHooked = true
         WorldMapTitleButton:RegisterForDrag("LeftButton")
         WorldMapTitleButton:HookScript("OnDragStart", function(self)
-            if InCombatLockdown() or not Akimbo.db.enabled then return end
-            map._akimboDragging = true
+            if InCombatLockdown() or not Offhand.db.enabled then return end
+            map._OffhandDragging = true
         end)
         WorldMapTitleButton:HookScript("OnDragStop", function(self)
             OnPanelDragStop(map)
@@ -190,7 +186,7 @@ function Canvas:ConfigureWorldMap()
     -- Interactive Ctrl + MouseWheel scaling
     local function OnMapMouseWheel(self, delta)
         if not IsControlKeyDown() then return end
-        if not Akimbo.db or not Akimbo.db.enabled then return end
+        if not Offhand.db or not Offhand.db.enabled then return end
         local current = map:GetScale() or 1.0
         local newScale
         if delta > 0 then
@@ -201,11 +197,11 @@ function Canvas:ConfigureWorldMap()
         newScale = math.floor(newScale * 100 + 0.5) / 100
 
         if IsFrameOnWorkspace(map) then
-            Akimbo.db.workspaceMapScale = newScale
+            Offhand.db.workspaceMapScale = newScale
             Canvas:ConfigureWorldMap()
             OnPanelDragStop(map)
         else
-            Akimbo.db.mainMapScale = newScale
+            Offhand.db.mainMapScale = newScale
             map:SetScale(newScale)
             OnPanelDragStop(map)
         end
@@ -215,22 +211,22 @@ function Canvas:ConfigureWorldMap()
         end
     end
 
-    if not map._akimboWheelHooked then
-        map._akimboWheelHooked = true
+    if not map._OffhandWheelHooked then
+        map._OffhandWheelHooked = true
         if map.EnableMouseWheel then map:EnableMouseWheel(true) end
         if map.HookScript then map:HookScript("OnMouseWheel", OnMapMouseWheel) end
     end
-    if WorldMapTitleButton and not WorldMapTitleButton._akimboWheelHooked then
-        WorldMapTitleButton._akimboWheelHooked = true
+    if WorldMapTitleButton and not WorldMapTitleButton._OffhandWheelHooked then
+        WorldMapTitleButton._OffhandWheelHooked = true
         if WorldMapTitleButton.EnableMouseWheel then WorldMapTitleButton:EnableMouseWheel(true) end
         if WorldMapTitleButton.HookScript then WorldMapTitleButton:HookScript("OnMouseWheel", OnMapMouseWheel) end
     end
 
     -- If map is on the workspace, apply preferred or auto-fit scale
-    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]
+    local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["WorldMapFrame"]
     local isWorkspaceMap = pos or IsFrameOnWorkspace(map)
     if isWorkspaceMap then
-        local userScale = Akimbo.db.workspaceMapScale
+        local userScale = Offhand.db.workspaceMapScale
         local fitScale
         if userScale and userScale ~= "AUTO" and tonumber(userScale) and tonumber(userScale) > 0 then
             fitScale = tonumber(userScale)
@@ -241,11 +237,11 @@ function Canvas:ConfigureWorldMap()
             fitScale = math.max(0.50, math.min(3.00, availableWidth / baseWidth))
         end
         map:SetScale(fitScale)
-        if Akimbo.db.persistentWorkspacePanels ~= false then
+        if Offhand.db.persistentWorkspacePanels ~= false then
             UnregisterSpecialFrame("WorldMapFrame")
         end
     else
-        local userMainScale = Akimbo.db.mainMapScale
+        local userMainScale = Offhand.db.mainMapScale
         if userMainScale and tonumber(userMainScale) and tonumber(userMainScale) > 0 then
             map:SetScale(tonumber(userMainScale))
         else
@@ -254,11 +250,11 @@ function Canvas:ConfigureWorldMap()
         RegisterSpecialFrame("WorldMapFrame")
     end
 
-    if not map._akimboPersistenceHooked and map.HookScript then
-        map._akimboPersistenceHooked = true
+    if not map._OffhandPersistenceHooked and map.HookScript then
+        map._OffhandPersistenceHooked = true
         map:HookScript("OnShow", function(self)
-            local isWs = (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(self)
-            if isWs and (Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) then
+            local isWs = (Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["WorldMapFrame"]) or IsFrameOnWorkspace(self)
+            if isWs and (Offhand.db and Offhand.db.persistentWorkspacePanels ~= false) then
                 UnregisterSpecialFrame("WorldMapFrame")
             else
                 RegisterSpecialFrame("WorldMapFrame")
@@ -270,7 +266,7 @@ end
 IsFrameOnWorkspace = function(frame)
     if not frame then return false end
     local x = frame:GetLeft()
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if not m then return false end
     if not x then
         local numPoints = frame.GetNumPoints and frame:GetNumPoints() or 0
@@ -286,7 +282,7 @@ IsFrameOnWorkspace = function(frame)
     local width = (frame:GetWidth() or 0) * scaleFactor
     if width <= 0 then width = 192 * scaleFactor end
     local centerX = (x * scaleFactor) + (width / 2)
-    if Akimbo.db.primaryPosition ~= "LEFT" then
+    if Offhand.db.primaryPosition ~= "LEFT" then
         return centerX < m.deckWidth
     else
         return centerX >= (m.gameWidth + m.bezel)
@@ -309,8 +305,8 @@ DemodalizePanel = function(frame)
     if SetUIPanelAttribute then
         pcall(function() SetUIPanelAttribute(frame, "area", nil) end)
     end
-    local isWs = (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]) or IsFrameOnWorkspace(frame)
-    if isWs and (Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) then
+    local isWs = (Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]) or IsFrameOnWorkspace(frame)
+    if isWs and (Offhand.db and Offhand.db.persistentWorkspacePanels ~= false) then
         UnregisterSpecialFrame(name)
     else
         RegisterSpecialFrame(name)
@@ -339,22 +335,22 @@ OnPanelDragStop = function(frame)
     end
     pcall(function() frame:SetUserPlaced(true) end)
 
-    if not Akimbo.db or not Akimbo.db.enabled then
-        frame._akimboDragging = false
+    if not Offhand.db or not Offhand.db.enabled then
+        frame._OffhandDragging = false
         return
     end
     local name = frame:GetName()
     if not name then
-        frame._akimboDragging = false
+        frame._OffhandDragging = false
         return
     end
 
-    Akimbo.db.savedWorkspacePositions = Akimbo.db.savedWorkspacePositions or {}
-    Akimbo.db.savedMainPositions = Akimbo.db.savedMainPositions or {}
+    Offhand.db.savedWorkspacePositions = Offhand.db.savedWorkspacePositions or {}
+    Offhand.db.savedMainPositions = Offhand.db.savedMainPositions or {}
 
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if not m then
-        frame._akimboDragging = false
+        frame._OffhandDragging = false
         return
     end
 
@@ -377,7 +373,7 @@ OnPanelDragStop = function(frame)
 
         -- Clamp strictly within the workspace boundaries so panels never bleed across the seam
         local minX, maxX
-        if Akimbo.db.primaryPosition ~= "LEFT" then
+        if Offhand.db.primaryPosition ~= "LEFT" then
             minX = 12
             maxX = math.max(minX, m.deckWidth - frameWidth - 12)
         else
@@ -391,16 +387,16 @@ OnPanelDragStop = function(frame)
         local maxY = math.max(minY, screenHeight - frameHeight - 30)
         local clampedY = math.max(minY, math.min(yInParent, maxY))
 
-        Akimbo.db.savedWorkspacePositions[name] = { x = clampedX, y = clampedY }
-        if Akimbo.db.savedMainPositions then
-            Akimbo.db.savedMainPositions[name] = nil
+        Offhand.db.savedWorkspacePositions[name] = { x = clampedX, y = clampedY }
+        if Offhand.db.savedMainPositions then
+            Offhand.db.savedMainPositions[name] = nil
         end
 
         frame:ClearAllPoints()
         local factor = parentScale / frameScale
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
 
-        if Akimbo.db.independentWorkspacePanels or frame == WorldMapFrame then
+        if Offhand.db.independentWorkspacePanels or frame == WorldMapFrame then
             -- Evict from Blizzard UIPanel slot if currently occupying one
             if GetUIPanel and (GetUIPanel("left") == frame or GetUIPanel("center") == frame or GetUIPanel("right") == frame or GetUIPanel("doublewide") == frame) then
                 pcall(function() HideUIPanel(frame, 1) end)
@@ -412,18 +408,18 @@ OnPanelDragStop = function(frame)
         end
 
         if string.match(name, "^ContainerFrame") then
-            if not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
-                if Akimbo.HUD and Akimbo.HUD.LayoutBags then
-                    Akimbo.HUD:LayoutBags()
+            if not (Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon()) then
+                if Offhand.HUD and Offhand.HUD.LayoutBags then
+                    Offhand.HUD:LayoutBags()
                 end
             end
         end
 
-        if Akimbo.db.persistentWorkspacePanels ~= false then
+        if Offhand.db.persistentWorkspacePanels ~= false then
             UnregisterSpecialFrame(name)
         end
     else
-        Akimbo.db.savedWorkspacePositions[name] = nil
+        Offhand.db.savedWorkspacePositions[name] = nil
         if frame == WorldMapFrame then
             frame:SetScale(1.0)
             DemodalizePanel(frame)
@@ -432,19 +428,19 @@ OnPanelDragStop = function(frame)
             local scaleFactor = frameScale / parentScale
             local xInParent = (frame:GetLeft() or 0) * scaleFactor
             local yInParent = (frame:GetBottom() or 0) * scaleFactor
-            Akimbo.db.savedMainPositions[name] = { x = xInParent, y = yInParent }
+            Offhand.db.savedMainPositions[name] = { x = xInParent, y = yInParent }
             RegisterSpecialFrame(name)
         elseif string.match(name, "^ContainerFrame") then
             pcall(function() frame:SetUserPlaced(false) end)
-            if not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
-                if Akimbo.HUD and Akimbo.HUD.LayoutBags then
-                    Akimbo.HUD:LayoutBags()
+            if not (Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon()) then
+                if Offhand.HUD and Offhand.HUD.LayoutBags then
+                    Offhand.HUD:LayoutBags()
                 end
             end
         elseif name == "MinimapCluster" then
             pcall(function() frame:SetUserPlaced(false) end)
-            if Akimbo.HUD and Akimbo.HUD.AlignHUDFrames then
-                Akimbo.HUD:AlignHUDFrames()
+            if Offhand.HUD and Offhand.HUD.AlignHUDFrames then
+                Offhand.HUD:AlignHUDFrames()
             end
         else
             RemodalizePanel(frame)
@@ -452,22 +448,22 @@ OnPanelDragStop = function(frame)
         end
     end
 
-    frame._akimboDragging = false
+    frame._OffhandDragging = false
 end
 
 RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
     local frame = (selfOrFrame == Canvas and maybeFrame) or maybeFrame or selfOrFrame
     if not frame or type(frame) ~= "table" or not frame.GetName then return end
-    if not Akimbo.db or not Akimbo.db.enabled then return end
+    if not Offhand.db or not Offhand.db.enabled then return end
     local name = frame:GetName()
     if not name then return end
 
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if not m then return end
 
-    local wPos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+    local wPos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]
     if wPos and wPos.x and wPos.y then
-        if Akimbo.db.independentWorkspacePanels or frame == WorldMapFrame then
+        if Offhand.db.independentWorkspacePanels or frame == WorldMapFrame then
             DemodalizePanel(frame)
         end
         if frame == WorldMapFrame then
@@ -483,7 +479,7 @@ RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
 
         -- Sanitize/clamp in case DB had bad coordinates (like y = -4.2 or x = 493.6)
         local minX, maxX
-        if Akimbo.db.primaryPosition ~= "LEFT" then
+        if Offhand.db.primaryPosition ~= "LEFT" then
             minX = 12
             maxX = math.max(minX, m.deckWidth - frameWidth - 12)
         else
@@ -503,7 +499,7 @@ RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
         frame:ClearAllPoints()
         frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", clampedX * factor, clampedY * factor)
         pcall(function() frame:SetUserPlaced(true) end)
-        if Akimbo.db.persistentWorkspacePanels ~= false then
+        if Offhand.db.persistentWorkspacePanels ~= false then
             UnregisterSpecialFrame(name)
         end
         return
@@ -514,7 +510,7 @@ RestoreWorkspacePosition = function(selfOrFrame, maybeFrame)
         frame:SetScale(1.0)
         DemodalizePanel(frame)
         RegisterSpecialFrame("WorldMapFrame")
-        local mPos = Akimbo.db.savedMainPositions and Akimbo.db.savedMainPositions["WorldMapFrame"]
+        local mPos = Offhand.db.savedMainPositions and Offhand.db.savedMainPositions["WorldMapFrame"]
         local frameScale = (frame.GetEffectiveScale and frame:GetEffectiveScale()) or 1
         local parentScale = (UIParent.GetEffectiveScale and UIParent:GetEffectiveScale()) or 1
         local factor = parentScale / frameScale
@@ -539,14 +535,14 @@ end
 -- Universal Panel Dragger (Allows moving panels to the secondary monitor)
 -- ============================================================================
 local function MakePanelDraggable(frame)
-    if not frame or frame._akimboMovable then return end
+    if not frame or frame._OffhandMovable then return end
     local name = frame.GetName and frame:GetName()
 
-    if name == "MinimapCluster" and Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon() then
+    if name == "MinimapCluster" and Offhand.HasCustomMinimapAddon and Offhand.HasCustomMinimapAddon() then
         return
     end
 
-    if name and string.match(name, "^ContainerFrame") and Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon() then
+    if name and string.match(name, "^ContainerFrame") and Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon() then
         return
     end
 
@@ -556,7 +552,7 @@ local function MakePanelDraggable(frame)
     -- Create an elevated drag handle across the title bar area so clicks aren't swallowed by child elements
     -- MinimapCluster uses MinimapZoneTextButton as its natural drag handle and must not have an overlaid handle
     if frame ~= MinimapCluster then
-        local handle = frame._akimboHandle
+        local handle = frame._OffhandHandle
         if not handle and CreateFrame then
             handle = CreateFrame("Frame", nil, frame)
             handle:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 0)
@@ -568,8 +564,8 @@ local function MakePanelDraggable(frame)
             handle:RegisterForDrag("LeftButton")
 
             handle:HookScript("OnDragStart", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled then return end
-                frame._akimboDragging = true
+                if InCombatLockdown() or not Offhand.db.enabled then return end
+                frame._OffhandDragging = true
                 frame:StartMoving()
             end)
 
@@ -577,7 +573,7 @@ local function MakePanelDraggable(frame)
                 OnPanelDragStop(frame)
             end)
 
-            frame._akimboHandle = handle
+            frame._OffhandHandle = handle
         end
     end
 
@@ -585,8 +581,8 @@ local function MakePanelDraggable(frame)
     frame:RegisterForDrag("LeftButton")
 
     frame:HookScript("OnDragStart", function(self)
-        if InCombatLockdown() or not Akimbo.db.enabled then return end
-        frame._akimboDragging = true
+        if InCombatLockdown() or not Offhand.db.enabled then return end
+        frame._OffhandDragging = true
         frame:StartMoving()
     end)
 
@@ -600,13 +596,13 @@ local function MakePanelDraggable(frame)
 
     if frame == MinimapCluster then
         local function HookMinimapDragHandle(handleFrame)
-            if handleFrame and not handleFrame._akimboHooked then
-                handleFrame._akimboHooked = true
+            if handleFrame and not handleFrame._OffhandHooked then
+                handleFrame._OffhandHooked = true
                 handleFrame:EnableMouse(true)
                 handleFrame:RegisterForDrag("LeftButton")
                 handleFrame:HookScript("OnDragStart", function(self)
-                    if InCombatLockdown() or not Akimbo.db.enabled then return end
-                    frame._akimboDragging = true
+                    if InCombatLockdown() or not Offhand.db.enabled then return end
+                    frame._OffhandDragging = true
                     frame:StartMoving()
                 end)
                 handleFrame:HookScript("OnDragStop", function(self)
@@ -621,12 +617,12 @@ local function MakePanelDraggable(frame)
     end
 
     if frame == WorldMapFrame then
-        if WorldMapTitleButton and not WorldMapTitleButton._akimboHooked then
-            WorldMapTitleButton._akimboHooked = true
+        if WorldMapTitleButton and not WorldMapTitleButton._OffhandHooked then
+            WorldMapTitleButton._OffhandHooked = true
             WorldMapTitleButton:RegisterForDrag("LeftButton")
             WorldMapTitleButton:HookScript("OnDragStart", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled then return end
-                frame._akimboDragging = true
+                if InCombatLockdown() or not Offhand.db.enabled then return end
+                frame._OffhandDragging = true
             end)
             WorldMapTitleButton:HookScript("OnDragStop", function(self)
                 OnPanelDragStop(frame)
@@ -640,38 +636,38 @@ local function MakePanelDraggable(frame)
         end
     end
 
-    frame._akimboMovable = true
+    frame._OffhandMovable = true
 end
 
 Canvas.RestoreWorkspacePosition = RestoreWorkspacePosition
 Canvas.MakePanelDraggable = MakePanelDraggable
 
 function Canvas:TryMakeFrameDraggable(frame)
-    if not frame or frame._akimboMovable or not frame.GetName then return end
+    if not frame or frame._OffhandMovable or not frame.GetName then return end
     local name = frame:GetName()
     if not name then return end
-    if name == "MinimapCluster" and Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon() then
+    if name == "MinimapCluster" and Offhand.HasCustomMinimapAddon and Offhand.HasCustomMinimapAddon() then
         return
     end
-    if string.match(name, "^ContainerFrame") and Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon() then
+    if string.match(name, "^ContainerFrame") and Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon() then
         return
     end
     local isPanel = UIPanelWindows and UIPanelWindows[name]
     if isPanel or frame.TitleContainer or frame.TitleText or _G[name .. "TitleText"] then
         frame:SetClampedToScreen(false)
         MakePanelDraggable(frame)
-        if Akimbo.db and Akimbo.db.independentWorkspacePanels and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name] then
+        if Offhand.db and Offhand.db.independentWorkspacePanels and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name] then
             DemodalizePanel(frame)
         end
     end
 end
 
 function Canvas:EnableFreeDragging()
-    if not Akimbo.db or not Akimbo.db.enabled then return end
+    if not Offhand.db or not Offhand.db.enabled then return end
     if InCombatLockdown() then
         if not self.dragSetupPending then
             self.dragSetupPending = true
-            Akimbo:RunOrQueueCombat(function()
+            Offhand:RunOrQueueCombat(function()
                 Canvas.dragSetupPending = false
                 Canvas:EnableFreeDragging()
             end)
@@ -679,8 +675,8 @@ function Canvas:EnableFreeDragging()
         return
     end
 
-    local hasCustomBags = Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()
-    local hasCustomMinimap = Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon()
+    local hasCustomBags = Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon()
+    local hasCustomMinimap = Offhand.HasCustomMinimapAddon and Offhand.HasCustomMinimapAddon()
 
     -- List of standard frames that players love dragging to their secondary workspace
     local frameNames = {
@@ -720,7 +716,7 @@ function Canvas:EnableFreeDragging()
         if frame then
             frame:SetClampedToScreen(false)
             MakePanelDraggable(frame)
-            if Akimbo.db and Akimbo.db.independentWorkspacePanels and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name] then
+            if Offhand.db and Offhand.db.independentWorkspacePanels and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name] then
                 DemodalizePanel(frame)
             end
         end
@@ -729,14 +725,14 @@ function Canvas:EnableFreeDragging()
     if not hasCustomBags and ContainerFrame_GenerateFrame and not Canvas._bagGenHooked then
         Canvas._bagGenHooked = true
         hooksecurefunc("ContainerFrame_GenerateFrame", function(frame)
-            if frame and not (Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()) then
+            if frame and not (Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon()) then
                 frame:SetClampedToScreen(false)
                 MakePanelDraggable(frame)
             end
         end)
     end
 
-    if not hasCustomMinimap and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"] and MinimapCluster then
+    if not hasCustomMinimap and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["MinimapCluster"] and MinimapCluster then
         RestoreWorkspacePosition(MinimapCluster)
     end
 
@@ -772,10 +768,10 @@ function Offhand:UpdateCanvas()
     Canvas:UpdateLayout()
 end
 
-function Akimbo:InitializeCanvas()
+function Offhand:InitializeCanvas()
     Offhand:InitializeCanvas()
 end
 
-function Akimbo:UpdateCanvas()
+function Offhand:UpdateCanvas()
     Offhand:UpdateCanvas()
 end

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Akimbo Slider Stepping, Fixed Text Entry & Drag Debounce Unit Tests
+-- Offhand Slider Stepping, Fixed Text Entry & Drag Debounce Unit Tests
 -- ============================================================================
 
 SlashCmdList = {}
@@ -140,17 +140,17 @@ GetBuildInfo = function() return "1.15.5", "58238", "Jan 1 2025", 11505 end
 hooksecurefunc = function(t, name, fn) end
 UISpecialFrames = {}
 
--- Load Akimbo modules
+-- Load Offhand modules
 local addon = { modules = {} }
-assert(loadfile("Core/Init.lua"))("Akimbo", addon)
-assert(loadfile("Core/Config.lua"))("Akimbo", addon)
-assert(loadfile("Core/Viewport.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Locales/enUS.lua"))("Akimbo", addon)
-assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
-assert(loadfile("UI/Options.lua"))("Akimbo", addon)
-assert(loadfile("UI/Wizard.lua"))("Akimbo", addon)
+assert(loadfile("Core/Init.lua"))("Offhand", addon)
+assert(loadfile("Core/Config.lua"))("Offhand", addon)
+assert(loadfile("Core/Viewport.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Locales/enUS.lua"))("Offhand", addon)
+assert(loadfile("UI/Themes.lua"))("Offhand", addon)
+assert(loadfile("UI/Options.lua"))("Offhand", addon)
+assert(loadfile("UI/Wizard.lua"))("Offhand", addon)
 
 local layoutAppliedCount = 0
 addon.ApplyFullLayout = function()
@@ -174,9 +174,9 @@ addon.db = {
 }
 
 -- ============================================================================
--- 1. Test Akimbo.ParseSliderInput
+-- 1. Test Offhand.ParseSliderInput
 -- ============================================================================
-print("--> Testing Akimbo.ParseSliderInput smart parser...")
+print("--> Testing Offhand.ParseSliderInput smart parser...")
 assert(addon.ParseSliderInput ~= nil, "addon.ParseSliderInput must exist")
 
 -- UI Scale parsing (min 0.25, max 1.25, step 0.01, format "%.0f%%")

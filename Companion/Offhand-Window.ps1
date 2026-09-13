@@ -47,16 +47,12 @@ function Test-OffhandAddonStatus {
         $result.WowDir = Split-Path -Parent $proc.MainModule.FileName
         if (-not $result.WowDir) { throw 'Client path unavailable.' }
         $directory = Join-Path $result.WowDir 'Interface\AddOns\Offhand'
-        $legacyDir = Join-Path $result.WowDir 'Interface\AddOns\Akimbo'
-        $manifests = @('Offhand.toc', 'Offhand_Vanilla.toc', 'Akimbo.toc', 'Akimbo_Vanilla.toc')
-        foreach ($dir in @($directory, $legacyDir)) {
-            foreach ($manifest in $manifests) {
-                if (Test-Path -LiteralPath (Join-Path $dir $manifest) -PathType Leaf) {
-                    $result.Installed = $true
-                    break
-                }
+        $manifests = @('Offhand.toc', 'Offhand_Vanilla.toc')
+        foreach ($manifest in $manifests) {
+            if (Test-Path -LiteralPath (Join-Path $directory $manifest) -PathType Leaf) {
+                $result.Installed = $true
+                break
             }
-            if ($result.Installed) { break }
         }
         if ($result.Installed) {
             $result.Reason = 'Installed; confirm enabled in WoW. Live addon state is unavailable.'
@@ -139,6 +135,4 @@ function Invoke-OffhandSpan {
     } finally { [void][OffhandNative]::SetThreadDpiAwarenessContext($previousDpi) }
 }
 
-# Compatibility aliases
-Set-Alias -Name Invoke-AkimboSpan -Value Invoke-OffhandSpan -ErrorAction SilentlyContinue
-Set-Alias -Name Test-AkimboAddonStatus -Value Test-OffhandAddonStatus -ErrorAction SilentlyContinue
+

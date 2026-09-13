@@ -47,8 +47,8 @@ CharacterBag0Slot=frame(BagsBar)
 CharacterBag1Slot=frame(BagsBar)
 CharacterBag2Slot=frame(BagsBar)
 CharacterBag3Slot=frame(BagsBar)
-assert(loadfile("Core/Viewport.lua"))("Akimbo",addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo",addon)
+assert(loadfile("Core/Viewport.lua"))("Offhand",addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand",addon)
 local function worldPixels()
     local bl,tr=WorldFrame.points.BOTTOMLEFT,WorldFrame.points.TOPRIGHT
     local factor=WorldFrame:GetEffectiveScale()*ph/768

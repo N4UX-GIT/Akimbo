@@ -125,14 +125,14 @@ Mixin = function(t, m) end
 
 -- Load Themes and Options
 local themesChunk = assert(loadfile("UI/Themes.lua"))
-themesChunk("Akimbo", addon)
+themesChunk("Offhand", addon)
 
 local optionsChunk = assert(loadfile("UI/Options.lua"))
-optionsChunk("Akimbo", addon)
+optionsChunk("Offhand", addon)
 
 -- 1. Test Canvas Palettes and ApplyCanvasTheme
-local mockCanvas = makeMockFrame("AkimboCanvasFrame", 1440, 2560)
-_G["AkimboCanvasFrame"] = mockCanvas
+local mockCanvas = makeMockFrame("OffhandCanvasFrame", 1440, 2560)
+_G["OffhandCanvasFrame"] = mockCanvas
 addon.canvas = mockCanvas
 
 addon.db.canvasColor = "TINKER_SLATE"

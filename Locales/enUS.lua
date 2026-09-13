@@ -4,18 +4,15 @@
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 _G.Offhand = Offhand
-_G.Akimbo = Offhand
 
-local L = Akimbo.L or setmetatable({}, {
+local L = Offhand.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
 })
 
 Offhand.L = L
-Akimbo.L = L
 
 -- ============================================================================
 -- Core & General Strings

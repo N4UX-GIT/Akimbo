@@ -1,14 +1,13 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     UI/Wizard.lua: Visual 1-Click Auto-Configuration Wizard & Display Calibration
     Provides an authentic Classic WoW dialog for 1-click display setup, physical seam calibration,
     and fine continuous Global UI Scale adjustment.
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 
-local L = Offhand.L or Akimbo.L or setmetatable({}, {
+local L = Offhand.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
@@ -16,13 +15,12 @@ local L = Offhand.L or Akimbo.L or setmetatable({}, {
 
 local Wizard = {}
 Offhand.Wizard = Wizard
-Akimbo.Wizard = Wizard
 
 local wizardFrame = nil
 
 function Wizard:DetectTopology()
-    if Akimbo.Options and Akimbo.Options.DetectTopology then
-        return Akimbo.Options:DetectTopology()
+    if Offhand.Options and Offhand.Options.DetectTopology then
+        return Offhand.Options:DetectTopology()
     end
     return {
         physWidth = 1920,
@@ -50,7 +48,7 @@ local function CreateWizardCard(parent, titleText, yOffset, height)
         edgeSize = 12,
         insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
-    local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local themeKey = (Offhand.db and Offhand.db.theme) or "CLASSIC"
     if themeKey == "CLASSIC" then
         card:SetBackdropColor(1.0, 1.0, 1.0, 0.85)
         card:SetBackdropBorderColor(0.55, 0.50, 0.35, 0.85)
@@ -71,7 +69,7 @@ function Wizard:CreateFrame()
     if wizardFrame then return wizardFrame end
     if not CreateFrame then return nil end
 
-    local f = CreateFrame("Frame", "AkimboSetupWizardFrame", UIParent, "BackdropTemplate")
+    local f = CreateFrame("Frame", "OffhandSetupWizardFrame", UIParent, "BackdropTemplate")
     f:SetSize(668, 672)
     f:SetFrameStrata("FULLSCREEN_DIALOG")
     f:EnableMouse(true)
@@ -82,14 +80,14 @@ function Wizard:CreateFrame()
     f:SetScript("OnDragStop", f.StopMovingOrSizing)
 
     if tinsert and UISpecialFrames then
-        tinsert(UISpecialFrames, "AkimboSetupWizardFrame")
+        tinsert(UISpecialFrames, "OffhandSetupWizardFrame")
     end
 
-    if Akimbo.Themes and Akimbo.Themes.ApplyBackdrop then
-        Akimbo.Themes:ApplyBackdrop(f, (Akimbo.db and Akimbo.db.theme) or "CLASSIC", 1.0)
+    if Offhand.Themes and Offhand.Themes.ApplyBackdrop then
+        Offhand.Themes:ApplyBackdrop(f, (Offhand.db and Offhand.db.theme) or "CLASSIC", 1.0)
     end
-    if Akimbo.Themes and Akimbo.Themes.CreateBayHeader then
-        f.header = Akimbo.Themes:CreateBayHeader(f, L["WIZARD_TITLE"])
+    if Offhand.Themes and Offhand.Themes.CreateBayHeader then
+        f.header = Offhand.Themes:CreateBayHeader(f, L["WIZARD_TITLE"])
     end
 
     local closeBtn = CreateFrame("Button", nil, f.header or f, "UIPanelCloseButton")
@@ -103,18 +101,18 @@ function Wizard:CreateFrame()
         Wizard:Close()
         if Wizard.openedFromOptions then
             Wizard.openedFromOptions = false
-            if Akimbo.Options and Akimbo.Options.Open then
-                Akimbo.Options:Open()
+            if Offhand.Options and Offhand.Options.Open then
+                Offhand.Options:Open()
             end
         end
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(closeBtn, L["WIZARD_BTN_CLOSE_TIP_TITLE"], L["WIZARD_BTN_CLOSE_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(closeBtn, L["WIZARD_BTN_CLOSE_TIP_TITLE"], L["WIZARD_BTN_CLOSE_TIP_DESC"])
     end
 
     f:SetScript("OnHide", function()
-        if Akimbo.Options and Akimbo.Options.HideSeamGuide then
-            Akimbo.Options:HideSeamGuide()
+        if Offhand.Options and Offhand.Options.HideSeamGuide then
+            Offhand.Options:HideSeamGuide()
         end
     end)
 
@@ -128,7 +126,7 @@ function Wizard:CreateFrame()
     if logoIcon and logoIcon.SetSize and logoIcon.SetPoint and logoIcon.SetTexture then
         logoIcon:SetSize(38, 38)
         logoIcon:SetPoint("TOPLEFT", 14, -28)
-        logoIcon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
+        logoIcon:SetTexture("Interface\\AddOns\\Offhand\\Media\\Offhand-logo")
         card1.logoIcon = logoIcon
         textLeft = 60
     end
@@ -149,8 +147,8 @@ function Wizard:CreateFrame()
     autoBtn:SetSize(608, 28)
     autoBtn:SetPoint("TOPLEFT", 14, -72)
     autoBtn:SetText("|cff00ff00" .. L["WIZARD_BTN_AUTOCONFIG"] .. "|r")
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(autoBtn, L["WIZARD_BTN_AUTOCONFIG_TIP_TITLE"], L["WIZARD_BTN_AUTOCONFIG_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(autoBtn, L["WIZARD_BTN_AUTOCONFIG_TIP_TITLE"], L["WIZARD_BTN_AUTOCONFIG_TIP_DESC"])
     end
     f.autoBtn = autoBtn
 
@@ -162,8 +160,8 @@ function Wizard:CreateFrame()
     f.statusText = statusText
 
     autoBtn:SetScript("OnClick", function()
-        if Akimbo.Options and Akimbo.Options.AutoConfigure then
-            local info = Akimbo.Options:AutoConfigure(false)
+        if Offhand.Options and Offhand.Options.AutoConfigure then
+            local info = Offhand.Options:AutoConfigure(false)
             f:UpdateState()
             statusText:SetText(string.format(L["WIZARD_STATUS_APPLIED"], info.description))
         end
@@ -182,19 +180,19 @@ function Wizard:CreateFrame()
     btnPl:SetSize(196, 24)
     btnPl:SetPoint("TOPLEFT", 14, -46)
     btnPl:SetText(L["PRESET_PL_LR"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPl, L["PRESET_PL_LR_TIP_TITLE"], L["PRESET_PL_LR_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnPl, L["PRESET_PL_LR_TIP_TITLE"], L["PRESET_PL_LR_TIP_DESC"]) end
 
     local btnPr = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
     btnPr:SetSize(196, 24)
     btnPr:SetPoint("LEFT", btnPl, "RIGHT", 10, 0)
     btnPr:SetText(L["PRESET_GL_PR"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPr, L["PRESET_GL_PR_TIP_TITLE"], L["PRESET_GL_PR_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnPr, L["PRESET_GL_PR_TIP_TITLE"], L["PRESET_GL_PR_TIP_DESC"]) end
 
     local btnDual = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
     btnDual:SetSize(196, 24)
     btnDual:SetPoint("LEFT", btnPr, "RIGHT", 10, 0)
     btnDual:SetText(L["PRESET_DUAL_LANDSCAPE"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnDual, L["PRESET_DUAL_LANDSCAPE_TIP_TITLE"], L["PRESET_DUAL_LANDSCAPE_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnDual, L["PRESET_DUAL_LANDSCAPE_TIP_TITLE"], L["PRESET_DUAL_LANDSCAPE_TIP_DESC"]) end
 
     local arLabel = card2:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     arLabel:SetPoint("TOPLEFT", 14, -80)
@@ -204,58 +202,58 @@ function Wizard:CreateFrame()
     btn169:SetSize(196, 24)
     btn169:SetPoint("TOPLEFT", 14, -98)
     btn169:SetText(L["AR_16_9"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btn169, L["AR_16_9_TIP_TITLE"], L["AR_16_9_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btn169, L["AR_16_9_TIP_TITLE"], L["AR_16_9_TIP_DESC"]) end
 
     local btn219 = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
     btn219:SetSize(196, 24)
     btn219:SetPoint("LEFT", btn169, "RIGHT", 10, 0)
     btn219:SetText(L["AR_21_9"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btn219, L["AR_21_9_TIP_TITLE"], L["AR_21_9_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btn219, L["AR_21_9_TIP_TITLE"], L["AR_21_9_TIP_DESC"]) end
 
     local btnFill = CreateFrame("Button", nil, card2, "UIPanelButtonTemplate")
     btnFill:SetSize(196, 24)
     btnFill:SetPoint("LEFT", btn219, "RIGHT", 10, 0)
     btnFill:SetText(L["AR_FILL"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnFill, L["AR_FILL_TIP_TITLE"], L["AR_FILL_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnFill, L["AR_FILL_TIP_TITLE"], L["AR_FILL_TIP_DESC"]) end
 
     btnPl:SetScript("OnClick", function()
-        Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-        Akimbo.db.primaryPosition = "RIGHT"
+        Offhand.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        Offhand.db.primaryPosition = "RIGHT"
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     btnPr:SetScript("OnClick", function()
-        Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-        Akimbo.db.primaryPosition = "LEFT"
+        Offhand.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+        Offhand.db.primaryPosition = "LEFT"
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     btnDual:SetScript("OnClick", function()
-        Akimbo.db.layoutPreset = "LANDSCAPE_DUAL"
-        Akimbo.db.primaryPosition = "LEFT"
-        Akimbo.db.deckWidthRatio = 0.50
+        Offhand.db.layoutPreset = "LANDSCAPE_DUAL"
+        Offhand.db.primaryPosition = "LEFT"
+        Offhand.db.deckWidthRatio = 0.50
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     btn169:SetScript("OnClick", function()
-        Akimbo.db.aspectRatioMode = "16_9"
+        Offhand.db.aspectRatioMode = "16_9"
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     btn219:SetScript("OnClick", function()
-        Akimbo.db.aspectRatioMode = "21_9"
+        Offhand.db.aspectRatioMode = "21_9"
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     btnFill:SetScript("OnClick", function()
-        Akimbo.db.aspectRatioMode = "FILL"
+        Offhand.db.aspectRatioMode = "FILL"
         f:UpdateState()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     -- ========================================================================
@@ -289,15 +287,15 @@ function Wizard:CreateFrame()
         seamEditBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
         seamEditBox:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
     end
-    seamEditBox:SetText(string.format("%.1f%%", ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
+    seamEditBox:SetText(string.format("%.1f%%", ((Offhand.db and Offhand.db.deckWidthRatio) or 0.36) * 100))
     f.seamEditBox = seamEditBox
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(seamEditBox, L["WIZARD_SEAM_EDIT_TIP_TITLE"], L["WIZARD_SEAM_EDIT_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(seamEditBox, L["WIZARD_SEAM_EDIT_TIP_TITLE"], L["WIZARD_SEAM_EDIT_TIP_DESC"])
     end
 
     local seamValText = card3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     seamValText:SetPoint("LEFT", seamEditBox, "RIGHT", 8, 0)
-    seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], ((Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36) * 100))
+    seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], ((Offhand.db and Offhand.db.deckWidthRatio) or 0.36) * 100))
     f.seamValText = seamValText
 
     -- Seam Slider
@@ -338,11 +336,11 @@ function Wizard:CreateFrame()
 
     local function CommitSeamEditBox()
         local txt = seamEditBox:GetText()
-        local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.15, 0.80, 0.005, "%.1f%%")
+        local parsed = Offhand.ParseSliderInput and Offhand:ParseSliderInput(txt, 0.15, 0.80, 0.005, "%.1f%%")
         if parsed then
             seamSlider:SetValueDirect(parsed)
         else
-            local cur = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+            local cur = (Offhand.db and Offhand.db.deckWidthRatio) or 0.36
             seamEditBox:SetText(string.format("%.1f%%", cur * 100))
         end
         if seamEditBox.ClearFocus then seamEditBox:ClearFocus() end
@@ -350,7 +348,7 @@ function Wizard:CreateFrame()
 
     seamEditBox:SetScript("OnEnterPressed", function() CommitSeamEditBox() end)
     seamEditBox:SetScript("OnEscapePressed", function(s)
-        local cur = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+        local cur = (Offhand.db and Offhand.db.deckWidthRatio) or 0.36
         s:SetText(string.format("%.1f%%", cur * 100))
         if s.ClearFocus then s:ClearFocus() end
     end)
@@ -367,19 +365,19 @@ function Wizard:CreateFrame()
     btnMinus:SetSize(46, 22)
     btnMinus:SetPoint("LEFT", seamSlider, "RIGHT", 12, 0)
     btnMinus:SetText(L["BTN_SEAM_MINUS"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnMinus, L["BTN_SEAM_MINUS_TIP_TITLE"], L["BTN_SEAM_MINUS_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnMinus, L["BTN_SEAM_MINUS_TIP_TITLE"], L["BTN_SEAM_MINUS_TIP_DESC"]) end
 
     local btnPlus = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnPlus:SetSize(46, 22)
     btnPlus:SetPoint("LEFT", btnMinus, "RIGHT", 4, 0)
     btnPlus:SetText(L["BTN_SEAM_PLUS"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnPlus, L["BTN_SEAM_PLUS_TIP_TITLE"], L["BTN_SEAM_PLUS_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnPlus, L["BTN_SEAM_PLUS_TIP_TITLE"], L["BTN_SEAM_PLUS_TIP_DESC"]) end
 
     local btnLaser = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnLaser:SetSize(138, 22)
     btnLaser:SetPoint("LEFT", btnPlus, "RIGHT", 12, 0)
     btnLaser:SetText(L["BTN_LASER_TOGGLE"])
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnLaser, L["BTN_LASER_TOGGLE_TIP_TITLE"], L["BTN_LASER_TOGGLE_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnLaser, L["BTN_LASER_TOGGLE_TIP_TITLE"], L["BTN_LASER_TOGGLE_TIP_DESC"]) end
 
     seamSlider:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then self.isDragging = true end
@@ -390,26 +388,26 @@ function Wizard:CreateFrame()
         if self._pendingApply then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end
     end)
 
     seamSlider:SetScript("OnValueChanged", function(self, val, userInput)
         val = math.floor((val / 0.005) + 0.5) * 0.005
-        Akimbo.db.deckWidthRatio = val
+        Offhand.db.deckWidthRatio = val
         seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], val * 100))
         if seamEditBox and not (seamEditBox.HasFocus and seamEditBox:HasFocus()) then
             seamEditBox:SetText(string.format("%.1f%%", val * 100))
         end
-        if Akimbo.Options and Akimbo.Options.ShowSeamGuide and Akimbo.Options:IsSeamGuideShown() then
-            Akimbo.Options:ShowSeamGuide(val)
+        if Offhand.Options and Offhand.Options.ShowSeamGuide and Offhand.Options:IsSeamGuideShown() then
+            Offhand.Options:ShowSeamGuide(val)
         end
         f:UpdateLaserButton()
 
         if self._isDirect then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
             return
         end
 
@@ -423,17 +421,17 @@ function Wizard:CreateFrame()
                     if s._pendingApply then
                         s._pendingApply = false
                         s:SetScript("OnUpdate", nil)
-                        Akimbo:ApplyFullLayout()
+                        Offhand:ApplyFullLayout()
                     end
                 end
             end)
         else
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(seamSlider, L["SLIDER_SEAM_WIDTH_TIP_TITLE"], L["SLIDER_SEAM_WIDTH_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(seamSlider, L["SLIDER_SEAM_WIDTH_TIP_TITLE"], L["SLIDER_SEAM_WIDTH_TIP_DESC"]) end
 
     btnMinus:SetScript("OnClick", function()
         local current = seamSlider:GetValue() or 0.36
@@ -446,11 +444,11 @@ function Wizard:CreateFrame()
     end)
 
     btnLaser:SetScript("OnClick", function()
-        if Akimbo.Options then
-            if Akimbo.Options:IsSeamGuideShown() then
-                Akimbo.Options:HideSeamGuide()
+        if Offhand.Options then
+            if Offhand.Options:IsSeamGuideShown() then
+                Offhand.Options:HideSeamGuide()
             else
-                Akimbo.Options:ShowSeamGuide(Akimbo.db.deckWidthRatio)
+                Offhand.Options:ShowSeamGuide(Offhand.db.deckWidthRatio)
             end
             f:UpdateLaserButton()
         end
@@ -462,21 +460,21 @@ function Wizard:CreateFrame()
     btnSeam36:SetPoint("TOPLEFT", 14, -98)
     btnSeam36:SetText(L["WIZARD_PRESET_SEAM_36"])
     btnSeam36:SetScript("OnClick", function() seamSlider:SetValue(0.36) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam36, L["WIZARD_PRESET_SEAM_36_TIP_TITLE"], L["WIZARD_PRESET_SEAM_36_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnSeam36, L["WIZARD_PRESET_SEAM_36_TIP_TITLE"], L["WIZARD_PRESET_SEAM_36_TIP_DESC"]) end
 
     local btnSeam50 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnSeam50:SetSize(196, 24)
     btnSeam50:SetPoint("LEFT", btnSeam36, "RIGHT", 10, 0)
     btnSeam50:SetText(L["WIZARD_PRESET_SEAM_50"])
     btnSeam50:SetScript("OnClick", function() seamSlider:SetValue(0.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam50, L["WIZARD_PRESET_SEAM_50_TIP_TITLE"], L["WIZARD_PRESET_SEAM_50_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnSeam50, L["WIZARD_PRESET_SEAM_50_TIP_TITLE"], L["WIZARD_PRESET_SEAM_50_TIP_DESC"]) end
 
     local btnSeam55 = CreateFrame("Button", nil, card3, "UIPanelButtonTemplate")
     btnSeam55:SetSize(196, 24)
     btnSeam55:SetPoint("LEFT", btnSeam50, "RIGHT", 10, 0)
     btnSeam55:SetText(L["WIZARD_PRESET_SEAM_55"])
     btnSeam55:SetScript("OnClick", function() seamSlider:SetValue(0.55) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnSeam55, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnSeam55, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
 
     -- ========================================================================
     -- CARD 4: GLOBAL UI SCALE & CALIBRATION (CONTINUOUS SLIDER)
@@ -509,15 +507,15 @@ function Wizard:CreateFrame()
         scaleEditBox:SetBackdropColor(0.04, 0.04, 0.06, 0.9)
         scaleEditBox:SetBackdropBorderColor(0.35, 0.33, 0.28, 0.9)
     end
-    scaleEditBox:SetText(string.format("%.0f%%", ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
+    scaleEditBox:SetText(string.format("%.0f%%", ((Offhand.db and Offhand.db.hudScale) or 0.70) * 100))
     f.scaleEditBox = scaleEditBox
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(scaleEditBox, L["WIZARD_SCALE_EDIT_TIP_TITLE"], L["WIZARD_SCALE_EDIT_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(scaleEditBox, L["WIZARD_SCALE_EDIT_TIP_TITLE"], L["WIZARD_SCALE_EDIT_TIP_DESC"])
     end
 
     local scaleValText = card4:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     scaleValText:SetPoint("LEFT", scaleEditBox, "RIGHT", 8, 0)
-    scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], ((Akimbo.db and Akimbo.db.hudScale) or 0.70) * 100))
+    scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], ((Offhand.db and Offhand.db.hudScale) or 0.70) * 100))
     f.scaleValText = scaleValText
 
     -- Continuous UI Scale Slider
@@ -559,11 +557,11 @@ function Wizard:CreateFrame()
 
     local function CommitScaleEditBox()
         local txt = scaleEditBox:GetText()
-        local parsed = Akimbo.ParseSliderInput and Akimbo:ParseSliderInput(txt, 0.25, 1.25, 0.01, "%.0f%%")
+        local parsed = Offhand.ParseSliderInput and Offhand:ParseSliderInput(txt, 0.25, 1.25, 0.01, "%.0f%%")
         if parsed then
             scaleSlider:SetValueDirect(parsed)
         else
-            local cur = (Akimbo.db and Akimbo.db.hudScale) or 0.70
+            local cur = (Offhand.db and Offhand.db.hudScale) or 0.70
             scaleEditBox:SetText(string.format("%.0f%%", cur * 100))
         end
         if scaleEditBox.ClearFocus then scaleEditBox:ClearFocus() end
@@ -571,7 +569,7 @@ function Wizard:CreateFrame()
 
     scaleEditBox:SetScript("OnEnterPressed", function() CommitScaleEditBox() end)
     scaleEditBox:SetScript("OnEscapePressed", function(s)
-        local cur = (Akimbo.db and Akimbo.db.hudScale) or 0.70
+        local cur = (Offhand.db and Offhand.db.hudScale) or 0.70
         s:SetText(string.format("%.0f%%", cur * 100))
         if s.ClearFocus then s:ClearFocus() end
     end)
@@ -588,13 +586,13 @@ function Wizard:CreateFrame()
     btnScaleMinus:SetSize(46, 22)
     btnScaleMinus:SetPoint("LEFT", scaleSlider, "RIGHT", 12, 0)
     btnScaleMinus:SetText("- 1%")
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleMinus, L["WIZARD_BTN_SCALE_DOWN_TIP_TITLE"], L["WIZARD_BTN_SCALE_DOWN_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnScaleMinus, L["WIZARD_BTN_SCALE_DOWN_TIP_TITLE"], L["WIZARD_BTN_SCALE_DOWN_TIP_DESC"]) end
 
     local btnScalePlus = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnScalePlus:SetSize(46, 22)
     btnScalePlus:SetPoint("LEFT", btnScaleMinus, "RIGHT", 4, 0)
     btnScalePlus:SetText("+ 1%")
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScalePlus, L["WIZARD_BTN_SCALE_UP_TIP_TITLE"], L["WIZARD_BTN_SCALE_UP_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnScalePlus, L["WIZARD_BTN_SCALE_UP_TIP_TITLE"], L["WIZARD_BTN_SCALE_UP_TIP_DESC"]) end
 
     local btnScaleReset = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnScaleReset:SetSize(138, 22)
@@ -603,7 +601,7 @@ function Wizard:CreateFrame()
     btnScaleReset:SetScript("OnClick", function()
         scaleSlider:SetValueDirect(0.70)
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"], L["WIZARD_BTN_SCALE_RESET_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnScaleReset, L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"], L["WIZARD_BTN_SCALE_RESET_TIP_DESC"]) end
 
     -- Physical-pixel-delta drag controller (scale-independent)
     local DRAG_PIXELS = 300
@@ -617,7 +615,7 @@ function Wizard:CreateFrame()
             local pixelDelta = curX - s._dragStartX
             local newVal = math.max(0.25, math.min(1.25, s._dragStartVal + pixelDelta * (1.00 / DRAG_PIXELS)))
             newVal = math.floor((newVal / 0.01) + 0.5) * 0.01
-            Akimbo.db.hudScale = newVal
+            Offhand.db.hudScale = newVal
             scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], newVal * 100))
             if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
                 scaleEditBox:SetText(string.format("%.0f%%", newVal * 100))
@@ -636,14 +634,14 @@ function Wizard:CreateFrame()
             self._dragStartX = nil
             self._dragStartVal = nil
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end
     end)
 
     scaleSlider:SetScript("OnValueChanged", function(self, val, userInput)
         if self._isCustomDrag then return end
         val = math.floor((val / 0.01) + 0.5) * 0.01
-        Akimbo.db.hudScale = val
+        Offhand.db.hudScale = val
         scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], val * 100))
         if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
             scaleEditBox:SetText(string.format("%.0f%%", val * 100))
@@ -651,12 +649,12 @@ function Wizard:CreateFrame()
         if self._isDirect then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
             return
         end
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(scaleSlider, L["WIZARD_UI_SCALE_TIP_TITLE"], L["WIZARD_UI_SCALE_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(scaleSlider, L["WIZARD_UI_SCALE_TIP_TITLE"], L["WIZARD_UI_SCALE_TIP_DESC"]) end
 
     btnScaleMinus:SetScript("OnClick", function()
         local current = scaleSlider:GetValue() or 0.70
@@ -674,28 +672,28 @@ function Wizard:CreateFrame()
     btnHud56:SetPoint("TOPLEFT", 14, -98)
     btnHud56:SetText(L["WIZARD_PRESET_SCALE_56"])
     btnHud56:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.56) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud56, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnHud56, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
 
     local btnHud65 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud65:SetSize(145, 24)
     btnHud65:SetPoint("LEFT", btnHud56, "RIGHT", 9, 0)
     btnHud65:SetText(L["WIZARD_PRESET_SCALE_65"])
     btnHud65:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.65) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud65, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnHud65, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
 
     local btnHud70 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud70:SetSize(145, 24)
     btnHud70:SetPoint("LEFT", btnHud65, "RIGHT", 9, 0)
     btnHud70:SetText(L["WIZARD_PRESET_SCALE_70"])
     btnHud70:SetScript("OnClick", function() scaleSlider:SetValueDirect(0.70) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud70, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnHud70, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
 
     local btnHud100 = CreateFrame("Button", nil, card4, "UIPanelButtonTemplate")
     btnHud100:SetSize(145, 24)
     btnHud100:SetPoint("LEFT", btnHud70, "RIGHT", 9, 0)
     btnHud100:SetText(L["WIZARD_PRESET_SCALE_100"])
     btnHud100:SetScript("OnClick", function() scaleSlider:SetValueDirect(1.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(btnHud100, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(btnHud100, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     -- ========================================================================
     -- FOOTER ACTIONS
@@ -707,41 +705,41 @@ function Wizard:CreateFrame()
     advBtn:SetScript("OnClick", function()
         Wizard.openedFromOptions = false
         Wizard:Close()
-        if Akimbo.Options and Akimbo.Options.Open then
-            Akimbo.Options:Open()
+        if Offhand.Options and Offhand.Options.Open then
+            Offhand.Options:Open()
         end
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(advBtn, L["WIZARD_BTN_ADVANCED_TIP_TITLE"], L["WIZARD_BTN_ADVANCED_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(advBtn, L["WIZARD_BTN_ADVANCED_TIP_TITLE"], L["WIZARD_BTN_ADVANCED_TIP_DESC"]) end
 
     local finishBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
     finishBtn:SetSize(280, 28)
     finishBtn:SetPoint("BOTTOMRIGHT", -18, 14)
     finishBtn:SetText("|cffffd100" .. L["WIZARD_BTN_FINISH"] .. "|r")
     finishBtn:SetScript("OnClick", function()
-        if Akimbo.db then
-            Akimbo.db.firstRunComplete = true
+        if Offhand.db then
+            Offhand.db.firstRunComplete = true
         end
         Wizard.openedFromOptions = false
         Wizard:Close()
-        Akimbo:ApplyFullLayout()
-        if Akimbo.Print then
-            Akimbo:Print(L["CONFIG_SAVED"] or "Configuration saved! Welcome to Akimbo Dual Monitor Workstation.")
+        Offhand:ApplyFullLayout()
+        if Offhand.Print then
+            Offhand:Print(L["CONFIG_SAVED"] or "Configuration saved! Welcome to Offhand Dual Monitor Workstation.")
         end
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(finishBtn, L["WIZARD_BTN_FINISH_TIP_TITLE"], L["WIZARD_BTN_FINISH_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(finishBtn, L["WIZARD_BTN_FINISH_TIP_TITLE"], L["WIZARD_BTN_FINISH_TIP_DESC"]) end
 
     function f:UpdateLaserButton()
-        local isShown = Akimbo.Options and Akimbo.Options.IsSeamGuideShown and Akimbo.Options:IsSeamGuideShown()
+        local isShown = Offhand.Options and Offhand.Options.IsSeamGuideShown and Offhand.Options:IsSeamGuideShown()
         btnLaser:SetText(isShown and ("|cffff3333" .. L["WIZARD_BTN_LASER_HIDE"] .. "|r") or L["WIZARD_BTN_LASER_SHOW"])
     end
 
     function f:UpdateState()
-        if not Akimbo.db then return end
-        local p = Akimbo.db.layoutPreset
-        local pos = Akimbo.db.primaryPosition
-        local ar = Akimbo.db.aspectRatioMode
-        local hud = Akimbo.db.hudScale or 0.70
-        local seam = Akimbo.db.deckWidthRatio or 0.36
+        if not Offhand.db then return end
+        local p = Offhand.db.layoutPreset
+        local pos = Offhand.db.primaryPosition
+        local ar = Offhand.db.aspectRatioMode
+        local hud = Offhand.db.hudScale or 0.70
+        local seam = Offhand.db.deckWidthRatio or 0.36
 
         seamSlider:SetValue(seam)
         seamValText:SetText(string.format(L["WIZARD_SEAM_VAL_FMT"], seam * 100))
@@ -768,8 +766,8 @@ function Wizard:CreateFrame()
         btnHud70:SetEnabled(math.abs(hud - 0.70) > 0.02)
         btnHud100:SetEnabled(math.abs(hud - 1.00) > 0.02)
 
-        local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
-        local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+        local trimKey = (Offhand.db and Offhand.db.trimColor) or "GOLD"
+        local pals = Offhand.Themes and Offhand.Themes.GetColorPalettes and Offhand.Themes:GetColorPalettes()
         local c = pals and pals[trimKey]
         if c then
             if seamSlider.thumb and seamSlider.thumb.SetVertexColor then
@@ -803,8 +801,8 @@ end
 
 function Wizard:Open()
     -- Hide Options dashboard if it is currently open to prevent overlapping windows
-    if Akimbo.Options and Akimbo.Options.GetConfigFrame then
-        local cfg = Akimbo.Options:GetConfigFrame()
+    if Offhand.Options and Offhand.Options.GetConfigFrame then
+        local cfg = Offhand.Options:GetConfigFrame()
         if cfg and cfg:IsShown() then
             Wizard.openedFromOptions = true
             cfg:Hide()
@@ -830,7 +828,7 @@ function Wizard:Open()
     f:UpdateState()
 
     -- Center over the 3D game screen if spanned
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if m and m.gameWidth and m.gameWidth > 0 then
         local cx = (m.gameLeft + m.gameRight) / 2
         local cy = (m.gameBottom + m.gameTop) / 2
@@ -841,8 +839,8 @@ function Wizard:Open()
         f:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     end
 
-    if Akimbo.Options and Akimbo.Options.ShowSeamGuide then
-        Akimbo.Options:ShowSeamGuide(Akimbo.db and Akimbo.db.deckWidthRatio)
+    if Offhand.Options and Offhand.Options.ShowSeamGuide then
+        Offhand.Options:ShowSeamGuide(Offhand.db and Offhand.db.deckWidthRatio)
         f:UpdateLaserButton()
     end
 
@@ -850,14 +848,14 @@ function Wizard:Open()
 end
 
 function Wizard:Close()
-    if Akimbo.Options and Akimbo.Options.HideSeamGuide then
-        Akimbo.Options:HideSeamGuide()
+    if Offhand.Options and Offhand.Options.HideSeamGuide then
+        Offhand.Options:HideSeamGuide()
     end
     if wizardFrame then
         wizardFrame:Hide()
     end
 end
 
-function Akimbo:OpenWizard()
+function Offhand:OpenWizard()
     Wizard:Open()
 end

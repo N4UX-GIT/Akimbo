@@ -1,11 +1,8 @@
 -- Anchor managed HUD frames inside the same rectangle used by WorldFrame.
 local _, Offhand = ...
-local Akimbo = Offhand
 local HUD = {}
 Offhand.SeamRedirect = HUD
 Offhand.HUD = HUD
-Akimbo.SeamRedirect = HUD
-Akimbo.HUD = HUD
 local aligning, pending = false, false
 local hooks = {}
 local desiredFrames = {}
@@ -53,9 +50,9 @@ local function HasCustomMinimapAddon()
     return false
 end
 
-Akimbo.HasCustomActionBarAddon = HasCustomActionBarAddon
-Akimbo.HasCustomBagAddon = HasCustomBagAddon
-Akimbo.HasCustomMinimapAddon = HasCustomMinimapAddon
+Offhand.HasCustomActionBarAddon = HasCustomActionBarAddon
+Offhand.HasCustomBagAddon = HasCustomBagAddon
+Offhand.HasCustomMinimapAddon = HasCustomMinimapAddon
 
 local actionNames = {"MainMenuBar", "MainActionBar", "StatusTrackingBarManager", "MainMenuExpBar",
     "MultiBarBottomLeft", "MultiBarBottomRight", "MultiBarLeft", "MultiBarRight",
@@ -107,20 +104,20 @@ local function Prepare(frame, m)
 end
 
 function HUD:RequestLayout()
-    if aligning or pending or not Akimbo.db or not Akimbo.db.enabled then return end
+    if aligning or pending or not Offhand.db or not Offhand.db.enabled then return end
     pending = true
     C_Timer.After(0.05, function()
-        if not Akimbo.db or not Akimbo.db.enabled then pending = false; return end
+        if not Offhand.db or not Offhand.db.enabled then pending = false; return end
         -- A HUD repair must not resize WorldFrame, the deck or docked modules.
-        Akimbo:RunOrQueueCombat(function()
+        Offhand:RunOrQueueCombat(function()
             pending = false
-            if Akimbo.db and Akimbo.db.enabled then HUD:AlignHUDFrames() end
+            if Offhand.db and Offhand.db.enabled then HUD:AlignHUDFrames() end
         end)
     end)
 end
 
 function HUD:AlignChatFrame(m)
-    if not ChatFrame1 or Akimbo.db.dockChat == false then return end
+    if not ChatFrame1 or Offhand.db.dockChat == false then return end
     local chat = ChatFrame1
     -- Chattynator replaces the visible chat frame. Use its exposed handler to
     -- locate the primary window without changing its saved profile or messages.
@@ -141,8 +138,8 @@ function HUD:AlignChatFrame(m)
             end
         end)
     end
-    if Akimbo.db.chatPosition == "DECK" and Akimbo.canvas then
-        local x = Akimbo.db.primaryPosition == "LEFT" and m.gameRight + m.bezel or 0
+    if Offhand.db.chatPosition == "DECK" and Offhand.canvas then
+        local x = Offhand.db.primaryPosition == "LEFT" and m.gameRight + m.bezel or 0
         ScreenPoint(chat, "BOTTOMLEFT",
             x + 24 * m.hudScale, 45 * m.hudScale)
         chat:SetSize(math.min(460, m.deckWidth / m.hudScale - 48), 220)
@@ -158,10 +155,10 @@ function HUD:AlignChatFrame(m)
 end
 
 function HUD:AlignHUDFrames(m)
-    if aligning or InCombatLockdown() or not Akimbo.db.enabled then return end
+    if aligning or InCombatLockdown() or not Offhand.db.enabled then return end
     aligning = true
     local ok, err = pcall(function()
-        m = m or Akimbo.Viewport:GetMetrics()
+        m = m or Offhand.Viewport:GetMetrics()
         if not HasCustomActionBarAddon() then
             local main = MainMenuBar or MainActionBar
             Prepare(main, m)
@@ -214,14 +211,14 @@ function HUD:AlignHUDFrames(m)
             if frame then
                 if item[1] == "MinimapCluster" and HasCustomMinimapAddon() then
                     -- Yield completely to custom minimap addon (e.g. SexyMap, BasicMinimap, ElvUI)
-                elseif frame._akimboDragging then
+                elseif frame._OffhandDragging then
                     -- Frame is actively being dragged by the player; do not interrupt!
                 else
                     Prepare(frame, m)
-                    local isWorkspace = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[item[1]]
+                    local isWorkspace = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[item[1]]
                     if isWorkspace then
-                        if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                            Akimbo.Canvas.RestoreWorkspacePosition(frame)
+                        if Offhand.Canvas and Offhand.Canvas.RestoreWorkspacePosition then
+                            Offhand.Canvas.RestoreWorkspacePosition(frame)
                         end
                     else
                         if item[1] == "MinimapCluster" then
@@ -240,7 +237,7 @@ function HUD:AlignHUDFrames(m)
         end
 
         self:AlignChatFrame(m)
-        if Akimbo.db.seamRedirect then
+        if Offhand.db.seamRedirect then
             for _, item in ipairs({{"UIErrorsFrame", -60}, {"RaidWarningFrame", -100}}) do
                 local frame = _G[item[1]]
                 Prepare(frame, m)
@@ -249,7 +246,7 @@ function HUD:AlignHUDFrames(m)
         end
     end)
     aligning = false
-    if not ok then Akimbo:Print("HUD layout error: %s", tostring(err)) end
+    if not ok then Offhand:Print("HUD layout error: %s", tostring(err)) end
 end
 
 -- Replay the last committed layout for just the frame Blizzard changed. A timer
@@ -257,7 +254,7 @@ end
 -- Cache only layout written by AlignHUDFrames; never replace Blizzard methods or
 -- force visibility/action state. The guard prevents our setters from re-entering.
 function HUD:RepairFrame(frame)
-    if aligning or not Akimbo.db or not Akimbo.db.enabled then return end
+    if aligning or not Offhand.db or not Offhand.db.enabled then return end
     if frame.IsUserPlaced and frame:IsUserPlaced() then return end
     if HasCustomActionBarAddon() then return end
     local desired = desiredFrames[frame]
@@ -268,7 +265,7 @@ function HUD:RepairFrame(frame)
         if desired.points then Points(frame, unpack(desired.points)) end
     end)
     aligning = false
-    if not ok then Akimbo:Print("HUD layout error: %s", tostring(err)) end
+    if not ok then Offhand:Print("HUD layout error: %s", tostring(err)) end
 end
 
 function HUD:IsManagedFrame(frame)
@@ -301,7 +298,7 @@ function HUD:HookFrames()
         if frame and not hooks[frame] then
             hooks[frame] = true
             hooksecurefunc(frame, "SetPoint", function()
-                local isWs = Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                local isWs = Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]
                 if not isWs and not (frame.IsUserPlaced and frame:IsUserPlaced()) then
                     HUD:RequestLayout()
                 end
@@ -318,8 +315,8 @@ function HUD:HookFrames()
     local function CenterGameMenu()
         for _, name in ipairs(menuFrameNames) do
             local frame = _G[name]
-            if frame and frame:IsShown() and not InCombatLockdown() and Akimbo.db and Akimbo.db.enabled then
-                local m = Akimbo.Viewport:GetMetrics()
+            if frame and frame:IsShown() and not InCombatLockdown() and Offhand.db and Offhand.db.enabled then
+                local m = Offhand.Viewport:GetMetrics()
                 frame:ClearAllPoints()
                 local cx = (m.gameLeft + m.gameRight) / 2
                 local cy = (m.gameBottom + m.gameTop) / 2
@@ -362,8 +359,8 @@ function HUD:HookFrames()
     end
 
     local function UpdateUIPanelOffsets()
-        if InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
-        local m = Akimbo.Viewport:GetMetrics()
+        if InCombatLockdown() or not Offhand.db or not Offhand.db.enabled then return end
+        local m = Offhand.Viewport:GetMetrics()
         if m and m.isSpanned and UIParent.SetAttribute then
             local left = m.gameLeft or 0
             UIParent:SetAttribute("LEFT_OFFSET", left)
@@ -407,16 +404,16 @@ function HUD:HookFrames()
     -- Keep bags on regular monitor unless user explicitly dragged them to workspace
     local isArrangingBags = false
     function HUD:LayoutBags()
-        if HasCustomBagAddon() or isArrangingBags or InCombatLockdown() or not Akimbo.db or not Akimbo.db.enabled then return end
+        if HasCustomBagAddon() or isArrangingBags or InCombatLockdown() or not Offhand.db or not Offhand.db.enabled then return end
         isArrangingBags = true
 
-        local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+        local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
         if not m then
             isArrangingBags = false
             return
         end
 
-        local isPortraitDeck = Akimbo.db.primaryPosition ~= "LEFT"
+        local isPortraitDeck = Offhand.db.primaryPosition ~= "LEFT"
         local deckMinX = isPortraitDeck and 12 or (m.gameRight + 12)
         local deckMaxX = isPortraitDeck and (m.deckWidth - 12) or (m.screenWidth - 12)
         local deckMinY = 12
@@ -424,9 +421,9 @@ function HUD:HookFrames()
         local deckMaxY = math.max(deckMinY, screenHeight - 30)
 
         -- Determine if bags are stationed on the workspace
-        local bpPos = Akimbo.db.savedWorkspacePositions and (
-            Akimbo.db.savedWorkspacePositions["ContainerFrame1"] or 
-            Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+        local bpPos = Offhand.db.savedWorkspacePositions and (
+            Offhand.db.savedWorkspacePositions["ContainerFrame1"] or 
+            Offhand.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
         )
         local bagsOnWorkspace = false
         if bpPos and bpPos.x and bpPos.y then
@@ -435,9 +432,9 @@ function HUD:HookFrames()
             for i = 1, (NUM_CONTAINER_FRAMES or 13) do
                 local f = _G["ContainerFrame" .. i]
                 local fname = f and f:GetName()
-                if fname and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[fname] then
+                if fname and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[fname] then
                     bagsOnWorkspace = true
-                    bpPos = Akimbo.db.savedWorkspacePositions[fname]
+                    bpPos = Offhand.db.savedWorkspacePositions[fname]
                     break
                 end
             end
@@ -457,10 +454,10 @@ function HUD:HookFrames()
                 local frame = _G["ContainerFrame" .. i]
                 if frame and frame:IsShown() then
                     local name = frame:GetName()
-                    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                    local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]
                     if pos and pos.x and pos.y then
-                        if Akimbo.Canvas and Akimbo.Canvas.RestoreWorkspacePosition then
-                            Akimbo.Canvas.RestoreWorkspacePosition(frame)
+                        if Offhand.Canvas and Offhand.Canvas.RestoreWorkspacePosition then
+                            Offhand.Canvas.RestoreWorkspacePosition(frame)
                         end
                         if frame.SetAlpha then frame:SetAlpha(1) end
                     else
@@ -510,7 +507,7 @@ function HUD:HookFrames()
                 local frame = _G["ContainerFrame" .. i]
                 if frame and frame:IsShown() then
                     local name = frame:GetName()
-                    local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                    local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]
                     if not pos then
                         frame:SetUserPlaced(false)
                         frame:ClearAllPoints()
@@ -527,7 +524,7 @@ function HUD:HookFrames()
         end
 
         if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
-            local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+            local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
             if not pos then
                 local right = m.gameRight - 16
                 local bottom = m.gameBottom + 32
@@ -547,7 +544,7 @@ function HUD:HookFrames()
         self.anchorsHooked = true
         local origUpdateContainerFrameAnchors = _G.UpdateContainerFrameAnchors
         _G.UpdateContainerFrameAnchors = function(...)
-            if HasCustomBagAddon() or not Akimbo.db or not Akimbo.db.enabled then
+            if HasCustomBagAddon() or not Offhand.db or not Offhand.db.enabled then
                 return origUpdateContainerFrameAnchors(...)
             end
             HUD:LayoutBags()
@@ -562,7 +559,7 @@ function HUD:HookFrames()
             frame:HookScript("OnShow", function(self)
                 if HasCustomBagAddon() then return end
                 local name = self:GetName()
-                local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions[name]
+                local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions[name]
                 if not pos then
                     if self.SetAlpha then self:SetAlpha(0) end
                 end
@@ -581,7 +578,7 @@ function HUD:HookFrames()
         hooks[ContainerFrameCombinedBags] = true
         ContainerFrameCombinedBags:HookScript("OnShow", function(self)
             if HasCustomBagAddon() then return end
-            local pos = Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
+            local pos = Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["ContainerFrameCombinedBags"]
             if not pos then
                 if self.SetAlpha then self:SetAlpha(0) end
             end
@@ -637,8 +634,8 @@ function HUD:HookFrames()
             hooks[frame] = true
             local index = i
             frame:HookScript("OnShow", function(self)
-                if InCombatLockdown() or not Akimbo.db.enabled or not Akimbo.db.seamRedirect then return end
-                local m = Akimbo.Viewport:GetMetrics()
+                if InCombatLockdown() or not Offhand.db.enabled or not Offhand.db.seamRedirect then return end
+                local m = Offhand.Viewport:GetMetrics()
                 Prepare(self, m)
                 Anchor(self, "CENTER", m, 0, (index - 1) * 120)
             end)
@@ -653,9 +650,9 @@ function Offhand:UpdateSeamRedirect()
     HUD:HookFrames()
     HUD:AlignHUDFrames()
 end
-function Akimbo:InitializeSeamRedirect()
+function Offhand:InitializeSeamRedirect()
     Offhand:InitializeSeamRedirect()
 end
-function Akimbo:UpdateSeamRedirect()
+function Offhand:UpdateSeamRedirect()
     Offhand:UpdateSeamRedirect()
 end

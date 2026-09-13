@@ -145,16 +145,16 @@ _G.MinimapCluster = MinimapCluster
 _G.MinimapZoneTextButton = MinimapZoneTextButton
 _G.ContainerFrame1 = ContainerFrame1
 
--- Load Akimbo modules
-assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
+-- Load Offhand modules
+assert(loadfile("UI/Themes.lua"))("Offhand", addon)
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
 
 -- 1. Test Canvas draggability setup and HUD hooks
 addon.Canvas:EnableFreeDragging()
 addon.SeamRedirect:HookFrames()
-assert(MinimapCluster._akimboHandle ~= nil or MinimapZoneTextButton._akimboHooked == true, "MinimapCluster must be made draggable")
-assert(ContainerFrame1._akimboHandle ~= nil, "ContainerFrame1 must have a drag handle")
+assert(MinimapCluster._OffhandHandle ~= nil or MinimapZoneTextButton._OffhandHooked == true, "MinimapCluster must be made draggable")
+assert(ContainerFrame1._OffhandHandle ~= nil, "ContainerFrame1 must have a drag handle")
 
 -- 2. Test MinimapCluster dragged onto workspace
 MinimapCluster.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 100, 500 } }
@@ -187,15 +187,15 @@ assert(mmPt[4] == metrics.gameRight, "MinimapCluster must anchor to gameRight on
 -- 4. Test ContainerFrame1 dragging to workspace
 ContainerFrame1:Show()
 ContainerFrame1.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 200, 300 } }
-if ContainerFrame1._akimboHandle and ContainerFrame1._akimboHandle.scripts["OnDragStop"] then
-    ContainerFrame1._akimboHandle.scripts["OnDragStop"]()
+if ContainerFrame1._OffhandHandle and ContainerFrame1._OffhandHandle.scripts["OnDragStop"] then
+    ContainerFrame1._OffhandHandle.scripts["OnDragStop"]()
 end
 assert(addon.db.savedWorkspacePositions["ContainerFrame1"] ~= nil, "ContainerFrame1 must be saved to workspace positions")
 
 -- 5. Test ContainerFrame1 dragged back to game monitor (x >= deckWidth)
 ContainerFrame1.points = { { "BOTTOMLEFT", UIParent, "BOTTOMLEFT", 2000, 300 } }
-if ContainerFrame1._akimboHandle and ContainerFrame1._akimboHandle.scripts["OnDragStop"] then
-    ContainerFrame1._akimboHandle.scripts["OnDragStop"]()
+if ContainerFrame1._OffhandHandle and ContainerFrame1._OffhandHandle.scripts["OnDragStop"] then
+    ContainerFrame1._OffhandHandle.scripts["OnDragStop"]()
 end
 assert(addon.db.savedWorkspacePositions["ContainerFrame1"] == nil, "ContainerFrame1 must be cleared from workspace when on gaming monitor")
 -- When dropped on gaming monitor, LayoutBags runs and anchors it to BOTTOMRIGHT of game monitor
@@ -217,7 +217,7 @@ assert(#ContainerFrame1.points == 0, "HUD:LayoutBags must yield and NOT alter po
 
 local customBag = makeMockFrame("ContainerFrame2", 192, 250)
 addon.Canvas.MakePanelDraggable(customBag)
-assert(customBag._akimboHandle == nil, "MakePanelDraggable must yield and NOT attach handles to container frames when custom bag addon is active")
+assert(customBag._OffhandHandle == nil, "MakePanelDraggable must yield and NOT attach handles to container frames when custom bag addon is active")
 
 -- 8. Test 3rd-party Minimap Addon detection and yielding (e.g. SexyMap / BasicMinimap)
 _G.SexyMap = { version = "1.0" }
@@ -228,6 +228,6 @@ assert(#MinimapCluster.points == 0, "HUD:AlignHUDFrames must yield and NOT alter
 
 local customMinimap = makeMockFrame("MinimapCluster", 192, 192)
 addon.Canvas.MakePanelDraggable(customMinimap)
-assert(customMinimap._akimboMovable == nil, "MakePanelDraggable must yield and NOT manage MinimapCluster when SexyMap is present")
+assert(customMinimap._OffhandMovable == nil, "MakePanelDraggable must yield and NOT manage MinimapCluster when SexyMap is present")
 
 print("PASS: MinimapCluster & Bag workspace persistence, header border & close button, 3rd-party addon yielding without conflict")

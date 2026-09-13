@@ -1,13 +1,12 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     UI/Options.lua: Clean Tabbed Settings, Calibration Dashboard & Setup Guide
     (Pure ASCII, sleek tabbed interface, zero clutter, bulletproof native widgets)
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 
-local L = Offhand.L or Akimbo.L or setmetatable({}, {
+local L = Offhand.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
@@ -17,7 +16,6 @@ local tinsert = table.insert
 
 local Options = {}
 Offhand.Options = Options
-Akimbo.Options = Options
 
 local configFrame
 local setupFrame
@@ -222,18 +220,18 @@ end
 
 function Options:AutoConfigure(silent)
     local info = Options:DetectTopology()
-    if not Akimbo.db then return info end
+    if not Offhand.db then return info end
 
-    Akimbo.db.enabled = true
-    Akimbo.db.layoutPreset = info.recommendedPreset
-    Akimbo.db.deckWidthRatio = info.recommendedDeckRatio
-    Akimbo.db.primaryPosition = info.recommendedPosition or "RIGHT"
-    Akimbo.db.aspectRatioMode = info.recommendedAR or "16_9"
-    Akimbo.db.hudScale = 0.70
-    Akimbo.db.firstRunComplete = true
+    Offhand.db.enabled = true
+    Offhand.db.layoutPreset = info.recommendedPreset
+    Offhand.db.deckWidthRatio = info.recommendedDeckRatio
+    Offhand.db.primaryPosition = info.recommendedPosition or "RIGHT"
+    Offhand.db.aspectRatioMode = info.recommendedAR or "16_9"
+    Offhand.db.hudScale = 0.70
+    Offhand.db.firstRunComplete = true
 
-    if Akimbo.ApplyFullLayout then
-        Akimbo:ApplyFullLayout()
+    if Offhand.ApplyFullLayout then
+        Offhand:ApplyFullLayout()
     end
 
     if not silent then
@@ -243,9 +241,9 @@ function Options:AutoConfigure(silent)
                 Options:HideSeamGuide()
             end)
         end
-        if Akimbo.Print then
-            Akimbo:Print(L["MSG_AUTOCONFIG_APPLIED"], info.description)
-            Akimbo:Print(L["MSG_AUTOCONFIG_DETAILS"],
+        if Offhand.Print then
+            Offhand:Print(L["MSG_AUTOCONFIG_APPLIED"], info.description)
+            Offhand:Print(L["MSG_AUTOCONFIG_DETAILS"],
                 info.recommendedPreset, info.recommendedDeckRatio * 100, info.recommendedAR or "16_9")
         end
         if configFrame and configFrame.IsShown and configFrame:IsShown() then
@@ -261,11 +259,11 @@ end
 function Options:ShowSeamGuide(deckRatio)
     if not UIParent then return end
     if not deckRatio then
-        deckRatio = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+        deckRatio = (Offhand.db and Offhand.db.deckWidthRatio) or 0.36
     end
 
     if not seamGuideLine then
-        seamGuideLine = CreateFrame("Frame", "AkimboSeamGuideLine", UIParent)
+        seamGuideLine = CreateFrame("Frame", "OffhandSeamGuideLine", UIParent)
         seamGuideLine:SetFrameStrata("TOOLTIP")
         seamGuideLine:SetWidth(4)
 
@@ -283,7 +281,7 @@ function Options:ShowSeamGuide(deckRatio)
     local screenW = UIParent:GetWidth() or 1920
     local screenH = UIParent:GetHeight() or 1080
     local x = screenW * deckRatio
-    if Akimbo.db and Akimbo.db.primaryPosition == "LEFT" then
+    if Offhand.db and Offhand.db.primaryPosition == "LEFT" then
         x = screenW - x
     end
 
@@ -318,10 +316,10 @@ local function CreateNativeCheckbox(parent, text, getVal, setVal, tooltipTitle, 
     check:SetChecked(getVal())
     check:SetScript("OnClick", function(self)
         setVal(self:GetChecked())
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
-    if (tooltipTitle or tooltipText) and Akimbo.SetTooltip then
-        Akimbo:SetTooltip(check, tooltipTitle, tooltipText)
+    if (tooltipTitle or tooltipText) and Offhand.SetTooltip then
+        Offhand:SetTooltip(check, tooltipTitle, tooltipText)
     end
     return check
 end
@@ -340,8 +338,8 @@ local function CreateNativeRadioButton(parent, text, getVal, setVal, tooltipTitl
         setVal()
         Options:RefreshPanel()
     end)
-    if (tooltipTitle or tooltipText) and Akimbo.SetTooltip then
-        Akimbo:SetTooltip(radio, tooltipTitle, tooltipText)
+    if (tooltipTitle or tooltipText) and Offhand.SetTooltip then
+        Offhand:SetTooltip(radio, tooltipTitle, tooltipText)
     end
     return radio
 end
@@ -368,8 +366,8 @@ local function ParseSliderInput(inputStr, minVal, maxVal, step, formatStr)
     return math.max(minVal, math.min(maxVal, stepped))
 end
 
-Akimbo.ParseSliderInput = function(self, ...)
-    if type(self) == "table" and self == Akimbo then
+Offhand.ParseSliderInput = function(self, ...)
+    if type(self) == "table" and self == Offhand then
         return ParseSliderInput(...)
     else
         return ParseSliderInput(self, ...)
@@ -419,8 +417,8 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     btnPlus:SetPoint("BOTTOMRIGHT", slider, "TOPRIGHT", 0, 3)
     btnPlus:SetText("+")
     slider.btnPlus = btnPlus
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(btnPlus, L["SLIDER_STEP_UP_TIP_TITLE"], string.format(L["SLIDER_STEP_UP_TIP_DESC_FMT"], FormatValue(step)))
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(btnPlus, L["SLIDER_STEP_UP_TIP_TITLE"], string.format(L["SLIDER_STEP_UP_TIP_DESC_FMT"], FormatValue(step)))
     end
 
     -- Direct Value Entry EditBox
@@ -442,8 +440,8 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end
     editBox:SetText(FormatValue(getVal()))
     slider.editBox = editBox
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(editBox, L["SLIDER_EDITBOX_TIP_TITLE"], L["SLIDER_EDITBOX_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(editBox, L["SLIDER_EDITBOX_TIP_TITLE"], L["SLIDER_EDITBOX_TIP_DESC"])
     end
 
     -- Value Stepper [-] Button
@@ -452,8 +450,8 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     btnMinus:SetPoint("RIGHT", editBox, "LEFT", -2, 0)
     btnMinus:SetText("-")
     slider.btnMinus = btnMinus
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(btnMinus, L["SLIDER_STEP_DOWN_TIP_TITLE"], string.format(L["SLIDER_STEP_DOWN_TIP_DESC_FMT"], FormatValue(step)))
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(btnMinus, L["SLIDER_STEP_DOWN_TIP_TITLE"], string.format(L["SLIDER_STEP_DOWN_TIP_DESC_FMT"], FormatValue(step)))
     end
 
     -- Header Title
@@ -481,7 +479,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         if s._pendingApply then
             s._pendingApply = false
             s:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end
     end
 
@@ -546,7 +544,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end)
 
     -- Physical-pixel-delta drag controller.
-    -- GetCursorPosition() returns raw screen pixels — scale-independent.
+    -- GetCursorPosition() returns raw screen pixels â€” scale-independent.
     -- The same physical mouse movement always produces the same value change
     -- regardless of UIParent:SetScale(), fixing the runaway sensitivity on the
     -- Global UI Scale slider (which modifies the parent frame's own scale).
@@ -589,7 +587,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
             self._dragStartX = nil
             self._dragStartVal = nil
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end
     end)
 
@@ -610,12 +608,12 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         if self._isDirect then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
             return
         end
 
         -- Fallback for any external SetValue not covered above
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end)
 
     slider.UpdateText = function(self)
@@ -626,12 +624,12 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end
 
     slider.UpdateTheme = function(self, trimKey)
-        local key = trimKey or (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        local key = trimKey or (Offhand.db and Offhand.db.trimColor) or "GOLD"
         local c
-        if key == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
-            c = Akimbo.db.customTrimColor
+        if key == "CUSTOM" and Offhand.db and Offhand.db.customTrimColor then
+            c = Offhand.db.customTrimColor
         else
-            local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+            local pals = Offhand.Themes and Offhand.Themes.GetColorPalettes and Offhand.Themes:GetColorPalettes()
             c = pals and pals[key]
         end
         if c and self.thumb and self.thumb.SetVertexColor then
@@ -642,8 +640,8 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
     end
     slider:UpdateTheme()
 
-    if (tooltipTitle or tooltipText) and Akimbo.SetTooltip then
-        Akimbo:SetTooltip(slider, tooltipTitle, tooltipText)
+    if (tooltipTitle or tooltipText) and Offhand.SetTooltip then
+        Offhand:SetTooltip(slider, tooltipTitle, tooltipText)
     end
 
     tinsert(registeredSliders, slider)
@@ -664,16 +662,16 @@ function Options:CreateBottomControl(parent)
     input:SetNumeric(true)
     input:SetMaxLetters(5)
     local function Refresh()
-        input:SetText(tostring(math.floor(Akimbo.db.gameBottomPixels or 0)))
+        input:SetText(tostring(math.floor(Offhand.db.gameBottomPixels or 0)))
     end
     local function Apply(delta)
         local value = tonumber(input:GetText())
         if not value then Refresh(); return end
         local _, height = GetPhysicalScreenSize()
-        Akimbo.db.gameBottomPixels = math.max(0, math.min(height - 1,
+        Offhand.db.gameBottomPixels = math.max(0, math.min(height - 1,
             math.floor(value + (delta or 0) + 0.5)))
         Refresh()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end
     local previous = input
     for _, item in ipairs({{"-1 px", -1}, {"+1 px", 1}, {"Apply", 0}}) do
@@ -703,7 +701,7 @@ end
 function Options:CreateFloatingPanel()
     if configFrame then return configFrame end
 
-    configFrame = CreateFrame("Frame", "AkimboFloatingConfigFrame", UIParent, "BackdropTemplate")
+    configFrame = CreateFrame("Frame", "OffhandFloatingConfigFrame", UIParent, "BackdropTemplate")
     configFrame:SetSize(720, 680)
     configFrame:SetFrameStrata("DIALOG")
     configFrame:EnableMouse(true)
@@ -714,11 +712,11 @@ function Options:CreateFloatingPanel()
     configFrame:SetScript("OnDragStop", configFrame.StopMovingOrSizing)
 
     if tinsert and UISpecialFrames then
-        tinsert(UISpecialFrames, "AkimboFloatingConfigFrame")
+        tinsert(UISpecialFrames, "OffhandFloatingConfigFrame")
     end
 
-    Akimbo.Themes:ApplyBackdrop(configFrame, (Akimbo.db and Akimbo.db.theme) or "CLASSIC", 0.98)
-    configFrame.header = Akimbo.Themes:CreateBayHeader(configFrame, "AKIMBO DUAL MONITOR WORKSTATION")
+    Offhand.Themes:ApplyBackdrop(configFrame, (Offhand.db and Offhand.db.theme) or "CLASSIC", 0.98)
+    configFrame.header = Offhand.Themes:CreateBayHeader(configFrame, "Offhand DUAL MONITOR WORKSTATION")
 
     local closeBtn = CreateFrame("Button", nil, configFrame.header, "UIPanelCloseButton")
     closeBtn:SetSize(28, 28)
@@ -737,14 +735,14 @@ function Options:CreateFloatingPanel()
     autoWizardBtn:SetPoint("TOPRIGHT", -18, -56)
     autoWizardBtn:SetText(L["BTN_AUTO_WIZARD"])
     autoWizardBtn:SetScript("OnClick", function()
-        if Akimbo.Wizard and Akimbo.Wizard.Open then
-            Akimbo.Wizard.openedFromOptions = true
+        if Offhand.Wizard and Offhand.Wizard.Open then
+            Offhand.Wizard.openedFromOptions = true
             configFrame:Hide()
-            Akimbo.Wizard:Open()
+            Offhand.Wizard:Open()
         end
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(autoWizardBtn, L["BTN_AUTO_WIZARD_TIP_TITLE"], L["BTN_AUTO_WIZARD_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(autoWizardBtn, L["BTN_AUTO_WIZARD_TIP_TITLE"], L["BTN_AUTO_WIZARD_TIP_DESC"])
     end
     configFrame.autoWizardBtn = autoWizardBtn
 
@@ -825,13 +823,13 @@ function Options:CreateFloatingPanel()
     end
 
     function Options:UpdateCardThemes()
-        local trimKey = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
-        local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+        local trimKey = (Offhand.db and Offhand.db.trimColor) or "GOLD"
+        local themeKey = (Offhand.db and Offhand.db.theme) or "CLASSIC"
         local c
-        if trimKey == "CUSTOM" and Akimbo.db and Akimbo.db.customTrimColor then
-            c = Akimbo.db.customTrimColor
+        if trimKey == "CUSTOM" and Offhand.db and Offhand.db.customTrimColor then
+            c = Offhand.db.customTrimColor
         else
-            local pals = Akimbo.Themes and Akimbo.Themes.GetColorPalettes and Akimbo.Themes:GetColorPalettes()
+            local pals = Offhand.Themes and Offhand.Themes.GetColorPalettes and Offhand.Themes:GetColorPalettes()
             c = pals and pals[trimKey]
         end
         local br = c and { c.r * 0.75, c.g * 0.75, c.b * 0.75, 0.85 } or { 0.55, 0.50, 0.35, 0.85 }
@@ -901,9 +899,9 @@ function Options:CreateFloatingPanel()
     -- ========================================================================
     local card1_1 = CreateCard(tab1, "Display Mode & Dual Monitor Orientation", 0, 104)
 
-    local enableCheck = CreateNativeCheckbox(card1_1, "Enable Akimbo Dual Monitor Mode",
-        function() return Akimbo.db and Akimbo.db.enabled end,
-        function(val) Akimbo.db.enabled = val end,
+    local enableCheck = CreateNativeCheckbox(card1_1, "Enable Offhand Dual Monitor Mode",
+        function() return Offhand.db and Offhand.db.enabled end,
+        function(val) Offhand.db.enabled = val end,
         L["CHECK_CANVAS_ENABLED_TIP_TITLE"], L["CHECK_CANVAS_ENABLED_TIP_DESC"]
     )
     enableCheck:SetPoint("TOPLEFT", 12, -26)
@@ -913,7 +911,7 @@ function Options:CreateFloatingPanel()
         function() return (seamGuideLine and seamGuideLine:IsShown()) or false end,
         function(val)
             if val then
-                Options:ShowSeamGuide(Akimbo.db and Akimbo.db.deckWidthRatio)
+                Options:ShowSeamGuide(Offhand.db and Offhand.db.deckWidthRatio)
             else
                 Options:HideSeamGuide()
             end
@@ -924,31 +922,31 @@ function Options:CreateFloatingPanel()
     configFrame.laserCheck = laserCheck
 
     local rPortraitLeft = CreateNativeRadioButton(card1_1, "Portrait (Left) + Game (Right)",
-        function() return (Akimbo.db and Akimbo.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Akimbo.db.primaryPosition == "RIGHT") end,
+        function() return (Offhand.db and Offhand.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Offhand.db.primaryPosition == "RIGHT") end,
         function()
-            Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-            Akimbo.db.primaryPosition = "RIGHT"
+            Offhand.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+            Offhand.db.primaryPosition = "RIGHT"
         end,
         L["PRESET_PL_LR_TIP_TITLE"], L["PRESET_PL_LR_TIP_DESC"]
     )
     rPortraitLeft:SetPoint("TOPLEFT", 12, -50)
 
     local rPortraitRight = CreateNativeRadioButton(card1_1, "Game (Left) + Portrait (Right)",
-        function() return (Akimbo.db and Akimbo.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Akimbo.db.primaryPosition == "LEFT") end,
+        function() return (Offhand.db and Offhand.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Offhand.db.primaryPosition == "LEFT") end,
         function()
-            Akimbo.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
-            Akimbo.db.primaryPosition = "LEFT"
+            Offhand.db.layoutPreset = "PORTRAIT_LEFT_LANDSCAPE_RIGHT"
+            Offhand.db.primaryPosition = "LEFT"
         end,
         L["PRESET_GL_PR_TIP_TITLE"], L["PRESET_GL_PR_TIP_DESC"]
     )
     rPortraitRight:SetPoint("TOPLEFT", 360, -50)
 
     local rDual = CreateNativeRadioButton(card1_1, "Dual Landscape Side-by-Side (50/50)",
-        function() return (Akimbo.db and Akimbo.db.layoutPreset == "LANDSCAPE_DUAL") end,
+        function() return (Offhand.db and Offhand.db.layoutPreset == "LANDSCAPE_DUAL") end,
         function()
-            Akimbo.db.layoutPreset = "LANDSCAPE_DUAL"
-            Akimbo.db.primaryPosition = "LEFT"
-            Akimbo.db.deckWidthRatio = 0.50
+            Offhand.db.layoutPreset = "LANDSCAPE_DUAL"
+            Offhand.db.primaryPosition = "LEFT"
+            Offhand.db.deckWidthRatio = 0.50
         end,
         L["PRESET_DUAL_LANDSCAPE_TIP_TITLE"], L["PRESET_DUAL_LANDSCAPE_TIP_DESC"]
     )
@@ -961,8 +959,8 @@ function Options:CreateFloatingPanel()
     autoDetectBtn:SetScript("OnClick", function()
         Options:AutoConfigure()
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(autoDetectBtn, L["BTN_1CLICK_AUTOCONFIG_TIP_TITLE"], L["BTN_1CLICK_AUTOCONFIG_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(autoDetectBtn, L["BTN_1CLICK_AUTOCONFIG_TIP_TITLE"], L["BTN_1CLICK_AUTOCONFIG_TIP_DESC"])
     end
     card1_1.autoDetectBtn = autoDetectBtn
 
@@ -970,30 +968,30 @@ function Options:CreateFloatingPanel()
     local card1_2 = CreateCard(tab1, "3D Game Viewport Geometry & Bezel Seam", -118, 120)
 
     local r169 = CreateNativeRadioButton(card1_2, "16:9 Standard",
-        function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "16_9") end,
-        function() Akimbo.db.aspectRatioMode = "16_9" end,
+        function() return (Offhand.db and Offhand.db.aspectRatioMode == "16_9") end,
+        function() Offhand.db.aspectRatioMode = "16_9" end,
         L["AR_16_9_TIP_TITLE"], L["AR_16_9_TIP_DESC"]
     )
     r169:SetPoint("TOPLEFT", 12, -26)
 
     local r219 = CreateNativeRadioButton(card1_2, "21:9 Ultrawide",
-        function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "21_9") end,
-        function() Akimbo.db.aspectRatioMode = "21_9" end,
+        function() return (Offhand.db and Offhand.db.aspectRatioMode == "21_9") end,
+        function() Offhand.db.aspectRatioMode = "21_9" end,
         L["AR_21_9_TIP_TITLE"], L["AR_21_9_TIP_DESC"]
     )
     r219:SetPoint("TOPLEFT", 200, -26)
 
     local rFill = CreateNativeRadioButton(card1_2, "Fit Window Height (Fill)",
-        function() return (Akimbo.db and Akimbo.db.aspectRatioMode == "FILL") end,
-        function() Akimbo.db.aspectRatioMode = "FILL" end,
+        function() return (Offhand.db and Offhand.db.aspectRatioMode == "FILL") end,
+        function() Offhand.db.aspectRatioMode = "FILL" end,
         L["AR_FILL_TIP_TITLE"], L["AR_FILL_TIP_DESC"]
     )
     rFill:SetPoint("TOPLEFT", 380, -26)
 
     local seamSlider = CreateNativeSlider(card1_2, "Bezel Seam Width (% of Window)", 0.15, 0.80, 0.005,
-        function() return (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36 end,
+        function() return (Offhand.db and Offhand.db.deckWidthRatio) or 0.36 end,
         function(val)
-            Akimbo.db.deckWidthRatio = val
+            Offhand.db.deckWidthRatio = val
             Options:ShowSeamGuide(val)
             laserCheck:SetChecked(true)
         end,
@@ -1008,21 +1006,21 @@ function Options:CreateFloatingPanel()
     p36Btn:SetPoint("LEFT", seamSlider, "RIGHT", 16, -6)
     p36Btn:SetText("36%")
     p36Btn:SetScript("OnClick", function() seamSlider:SetValue(0.36) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p36Btn, L["WIZARD_PRESET_SEAM_36_TIP_TITLE"], L["WIZARD_PRESET_SEAM_36_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p36Btn, L["WIZARD_PRESET_SEAM_36_TIP_TITLE"], L["WIZARD_PRESET_SEAM_36_TIP_DESC"]) end
 
     local p50Btn = CreateFrame("Button", nil, card1_2, "UIPanelButtonTemplate")
     p50Btn:SetSize(66, 22)
     p50Btn:SetPoint("LEFT", p36Btn, "RIGHT", 6, 0)
     p50Btn:SetText("50%")
     p50Btn:SetScript("OnClick", function() seamSlider:SetValue(0.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p50Btn, L["WIZARD_PRESET_SEAM_50_TIP_TITLE"], L["WIZARD_PRESET_SEAM_50_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p50Btn, L["WIZARD_PRESET_SEAM_50_TIP_TITLE"], L["WIZARD_PRESET_SEAM_50_TIP_DESC"]) end
 
     local p55Btn = CreateFrame("Button", nil, card1_2, "UIPanelButtonTemplate")
     p55Btn:SetSize(66, 22)
     p55Btn:SetPoint("LEFT", p50Btn, "RIGHT", 6, 0)
     p55Btn:SetText("55%")
     p55Btn:SetScript("OnClick", function() seamSlider:SetValue(0.55) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p55Btn, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p55Btn, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
 
 
     local card1_3 = CreateCard(tab1, "Screen Bottom Offset & Global UI Scale", -252, 210)
@@ -1031,8 +1029,8 @@ function Options:CreateFloatingPanel()
     bottomControl:SetPoint("TOPLEFT", 12, -26)
 
     local hudSlider = CreateNativeSlider(card1_3, "Global UI Size (% of Game View)", 0.25, 1.25, 0.01,
-        function() return (Akimbo.db and Akimbo.db.hudScale) or 0.70 end,
-        function(val) Akimbo.db.hudScale = val end,
+        function() return (Offhand.db and Offhand.db.hudScale) or 0.70 end,
+        function(val) Offhand.db.hudScale = val end,
         "%.0f%%",
         L["SLIDER_HUD_SCALE_TIP_TITLE"], L["SLIDER_HUD_SCALE_TIP_DESC"]
     )
@@ -1044,35 +1042,35 @@ function Options:CreateFloatingPanel()
     p56Btn:SetPoint("TOPLEFT", 360, -82)
     p56Btn:SetText("56%")
     p56Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.56) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
 
     local p65Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p65Btn:SetSize(56, 22)
     p65Btn:SetPoint("LEFT", p56Btn, "RIGHT", 5, 0)
     p65Btn:SetText("65%")
     p65Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.65) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p65Btn, L["WIZARD_PRESET_SCALE_65_TIP_TITLE"], L["WIZARD_PRESET_SCALE_65_TIP_DESC"]) end
 
     local p70Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p70Btn:SetSize(56, 22)
     p70Btn:SetPoint("LEFT", p65Btn, "RIGHT", 5, 0)
     p70Btn:SetText("70%")
     p70Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.70) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p70Btn, L["WIZARD_PRESET_SCALE_70_TIP_TITLE"], L["WIZARD_PRESET_SCALE_70_TIP_DESC"]) end
 
     local p85Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p85Btn:SetSize(56, 22)
     p85Btn:SetPoint("LEFT", p70Btn, "RIGHT", 5, 0)
     p85Btn:SetText("85%")
     p85Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.85) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"], L["WIZARD_PRESET_SCALE_85_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p85Btn, L["WIZARD_PRESET_SCALE_85_TIP_TITLE"], L["WIZARD_PRESET_SCALE_85_TIP_DESC"]) end
 
     local p100Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p100Btn:SetSize(56, 22)
     p100Btn:SetPoint("LEFT", p85Btn, "RIGHT", 5, 0)
     p100Btn:SetText("100%")
     p100Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(1.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p100Btn, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     local hudNote = card1_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     hudNote:SetPoint("TOPLEFT", 360, -112)
@@ -1087,9 +1085,9 @@ function Options:CreateFloatingPanel()
 
     local mapScaleSlider = CreateNativeSlider(card2_1, "Workspace Map Scale (% of Native)", 0.50, 2.50, 0.05,
         function()
-            local s = Akimbo.db and Akimbo.db.workspaceMapScale
+            local s = Offhand.db and Offhand.db.workspaceMapScale
             if s == "AUTO" then
-                local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+                local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
                 local baseWidth = (WorldMapFrame and WorldMapFrame:GetWidth()) or 610
                 if baseWidth <= 0 then baseWidth = 610 end
                 local availableWidth = (m and m.deckWidth and (m.deckWidth - 24)) or 610
@@ -1098,9 +1096,9 @@ function Options:CreateFloatingPanel()
             return (tonumber(s) and tonumber(s)) or 1.00
         end,
         function(val)
-            Akimbo.db.workspaceMapScale = val
-            if Akimbo.Canvas and Akimbo.Canvas.ConfigureWorldMap then
-                Akimbo.Canvas:ConfigureWorldMap()
+            Offhand.db.workspaceMapScale = val
+            if Offhand.Canvas and Offhand.Canvas.ConfigureWorldMap then
+                Offhand.Canvas:ConfigureWorldMap()
             end
         end,
         "%.0f%%",
@@ -1114,57 +1112,57 @@ function Options:CreateFloatingPanel()
     autoFitBtn:SetPoint("LEFT", mapScaleSlider, "RIGHT", 12, -6)
     autoFitBtn:SetText("Auto-Fit")
     autoFitBtn:SetScript("OnClick", function()
-        Akimbo.db.workspaceMapScale = "AUTO"
-        if Akimbo.Canvas and Akimbo.Canvas.ConfigureWorldMap then
-            Akimbo.Canvas:ConfigureWorldMap()
+        Offhand.db.workspaceMapScale = "AUTO"
+        if Offhand.Canvas and Offhand.Canvas.ConfigureWorldMap then
+            Offhand.Canvas:ConfigureWorldMap()
         end
-        local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+        local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
         local baseWidth = (WorldMapFrame and WorldMapFrame:GetWidth()) or 610
         if baseWidth <= 0 then baseWidth = 610 end
         local availableWidth = (m and m.deckWidth and (m.deckWidth - 24)) or 610
         local computedScale = math.max(0.50, math.min(2.50, math.floor((availableWidth / baseWidth) * 100 + 0.5) / 100))
         mapScaleSlider:SetValue(computedScale)
     end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(autoFitBtn, L["BTN_MAP_AUTOFIT_TIP_TITLE"], L["BTN_MAP_AUTOFIT_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(autoFitBtn, L["BTN_MAP_AUTOFIT_TIP_TITLE"], L["BTN_MAP_AUTOFIT_TIP_DESC"]) end
 
     local p100Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p100Btn:SetSize(48, 22)
     p100Btn:SetPoint("LEFT", autoFitBtn, "RIGHT", 5, 0)
     p100Btn:SetText("100%")
     p100Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, L["BTN_MAP_100_TIP_TITLE"], L["BTN_MAP_100_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p100Btn, L["BTN_MAP_100_TIP_TITLE"], L["BTN_MAP_100_TIP_DESC"]) end
 
     local p150Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p150Btn:SetSize(48, 22)
     p150Btn:SetPoint("LEFT", p100Btn, "RIGHT", 5, 0)
     p150Btn:SetText("150%")
     p150Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(1.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p150Btn, L["BTN_MAP_150_TIP_TITLE"], L["BTN_MAP_150_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p150Btn, L["BTN_MAP_150_TIP_TITLE"], L["BTN_MAP_150_TIP_DESC"]) end
 
     local p200Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p200Btn:SetSize(48, 22)
     p200Btn:SetPoint("LEFT", p150Btn, "RIGHT", 5, 0)
     p200Btn:SetText("200%")
     p200Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.00) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p200Btn, L["BTN_MAP_200_TIP_TITLE"], L["BTN_MAP_200_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p200Btn, L["BTN_MAP_200_TIP_TITLE"], L["BTN_MAP_200_TIP_DESC"]) end
 
     local p250Btn = CreateFrame("Button", nil, card2_1, "UIPanelButtonTemplate")
     p250Btn:SetSize(48, 22)
     p250Btn:SetPoint("LEFT", p200Btn, "RIGHT", 5, 0)
     p250Btn:SetText("250%")
     p250Btn:SetScript("OnClick", function() mapScaleSlider:SetValue(2.50) end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(p250Btn, L["BTN_MAP_250_TIP_TITLE"], L["BTN_MAP_250_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(p250Btn, L["BTN_MAP_250_TIP_TITLE"], L["BTN_MAP_250_TIP_DESC"]) end
 
     local mapTip = card2_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     mapTip:SetPoint("TOPLEFT", 12, -76)
     mapTip:SetText("|cffffd100Map Zoom Tip:|r Hold |cffffffffCtrl + Mousewheel|r over the World Map to scale it in real-time!")
 
     local mapMoveCheck = CreateNativeCheckbox(card2_1, "Keep World Map open while running / walking",
-        function() return Akimbo.db and Akimbo.db.preventMapCloseOnMove end,
+        function() return Offhand.db and Offhand.db.preventMapCloseOnMove end,
         function(val)
-            Akimbo.db.preventMapCloseOnMove = val
-            if Akimbo.Canvas and Akimbo.Canvas.UpdateMapMovementBehavior then
-                Akimbo.Canvas:UpdateMapMovementBehavior()
+            Offhand.db.preventMapCloseOnMove = val
+            if Offhand.Canvas and Offhand.Canvas.UpdateMapMovementBehavior then
+                Offhand.Canvas:UpdateMapMovementBehavior()
             end
         end,
         "Persistent Map Movement", "Prevents the World Map from closing automatically when your character moves."
@@ -1184,8 +1182,8 @@ function Options:CreateFloatingPanel()
     local card2_2 = CreateCard(tab2, "Workspace Window Management & Persistence", -164, 190)
 
     local panelCheck = CreateNativeCheckbox(card2_2, "Keep panels placed on workspace open independently",
-        function() return Akimbo.db and Akimbo.db.independentWorkspacePanels end,
-        function(val) Akimbo.db.independentWorkspacePanels = val end,
+        function() return Offhand.db and Offhand.db.independentWorkspacePanels end,
+        function(val) Offhand.db.independentWorkspacePanels = val end,
         L["CHECK_ESC_PERSIST_TIP_TITLE"], L["CHECK_ESC_PERSIST_TIP_DESC"]
     )
     panelCheck:SetPoint("TOPLEFT", 10, -26)
@@ -1195,11 +1193,11 @@ function Options:CreateFloatingPanel()
     panelDesc:SetText("|cff888888Allows opening bags, character pane, spellbook & map simultaneously.|r")
 
     local escapeCheck = CreateNativeCheckbox(card2_2, "Keep workspace panels open when pressing Escape",
-        function() return Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false end,
+        function() return Offhand.db and Offhand.db.persistentWorkspacePanels ~= false end,
         function(val)
-            Akimbo.db.persistentWorkspacePanels = val
-            if Akimbo.Canvas and Akimbo.Canvas.UpdatePersistenceBehavior then
-                Akimbo.Canvas:UpdatePersistenceBehavior()
+            Offhand.db.persistentWorkspacePanels = val
+            if Offhand.Canvas and Offhand.Canvas.UpdatePersistenceBehavior then
+                Offhand.Canvas:UpdatePersistenceBehavior()
             end
         end,
         L["CHECK_ESC_PERSIST_TIP_TITLE"], L["CHECK_ESC_PERSIST_TIP_DESC"]
@@ -1211,15 +1209,15 @@ function Options:CreateFloatingPanel()
     escapeDesc:SetText("|cff888888Escape clears targets or opens Game Menu without closing workspace elements.|r")
 
     local seamCheck = CreateNativeCheckbox(card2_2, "Reroute popups & dialogs away from center bezel",
-        function() return Akimbo.db and Akimbo.db.seamRedirect end,
-        function(val) Akimbo.db.seamRedirect = val end,
+        function() return Offhand.db and Offhand.db.seamRedirect end,
+        function(val) Offhand.db.seamRedirect = val end,
         L["CHECK_SEAM_REDIRECT_TIP_TITLE"], L["CHECK_SEAM_REDIRECT_TIP_DESC"]
     )
     seamCheck:SetPoint("TOPLEFT", 10, -114)
 
     local forceCheck = CreateNativeCheckbox(card2_2, "Force Dual Mode (Preview on single display)",
-        function() return (Akimbo.db and Akimbo.db.forceDualOnSingle) or false end,
-        function(val) Akimbo.db.forceDualOnSingle = val end,
+        function() return (Offhand.db and Offhand.db.forceDualOnSingle) or false end,
+        function(val) Offhand.db.forceDualOnSingle = val end,
         "Force Dual Mode", "Forces multi-monitor canvas logic on single-screen setups for testing and preview."
     )
     forceCheck:SetPoint("TOPLEFT", 10, -138)
@@ -1232,8 +1230,8 @@ function Options:CreateFloatingPanel()
     local card2_3 = CreateCard(tab2, "Bezel Compensation & Window Spanning", -366, 104)
 
     local bezelSlider = CreateNativeSlider(card2_3, "Bezel Compensation Gap", 0, 100, 2,
-        function() return (Akimbo.db and Akimbo.db.bezelGap) or 0 end,
-        function(val) Akimbo.db.bezelGap = val end,
+        function() return (Offhand.db and Offhand.db.bezelGap) or 0 end,
+        function(val) Offhand.db.bezelGap = val end,
         "%d px",
         L["SLIDER_BEZEL_GAP_TIP_TITLE"], L["SLIDER_BEZEL_GAP_TIP_DESC"]
     )
@@ -1245,7 +1243,7 @@ function Options:CreateFloatingPanel()
     guideLinkBtn:SetPoint("TOPLEFT", 350, -38)
     guideLinkBtn:SetText(L["BTN_GUIDE_LINK"])
     guideLinkBtn:SetScript("OnClick", function() Options:ShowSetupGuide() end)
-    if Akimbo.SetTooltip then Akimbo:SetTooltip(guideLinkBtn, L["BTN_GUIDE_LINK_TIP_TITLE"], L["BTN_GUIDE_LINK_TIP_DESC"]) end
+    if Offhand.SetTooltip then Offhand:SetTooltip(guideLinkBtn, L["BTN_GUIDE_LINK_TIP_TITLE"], L["BTN_GUIDE_LINK_TIP_DESC"]) end
 
     local bezelNote = card2_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
     bezelNote:SetPoint("TOPLEFT", 12, -76)
@@ -1257,12 +1255,12 @@ function Options:CreateFloatingPanel()
     local card3_1 = CreateCard(tab3, "Visual Theme Preset", 0, 114)
 
     local rClassic = CreateNativeRadioButton(card3_1, "Classic Warcraft",
-        function() return (Akimbo.db and Akimbo.db.theme == "CLASSIC") end,
+        function() return (Offhand.db and Offhand.db.theme == "CLASSIC") end,
         function()
-            Akimbo.db.theme = "CLASSIC"
-            Akimbo.db.trimColor = "GOLD"
-            Akimbo.db.canvasColor = "CLASSIC_STONE"
-            Akimbo:UpdateTheme()
+            Offhand.db.theme = "CLASSIC"
+            Offhand.db.trimColor = "GOLD"
+            Offhand.db.canvasColor = "CLASSIC_STONE"
+            Offhand:UpdateTheme()
         end,
         L["THEME_CLASSIC_TIP_TITLE"], L["THEME_CLASSIC_TIP_DESC"]
     )
@@ -1273,12 +1271,12 @@ function Options:CreateFloatingPanel()
     subClassic:SetText("|cff888888Authentic WoW gold & stone|r")
 
     local rSlate = CreateNativeRadioButton(card3_1, "Blizzard Slate",
-        function() return (Akimbo.db and Akimbo.db.theme == "BLIZZARD_SLATE") end,
+        function() return (Offhand.db and Offhand.db.theme == "BLIZZARD_SLATE") end,
         function()
-            Akimbo.db.theme = "BLIZZARD_SLATE"
-            Akimbo.db.trimColor = "SILVER"
-            Akimbo.db.canvasColor = "CHARCOAL"
-            Akimbo:UpdateTheme()
+            Offhand.db.theme = "BLIZZARD_SLATE"
+            Offhand.db.trimColor = "SILVER"
+            Offhand.db.canvasColor = "CHARCOAL"
+            Offhand:UpdateTheme()
         end,
         L["THEME_SLATE_TIP_TITLE"], L["THEME_SLATE_TIP_DESC"]
     )
@@ -1289,12 +1287,12 @@ function Options:CreateFloatingPanel()
     subSlate:SetText("|cff888888Charcoal dialog & silver trim|r")
 
     local rTinker = CreateNativeRadioButton(card3_1, "Gnomish Tinker",
-        function() return (Akimbo.db and Akimbo.db.theme == "GNOMISH_TINKER") end,
+        function() return (Offhand.db and Offhand.db.theme == "GNOMISH_TINKER") end,
         function()
-            Akimbo.db.theme = "GNOMISH_TINKER"
-            Akimbo.db.trimColor = "TINKER_BRASS"
-            Akimbo.db.canvasColor = "TINKER_SLATE"
-            Akimbo:UpdateTheme()
+            Offhand.db.theme = "GNOMISH_TINKER"
+            Offhand.db.trimColor = "TINKER_BRASS"
+            Offhand.db.canvasColor = "TINKER_SLATE"
+            Offhand:UpdateTheme()
         end,
         L["THEME_TINKER_TIP_TITLE"], L["THEME_TINKER_TIP_DESC"]
     )
@@ -1305,12 +1303,12 @@ function Options:CreateFloatingPanel()
     subTinker:SetText("|cff00ccffClockwork brass & cyan glow|r")
 
     local rObsidian = CreateNativeRadioButton(card3_1, "Obsidian Dark",
-        function() return (Akimbo.db and Akimbo.db.theme == "OBSIDIAN") end,
+        function() return (Offhand.db and Offhand.db.theme == "OBSIDIAN") end,
         function()
-            Akimbo.db.theme = "OBSIDIAN"
-            Akimbo.db.trimColor = "BRONZE"
-            Akimbo.db.canvasColor = "CHARCOAL"
-            Akimbo:UpdateTheme()
+            Offhand.db.theme = "OBSIDIAN"
+            Offhand.db.trimColor = "BRONZE"
+            Offhand.db.canvasColor = "CHARCOAL"
+            Offhand:UpdateTheme()
         end,
         L["THEME_OBSIDIAN_TIP_TITLE"], L["THEME_OBSIDIAN_TIP_DESC"]
     )
@@ -1321,11 +1319,11 @@ function Options:CreateFloatingPanel()
     subObsidian:SetText("|cff888888Dark neutral slate workspace|r")
 
     local rPitchBlack = CreateNativeRadioButton(card3_1, "Pitch Black",
-        function() return (Akimbo.db and Akimbo.db.theme == "PITCH_BLACK") end,
+        function() return (Offhand.db and Offhand.db.theme == "PITCH_BLACK") end,
         function()
-            Akimbo.db.theme = "PITCH_BLACK"
-            Akimbo.db.canvasColor = "PURE_BLACK"
-            Akimbo:UpdateTheme()
+            Offhand.db.theme = "PITCH_BLACK"
+            Offhand.db.canvasColor = "PURE_BLACK"
+            Offhand:UpdateTheme()
         end,
         L["THEME_PITCH_BLACK_TIP_TITLE"], L["THEME_PITCH_BLACK_TIP_DESC"]
     )
@@ -1361,12 +1359,12 @@ function Options:CreateFloatingPanel()
         btn.trimData = t
         btn:SetText(t[2])
         btn:SetScript("OnClick", function()
-            Akimbo.db.trimColor = trimKey
-            Akimbo:UpdateTheme()
+            Offhand.db.trimColor = trimKey
+            Offhand:UpdateTheme()
             Options:RefreshPanel()
         end)
-        if Akimbo.SetTooltip then
-            Akimbo:SetTooltip(btn, string.format(L["BTN_TRIM_ACCENT_TIP_TITLE_FMT"], t[2]), string.format(L["BTN_TRIM_ACCENT_TIP_DESC_FMT"], t[2]))
+        if Offhand.SetTooltip then
+            Offhand:SetTooltip(btn, string.format(L["BTN_TRIM_ACCENT_TIP_TITLE_FMT"], t[2]), string.format(L["BTN_TRIM_ACCENT_TIP_DESC_FMT"], t[2]))
         end
         tinsert(trimBtnFrames, btn)
     end
@@ -1376,20 +1374,20 @@ function Options:CreateFloatingPanel()
     customTrimBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
     customTrimBtn:SetText(L["BTN_TRIM_CUSTOM"])
     customTrimBtn:SetScript("OnClick", function()
-        local cur = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
-        Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, 1.0, false, function(r, g, b)
-            Akimbo.db.customTrimColor = { r = r, g = g, b = b }
-            Akimbo.db.trimColor = "CUSTOM"
-            Akimbo:UpdateTheme()
+        local cur = (Offhand.db and Offhand.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
+        Offhand:OpenColorPicker(cur.r, cur.g, cur.b, 1.0, false, function(r, g, b)
+            Offhand.db.customTrimColor = { r = r, g = g, b = b }
+            Offhand.db.trimColor = "CUSTOM"
+            Offhand:UpdateTheme()
             Options:RefreshPanel()
         end)
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(customTrimBtn, L["BTN_TRIM_CUSTOM_TIP_TITLE"], L["BTN_TRIM_CUSTOM_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(customTrimBtn, L["BTN_TRIM_CUSTOM_TIP_TITLE"], L["BTN_TRIM_CUSTOM_TIP_DESC"])
     end
 
     function Options:UpdateTrimHighlights()
-        local curTrim = (Akimbo.db and Akimbo.db.trimColor) or "GOLD"
+        local curTrim = (Offhand.db and Offhand.db.trimColor) or "GOLD"
         for _, btn in ipairs(trimBtnFrames) do
             local t = btn.trimData
             local isSelected = (btn.trimKey == curTrim)
@@ -1407,7 +1405,7 @@ function Options:CreateFloatingPanel()
         end
         if customTrimBtn then
             local isCustom = (curTrim == "CUSTOM")
-            local c = (Akimbo.db and Akimbo.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
+            local c = (Offhand.db and Offhand.db.customTrimColor) or { r = 1.0, g = 0.82, b = 0.0 }
             if isCustom then
                 customTrimBtn:SetText(string.format(L["BTN_TRIM_CUSTOM_ACTIVE_FMT"], math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
                 if customTrimBtn.LockHighlight then customTrimBtn:LockHighlight() end
@@ -1449,12 +1447,12 @@ function Options:CreateFloatingPanel()
         btn.canvasTitle = c[2]
         btn:SetText(c[2])
         btn:SetScript("OnClick", function()
-            Akimbo.db.canvasColor = canvasKey
-            Akimbo:UpdateTheme()
+            Offhand.db.canvasColor = canvasKey
+            Offhand:UpdateTheme()
             Options:RefreshPanel()
         end)
-        if Akimbo.SetTooltip then
-            Akimbo:SetTooltip(btn, string.format(L["BTN_CANVAS_TONE_TIP_TITLE_FMT"], c[2]), string.format(L["BTN_CANVAS_TONE_TIP_DESC_FMT"], c[2]))
+        if Offhand.SetTooltip then
+            Offhand:SetTooltip(btn, string.format(L["BTN_CANVAS_TONE_TIP_TITLE_FMT"], c[2]), string.format(L["BTN_CANVAS_TONE_TIP_DESC_FMT"], c[2]))
         end
         tinsert(canvasBtnFrames, btn)
     end
@@ -1466,26 +1464,26 @@ function Options:CreateFloatingPanel()
     customCanvasBtn:SetPoint("TOPLEFT", 12 + 2 * (155 + 8), -58)
     customCanvasBtn:SetText(L["BTN_CANVAS_CUSTOM"])
     local function OpenCustomCanvasPicker()
-        local cur = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
-        local curA = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
-        Akimbo:OpenColorPicker(cur.r, cur.g, cur.b, curA, true, function(r, g, b, a)
-            Akimbo.db.customCanvasColor = { r = r, g = g, b = b }
+        local cur = (Offhand.db and Offhand.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+        local curA = (Offhand.db and Offhand.db.canvasAlpha) or 0.95
+        Offhand:OpenColorPicker(cur.r, cur.g, cur.b, curA, true, function(r, g, b, a)
+            Offhand.db.customCanvasColor = { r = r, g = g, b = b }
             if a ~= nil then
-                Akimbo.db.canvasAlpha = a
+                Offhand.db.canvasAlpha = a
             end
-            Akimbo.db.canvasColor = "CUSTOM"
-            Akimbo:UpdateTheme()
+            Offhand.db.canvasColor = "CUSTOM"
+            Offhand:UpdateTheme()
             if Options.UpdateCanvasHighlights then
                 Options:UpdateCanvasHighlights()
             end
             if alphaSlider and alphaSlider.SetValue then
-                alphaSlider:SetValue(Akimbo.db.canvasAlpha)
+                alphaSlider:SetValue(Offhand.db.canvasAlpha)
             end
         end)
     end
     customCanvasBtn:SetScript("OnClick", OpenCustomCanvasPicker)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(customCanvasBtn, L["BTN_CANVAS_CUSTOM_TIP_TITLE"], L["BTN_CANVAS_CUSTOM_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(customCanvasBtn, L["BTN_CANVAS_CUSTOM_TIP_TITLE"], L["BTN_CANVAS_CUSTOM_TIP_DESC"])
     end
 
     -- Live Workspace Canvas Swatch Preview (Interactive click-to-pick)
@@ -1494,8 +1492,8 @@ function Options:CreateFloatingPanel()
     swatchCard:SetPoint("TOPLEFT", 350, -88)
     if swatchCard.EnableMouse then swatchCard:EnableMouse(true) end
     swatchCard:SetScript("OnMouseDown", OpenCustomCanvasPicker)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(swatchCard, L["BTN_CANVAS_PREVIEW_TIP_TITLE"], L["BTN_CANVAS_PREVIEW_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(swatchCard, L["BTN_CANVAS_PREVIEW_TIP_TITLE"], L["BTN_CANVAS_PREVIEW_TIP_DESC"])
     end
 
     local swatchText = swatchCard:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -1503,8 +1501,8 @@ function Options:CreateFloatingPanel()
     card3_3.swatchCard = swatchCard
 
     function Options:UpdateCanvasHighlights()
-        local curColor = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
-        local curAlpha = (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
+        local curColor = (Offhand.db and Offhand.db.canvasColor) or "CHARCOAL"
+        local curAlpha = (Offhand.db and Offhand.db.canvasAlpha) or 0.95
         for _, btn in ipairs(canvasBtnFrames) do
             local isSelected = (btn.canvasKey == curColor)
             btn:SetText(btn.canvasTitle)
@@ -1521,7 +1519,7 @@ function Options:CreateFloatingPanel()
         end
         if customCanvasBtn then
             local isCustom = (curColor == "CUSTOM")
-            local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+            local c = (Offhand.db and Offhand.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
             if isCustom then
                 customCanvasBtn:SetText(string.format(L["BTN_CANVAS_CUSTOM_ACTIVE_FMT"], math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5)))
                 if customCanvasBtn.LockHighlight then customCanvasBtn:LockHighlight() end
@@ -1535,14 +1533,14 @@ function Options:CreateFloatingPanel()
             end
         end
 
-        if Akimbo.Themes and Akimbo.Themes.ApplyCanvasTheme then
-            Akimbo.Themes:ApplyCanvasTheme(swatchCard)
+        if Offhand.Themes and Offhand.Themes.ApplyCanvasTheme then
+            Offhand.Themes:ApplyCanvasTheme(swatchCard)
             local pName
             if curColor == "CUSTOM" then
-                local c = (Akimbo.db and Akimbo.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
+                local c = (Offhand.db and Offhand.db.customCanvasColor) or { r = 0.12, g = 0.22, b = 0.35 }
                 pName = string.format("Custom (#%02x%02x%02x)", math.floor(c.r*255+0.5), math.floor(c.g*255+0.5), math.floor(c.b*255+0.5))
             else
-                local pals = Akimbo.Themes:GetCanvasPalettes()
+                local pals = Offhand.Themes:GetCanvasPalettes()
                 pName = pals and pals[curColor] and pals[curColor].name or curColor
             end
             swatchText:SetText(string.format("|cffffd100Preview:|r %s (%d%%)", pName, math.floor(curAlpha * 100 + 0.5)))
@@ -1550,10 +1548,10 @@ function Options:CreateFloatingPanel()
     end
 
     alphaSlider = CreateNativeSlider(card3_3, "Workspace Background Opacity", 0.10, 1.0, 0.05,
-        function() return (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95 end,
+        function() return (Offhand.db and Offhand.db.canvasAlpha) or 0.95 end,
         function(val)
-            Akimbo.db.canvasAlpha = val
-            Akimbo:UpdateTheme()
+            Offhand.db.canvasAlpha = val
+            Offhand:UpdateTheme()
             if Options.UpdateCanvasHighlights then
                 Options:UpdateCanvasHighlights()
             end
@@ -1575,9 +1573,9 @@ function Options:CreateFloatingPanel()
     
     local activeProfileLabel = card4_1:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
     activeProfileLabel:SetPoint("TOPLEFT", 16, -24)
-    activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((AkimboCharDB and AkimboCharDB.activeProfile) or "Default") .. "|r")
+    activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((OffhandCharDB and OffhandCharDB.activeProfile) or "Default") .. "|r")
 
-    local profileScroll = CreateFrame("ScrollFrame", "AkimboProfileScrollFrame", card4_1, "UIPanelScrollFrameTemplate")
+    local profileScroll = CreateFrame("ScrollFrame", "OffhandProfileScrollFrame", card4_1, "UIPanelScrollFrameTemplate")
     profileScroll:SetPoint("TOPLEFT", 16, -56)
     profileScroll:SetSize(280, 420)
     
@@ -1632,8 +1630,8 @@ function Options:CreateFloatingPanel()
     createBtn:SetText(L["PROFILES_BTN_CREATE"] or "Create")
 
     function Options:UpdateProfileList()
-        local profiles = Akimbo.GetProfiles and Akimbo:GetProfiles() or {"Default"}
-        activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((AkimboCharDB and AkimboCharDB.activeProfile) or "Default") .. "|r")
+        local profiles = Offhand.GetProfiles and Offhand:GetProfiles() or {"Default"}
+        activeProfileLabel:SetText((L["PROFILES_CURRENT_LABEL"] or "Active Profile:") .. " |cff00ff00" .. tostring((OffhandCharDB and OffhandCharDB.activeProfile) or "Default") .. "|r")
         
         -- Hide old buttons
         for _, btn in ipairs(profileButtons) do btn:Hide() end
@@ -1670,42 +1668,42 @@ function Options:CreateFloatingPanel()
             yOffset = yOffset - 22
         end
         
-        loadBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile))
-        copyBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile))
-        deleteBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (AkimboCharDB and AkimboCharDB.activeProfile) and selectedProfileName ~= "Default")
+        loadBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (OffhandCharDB and OffhandCharDB.activeProfile))
+        copyBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (OffhandCharDB and OffhandCharDB.activeProfile))
+        deleteBtn:SetEnabled(selectedProfileName ~= nil and selectedProfileName ~= (OffhandCharDB and OffhandCharDB.activeProfile) and selectedProfileName ~= "Default")
     end
 
     loadBtn:SetScript("OnClick", function()
-        if selectedProfileName and Akimbo.SetProfile then
-            Akimbo:SetProfile(selectedProfileName)
+        if selectedProfileName and Offhand.SetProfile then
+            Offhand:SetProfile(selectedProfileName)
         end
     end)
     copyBtn:SetScript("OnClick", function()
-        if selectedProfileName and Akimbo.CopyProfile then
-            Akimbo:CopyProfile(selectedProfileName)
+        if selectedProfileName and Offhand.CopyProfile then
+            Offhand:CopyProfile(selectedProfileName)
         end
     end)
     deleteBtn:SetScript("OnClick", function()
-        if selectedProfileName and Akimbo.DeleteProfile then
-            Akimbo:DeleteProfile(selectedProfileName)
+        if selectedProfileName and Offhand.DeleteProfile then
+            Offhand:DeleteProfile(selectedProfileName)
             selectedProfileName = nil
             Options:UpdateProfileList()
         end
     end)
     resetBtn:SetScript("OnClick", function()
-        if Akimbo.ResetConfig then Akimbo:ResetConfig() end
+        if Offhand.ResetConfig then Offhand:ResetConfig() end
     end)
     createBtn:SetScript("OnClick", function()
         local t = strtrim(createEditBox:GetText() or "")
-        if t ~= "" and Akimbo.CreateProfile then
-            local success, err = Akimbo:CreateProfile(t)
+        if t ~= "" and Offhand.CreateProfile then
+            local success, err = Offhand:CreateProfile(t)
             if success then
                 createEditBox:SetText("")
                 createEditBox:ClearFocus()
                 selectedProfileName = t
                 Options:UpdateProfileList()
             else
-                Akimbo:Print("|cffff3333" .. tostring(err) .. "|r")
+                Offhand:Print("|cffff3333" .. tostring(err) .. "|r")
             end
         end
     end)
@@ -1718,11 +1716,11 @@ function Options:CreateFloatingPanel()
     applyBtn:SetPoint("BOTTOMLEFT", 20, 14)
     applyBtn:SetText(L["BTN_APPLY_LAYOUT"])
     applyBtn:SetScript("OnClick", function()
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_LAYOUT_APPLIED"])
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_LAYOUT_APPLIED"])
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(applyBtn, L["BTN_APPLY_LAYOUT_TIP_TITLE"], L["BTN_APPLY_LAYOUT_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(applyBtn, L["BTN_APPLY_LAYOUT_TIP_TITLE"], L["BTN_APPLY_LAYOUT_TIP_DESC"])
     end
 
     local closePanelBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
@@ -1732,8 +1730,8 @@ function Options:CreateFloatingPanel()
     closePanelBtn:SetScript("OnClick", function()
         Options:Close()
     end)
-    if Akimbo.SetTooltip then
-        Akimbo:SetTooltip(closePanelBtn, L["BTN_SAVE_CLOSE_TIP_TITLE"], L["BTN_SAVE_CLOSE_TIP_DESC"])
+    if Offhand.SetTooltip then
+        Offhand:SetTooltip(closePanelBtn, L["BTN_SAVE_CLOSE_TIP_TITLE"], L["BTN_SAVE_CLOSE_TIP_DESC"])
     end
 
     function Options:RefreshPanel()
@@ -1742,28 +1740,28 @@ function Options:CreateFloatingPanel()
         banner:SetText(string.format("|cffffd100Display:|r %s  |cffffd100Window:|r %dx%d (AR %.2f:1)",
             info.description, info.physWidth, info.physHeight, info.aspectRatio))
 
-        local curSeam = (Akimbo.db and Akimbo.db.deckWidthRatio) or 0.36
+        local curSeam = (Offhand.db and Offhand.db.deckWidthRatio) or 0.36
         seamSlider:SetValue(curSeam)
         if seamSlider.UpdateText then seamSlider:UpdateText() end
 
-        enableCheck:SetChecked((Akimbo.db and Akimbo.db.enabled) or false)
+        enableCheck:SetChecked((Offhand.db and Offhand.db.enabled) or false)
         laserCheck:SetChecked((seamGuideLine and seamGuideLine:IsShown()) or false)
 
-        rPortraitLeft:SetChecked(Akimbo.db and Akimbo.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Akimbo.db.primaryPosition == "RIGHT")
-        rPortraitRight:SetChecked(Akimbo.db and Akimbo.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Akimbo.db.primaryPosition == "LEFT")
-        rDual:SetChecked(Akimbo.db and Akimbo.db.layoutPreset == "LANDSCAPE_DUAL")
+        rPortraitLeft:SetChecked(Offhand.db and Offhand.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Offhand.db.primaryPosition == "RIGHT")
+        rPortraitRight:SetChecked(Offhand.db and Offhand.db.layoutPreset == "PORTRAIT_LEFT_LANDSCAPE_RIGHT" and Offhand.db.primaryPosition == "LEFT")
+        rDual:SetChecked(Offhand.db and Offhand.db.layoutPreset == "LANDSCAPE_DUAL")
 
-        r169:SetChecked(Akimbo.db and Akimbo.db.aspectRatioMode == "16_9")
-        r219:SetChecked(Akimbo.db and Akimbo.db.aspectRatioMode == "21_9")
-        rFill:SetChecked(Akimbo.db and Akimbo.db.aspectRatioMode == "FILL")
+        r169:SetChecked(Offhand.db and Offhand.db.aspectRatioMode == "16_9")
+        r219:SetChecked(Offhand.db and Offhand.db.aspectRatioMode == "21_9")
+        rFill:SetChecked(Offhand.db and Offhand.db.aspectRatioMode == "FILL")
 
-        seamCheck:SetChecked((Akimbo.db and Akimbo.db.seamRedirect) or false)
-        mapMoveCheck:SetChecked((Akimbo.db and Akimbo.db.preventMapCloseOnMove) or false)
-        panelCheck:SetChecked((Akimbo.db and Akimbo.db.independentWorkspacePanels) or false)
-        escapeCheck:SetChecked((Akimbo.db and Akimbo.db.persistentWorkspacePanels ~= false) or false)
-        forceCheck:SetChecked((Akimbo.db and Akimbo.db.forceDualOnSingle) or false)
+        seamCheck:SetChecked((Offhand.db and Offhand.db.seamRedirect) or false)
+        mapMoveCheck:SetChecked((Offhand.db and Offhand.db.preventMapCloseOnMove) or false)
+        panelCheck:SetChecked((Offhand.db and Offhand.db.independentWorkspacePanels) or false)
+        escapeCheck:SetChecked((Offhand.db and Offhand.db.persistentWorkspacePanels ~= false) or false)
+        forceCheck:SetChecked((Offhand.db and Offhand.db.forceDualOnSingle) or false)
 
-        local curTheme = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+        local curTheme = (Offhand.db and Offhand.db.theme) or "CLASSIC"
         rClassic:SetChecked(curTheme == "CLASSIC")
         rSlate:SetChecked(curTheme == "BLIZZARD_SLATE")
         rTinker:SetChecked(curTheme == "GNOMISH_TINKER")
@@ -1779,8 +1777,8 @@ function Options:CreateFloatingPanel()
             Options:UpdateProfileList()
         end
 
-        local bagAddon = Akimbo.HasCustomBagAddon and Akimbo.HasCustomBagAddon()
-        local mmAddon = Akimbo.HasCustomMinimapAddon and Akimbo.HasCustomMinimapAddon()
+        local bagAddon = Offhand.HasCustomBagAddon and Offhand.HasCustomBagAddon()
+        local mmAddon = Offhand.HasCustomMinimapAddon and Offhand.HasCustomMinimapAddon()
         if card2_2.compatDesc then
             if bagAddon and mmAddon then
                 card2_2.compatDesc:SetText("|cff00ff00Addon Compatibility:|r Custom Bag & Minimap addons active (control yielded).")
@@ -1794,7 +1792,7 @@ function Options:CreateFloatingPanel()
         end
 
         Options:UpdateCardThemes()
-        Akimbo:ApplyFullLayout()
+        Offhand:ApplyFullLayout()
     end
 
     SwitchTab(currentTab or 1)
@@ -1804,8 +1802,8 @@ function Options:CreateFloatingPanel()
 end
 
 function Options:Open(showSeamGuide)
-    if Akimbo.Wizard and Akimbo.Wizard.Close then
-        Akimbo.Wizard:Close()
+    if Offhand.Wizard and Offhand.Wizard.Close then
+        Offhand.Wizard:Close()
     end
     local panel = self:CreateFloatingPanel()
     if panel:IsShown() and not showSeamGuide then
@@ -1813,7 +1811,7 @@ function Options:Open(showSeamGuide)
         return
     end
 
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if m and m.gameWidth and m.gameWidth > 0 then
         local cx = (m.gameLeft + m.gameRight) / 2
         local cy = (m.gameBottom + m.gameTop) / 2
@@ -1828,7 +1826,7 @@ function Options:Open(showSeamGuide)
     panel:Show()
 
     if showSeamGuide then
-        self:ShowSeamGuide(Akimbo.db and Akimbo.db.deckWidthRatio)
+        self:ShowSeamGuide(Offhand.db and Offhand.db.deckWidthRatio)
         if configFrame and configFrame.laserCheck then
             configFrame.laserCheck:SetChecked(true)
         end
@@ -1837,8 +1835,8 @@ end
 
 function Options:Close()
     self:HideSeamGuide()
-    if Akimbo.db then
-        Akimbo.db.firstRunComplete = true
+    if Offhand.db then
+        Offhand.db.firstRunComplete = true
     end
     if configFrame then
         configFrame:Hide()
@@ -1850,7 +1848,7 @@ end
 -- ============================================================================
 function Options:ShowSetupGuide()
     if not setupFrame then
-        setupFrame = CreateFrame("Frame", "AkimboSetupGuideFrame", UIParent, "BackdropTemplate")
+        setupFrame = CreateFrame("Frame", "OffhandSetupGuideFrame", UIParent, "BackdropTemplate")
         setupFrame:SetSize(620, 500)
         setupFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
         setupFrame:SetFrameStrata("DIALOG")
@@ -1861,11 +1859,11 @@ function Options:ShowSetupGuide()
         setupFrame:SetScript("OnDragStop", setupFrame.StopMovingOrSizing)
 
         if tinsert and UISpecialFrames then
-            tinsert(UISpecialFrames, "AkimboSetupGuideFrame")
+            tinsert(UISpecialFrames, "OffhandSetupGuideFrame")
         end
 
-        Akimbo.Themes:ApplyBackdrop(setupFrame, "OBSIDIAN", 0.98)
-        Akimbo.Themes:CreateBayHeader(setupFrame, "AKIMBO WINDOW SPANNING GUIDE")
+        Offhand.Themes:ApplyBackdrop(setupFrame, "OBSIDIAN", 0.98)
+        Offhand.Themes:CreateBayHeader(setupFrame, "Offhand WINDOW SPANNING GUIDE")
 
         local closeBtn = CreateFrame("Button", nil, setupFrame, "UIPanelCloseButton")
         closeBtn:SetPoint("TOPRIGHT", setupFrame, "TOPRIGHT", -4, -4)
@@ -1893,26 +1891,26 @@ and placement in Windows first; the addon cannot measure individual monitors.
 In WoW, open Graphics settings and select Windowed display mode.
 
 |cffffcc00Step 2: Span the Window|r
-While WoW is open, run Akimbo-Span.bat (or Akimbo-Span.ps1) from your Akimbo folder.
+While WoW is open, run Offhand-Span.bat (or Offhand-Span.ps1) from your Offhand folder.
 The resulting canvas size depends on your Windows display arrangement.
 
 |cffffcc00Step 3: Calibrate the Game View|r
-Type /akimbo to open the settings dashboard.
+Type /Offhand to open the settings dashboard.
 A 1440-pixel left display within a 4000-pixel span uses 36% deck width.
 Choose 16:9 for a 2560x1440 game view when the remaining width is 2560 pixels.
 Use the Red Seam Guide laser to align the seam exactly with your physical bezel.
 
 |cffffcc00Step 4: Adjust HUD and Vertical Alignment|r
 Global UI size is based on the game view; 70% is the standard default.
-Use the Game bottom offset control, or /akimbo bottom <pixels>, for vertical alignment.
+Use the Game bottom offset control, or /Offhand bottom <pixels>, for vertical alignment.
 Use 0 for aligned bottom edges; the measured test setup uses 6.
 
-Type /akimbo to return to settings anytime.
-Type /akimbo diag to report the actual game rectangle in physical pixels.
+Type /Offhand to return to settings anytime.
+Type /Offhand diag to report the actual game rectangle in physical pixels.
 ]])
     end
 
-    local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics()
+    local m = Offhand.Viewport and Offhand.Viewport:GetMetrics()
     if m and m.gameWidth and m.gameWidth > 0 then
         local cx = (m.gameLeft + m.gameRight) / 2
         local cy = (m.gameBottom + m.gameTop) / 2
@@ -1926,6 +1924,6 @@ Type /akimbo diag to report the actual game rectangle in physical pixels.
     setupFrame:Show()
 end
 
-function Akimbo:InitializeOptions()
+function Offhand:InitializeOptions()
     -- Options ready
 end

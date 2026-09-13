@@ -52,7 +52,7 @@ ShowUIPanel=function(f)
     if f.attrs.area then if stack then stack:Hide() end;stack=f end
     f:Show()
 end
-assert(loadfile("Modules/MapDock.lua"))("Akimbo",addon)
+assert(loadfile("Modules/MapDock.lua"))("Offhand",addon)
 local map=addon.modules.MapDock
 map:Initialize()
 WorldMapFrame.maximized=true

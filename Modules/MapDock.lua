@@ -1,10 +1,8 @@
 -- Docked map is an independent window; other panels retain Blizzard behavior.
 local _, Offhand = ...
-local Akimbo = Offhand
-local L = Offhand.L or Akimbo.L or setmetatable({}, { __index = function(t, k) return k end })
+local L = Offhand.L or setmetatable({}, { __index = function(t, k) return k end })
 local Map = {}
 Offhand.modules.MapDock = Map
-Akimbo.modules.MapDock = Map
 local busy=false
 local scheduled=false
 function Map:Schedule()
@@ -18,7 +16,7 @@ function Map:Configure()
     if not frame or busy or InCombatLockdown() then return end
     busy=true
     local ok,err=pcall(function()
-        local enabled=Akimbo.db.enabled and Akimbo.db.dockMap
+        local enabled=Offhand.db.enabled and Offhand.db.dockMap
         if enabled and not self.original then
             local info=UIPanelWindows and UIPanelWindows.WorldMapFrame
             if not SetUIPanelAttribute or not info then return end
@@ -52,16 +50,16 @@ function Map:Configure()
             return
         end
         if not enabled or not self.original then return end
-        if frame._akimboDragging then return end
+        if frame._OffhandDragging then return end
         -- Minimize/RestoreUIPanelArea can reset metadata, so detach after sync too.
         SetUIPanelAttribute(frame,"area",nil)
-        if Akimbo.db.preventMapCloseOnMove then frame:UnregisterEvent("PLAYER_STARTED_MOVING")
+        if Offhand.db.preventMapCloseOnMove then frame:UnregisterEvent("PLAYER_STARTED_MOVING")
         elseif self.original.moving then frame:RegisterEvent("PLAYER_STARTED_MOVING") end
         if frame.IsMaximized and frame:IsMaximized() then frame:Minimize() end
         SetUIPanelAttribute(frame,"area",nil)
-        local size=Akimbo.db.mapWindowSize
-        if size and not frame._akimboDragging then
-            local m=Akimbo.Viewport:GetMetrics()
+        local size=Offhand.db.mapWindowSize
+        if size and not frame._OffhandDragging then
+            local m=Offhand.Viewport:GetMetrics()
             local factor=frame:GetEffectiveScale()/UIParent:GetEffectiveScale()
             local width=math.max(320,math.min(tonumber(size.width) or 610,(m.deckWidth-48)/factor))
             local height=math.max(240,math.min(tonumber(size.height) or 438,(m.screenHeight-48)/factor))
@@ -90,21 +88,21 @@ function Map:Configure()
             grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
             grip:SetScript("OnMouseDown",function(_,button)
                 if button~="LeftButton" or InCombatLockdown() then return end
-                local m=Akimbo.Viewport:GetMetrics()
+                local m=Offhand.Viewport:GetMetrics()
                 local factor=frame:GetEffectiveScale()/UIParent:GetEffectiveScale()
                 if frame.SetResizeBounds then frame:SetResizeBounds(320,240,
                     math.max(320,(m.deckWidth-48)/factor),math.max(240,(m.screenHeight-48)/factor)) end
-                frame._akimboDragging=true
+                frame._OffhandDragging=true
                 frame:StartSizing("BOTTOMRIGHT")
             end)
             grip:SetScript("OnMouseUp",function()
-                if not frame._akimboDragging then return end
+                if not frame._OffhandDragging then return end
                 frame:StopMovingOrSizing()
-                frame._akimboDragging=false
-                Akimbo.db.mapWindowSize={width=frame:GetWidth(),height=frame:GetHeight()}
+                frame._OffhandDragging=false
+                Offhand.db.mapWindowSize={width=frame:GetWidth(),height=frame:GetHeight()}
                 frame.minimizedWidth,frame.minimizedHeight=frame:GetWidth(),frame:GetHeight()
                 if frame.OnFrameSizeChanged then frame:OnFrameSizeChanged() end
-                if Akimbo.Panels then Akimbo.Panels:SavePosition(frame); Akimbo.Panels:Place(frame) end
+                if Offhand.Panels then Offhand.Panels:SavePosition(frame); Offhand.Panels:Place(frame) end
             end)
             self.grip=grip
             -- The Blizzard title button owns mouse input; the map root's drag
@@ -117,23 +115,23 @@ function Map:Configure()
             handle:EnableMouse(true)
             handle:RegisterForDrag("LeftButton")
             handle:SetScript("OnDragStart",function()
-                if InCombatLockdown() or not Akimbo.db.enabled or not Akimbo.db.dockMap then return end
-                frame._akimboDragging=true
+                if InCombatLockdown() or not Offhand.db.enabled or not Offhand.db.dockMap then return end
+                frame._OffhandDragging=true
                 frame:StartMoving()
             end)
             handle:SetScript("OnDragStop",function()
                 frame:StopMovingOrSizing()
-                frame._akimboDragging=false
-                if Akimbo.Panels then Akimbo.Panels:SavePosition(frame); Akimbo.Panels:Place(frame) end
+                frame._OffhandDragging=false
+                if Offhand.Panels then Offhand.Panels:SavePosition(frame); Offhand.Panels:Place(frame) end
             end)
             self.handle=handle
         end
         self.grip:Show()
         if self.handle then self.handle:Show() end
-        if Akimbo.Panels then Akimbo.Panels:Place(frame) end
+        if Offhand.Panels then Offhand.Panels:Place(frame) end
     end)
     busy=false
-    if not ok then Akimbo:Print(L["MSG_MAP_LAYOUT_ERROR"],tostring(err)) end
+    if not ok then Offhand:Print(L["MSG_MAP_LAYOUT_ERROR"],tostring(err)) end
 end
 
 function Map:Initialize()

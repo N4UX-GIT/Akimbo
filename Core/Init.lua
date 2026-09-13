@@ -5,8 +5,6 @@
 
 local addonName, Offhand = ...
 _G.Offhand = Offhand
-_G.Akimbo = Offhand
-local Akimbo = Offhand
 
 Offhand.name = addonName
 Offhand.version = "1.1.0"
@@ -31,7 +29,7 @@ function Offhand:Print(msg, ...)
 end
 
 function Offhand:Debug(msg, ...)
-    local db = (OffhandDB or AkimboDB)
+    local db = (OffhandDB or OffhandDB)
     if db and db.debugMode then
         if select("#", ...) > 0 then
             msg = string.format(msg, ...)
@@ -44,24 +42,24 @@ function Offhand:Debug(msg, ...)
 end
 
 -- Localization table with embedded English baseline
-local L = Akimbo.L or setmetatable({}, {
+local L = Offhand.L or setmetatable({}, {
     __index = function(t, key)
         return key
     end
 })
-Akimbo.L = L
+Offhand.L = L
 
 -- ============================================================================
 -- Default English Localization (Baseline for all clients)
 -- ============================================================================
-L["ADDON_TITLE"] = "Akimbo: Dual Monitor Workstation"
+L["ADDON_TITLE"] = "Offhand: Dual Monitor Workstation"
 L["ADDON_DESC"] = "Transforms dual monitor setups into a dedicated primary 3D viewport and secondary command deck."
-L["CMD_HELP_TITLE"] = "Akimbo Slash Commands"
+L["CMD_HELP_TITLE"] = "Offhand Slash Commands"
 L["LAYOUT_REAPPLIED"] = "Layout reapplied!"
-L["CONFIG_SAVED"] = "Configuration saved! Welcome to Akimbo Dual Monitor Workstation."
+L["CONFIG_SAVED"] = "Configuration saved! Welcome to Offhand Dual Monitor Workstation."
 
 -- Options Dashboard Header & Tabs
-L["OPTIONS_TITLE"] = "AKIMBO DUAL MONITOR WORKSTATION"
+L["OPTIONS_TITLE"] = "Offhand DUAL MONITOR WORKSTATION"
 L["TAB_DISPLAY"] = "Display & Viewport"
 L["TAB_WORKSPACE"] = "Workspace & Map"
 L["TAB_THEMES"] = "Themes & Colors"
@@ -133,8 +131,8 @@ L["SLIDER_BEZEL_GAP_TIP_DESC"] = "Compensates for the physical plastic border be
 
 -- Tab 2: Workspace & Map
 L["CARD_WORKSPACE_MGMT"] = "1. Workspace Panel Management & Behavior"
-L["CHECK_CANVAS_ENABLED"] = "Enable Akimbo Workspace Canvas"
-L["CHECK_CANVAS_ENABLED_TIP_TITLE"] = "Akimbo Workspace Canvas"
+L["CHECK_CANVAS_ENABLED"] = "Enable Offhand Workspace Canvas"
+L["CHECK_CANVAS_ENABLED_TIP_TITLE"] = "Offhand Workspace Canvas"
 L["CHECK_CANVAS_ENABLED_TIP_DESC"] = "Enables the secondary monitor workstation backdrop where UI panels, maps, character sheets, and bags are organized."
 L["CHECK_ESC_PERSIST"] = "Keep Panels in Workspace on ESC (Independent Panels)"
 L["CHECK_ESC_PERSIST_TIP_TITLE"] = "Independent Workspace Panels"
@@ -221,7 +219,7 @@ L["SLIDER_CANVAS_OPACITY_TIP_TITLE"] = "Canvas Transparency"
 L["SLIDER_CANVAS_OPACITY_TIP_DESC"] = "Adjusts how solid or translucent the secondary monitor workspace background appears (0% to 100%)."
 
 -- Wizard Dialog Strings & Tooltips
-L["WIZARD_TITLE"] = "AKIMBO AUTO-CONFIGURATION WIZARD"
+L["WIZARD_TITLE"] = "Offhand AUTO-CONFIGURATION WIZARD"
 L["WIZARD_CARD1_TITLE"] = "1. Display Topology & 1-Click Auto-Setup"
 L["WIZARD_DETECTED_PREFIX"] = "Detected Display:"
 L["WIZARD_RECOM_PREFIX"] = "Recommendation:"
@@ -264,14 +262,14 @@ L["WIZARD_PRESET_SCALE_65_TIP_TITLE"] = "Balanced UI (65%)"
 L["WIZARD_PRESET_SCALE_65_TIP_DESC"] = "A well-balanced scale providing crisp text legibility while maintaining generous screen real estate."
 L["WIZARD_PRESET_SCALE_70"] = "Standard (70%)"
 L["WIZARD_PRESET_SCALE_70_TIP_TITLE"] = "Standard UI (70%)"
-L["WIZARD_PRESET_SCALE_70_TIP_DESC"] = "Standard Akimbo default scale, ideal for 1440p and 4K displays at normal desk viewing distance."
+L["WIZARD_PRESET_SCALE_70_TIP_DESC"] = "Standard Offhand default scale, ideal for 1440p and 4K displays at normal desk viewing distance."
 L["WIZARD_PRESET_SCALE_100"] = "Default (100%)"
 L["WIZARD_PRESET_SCALE_100_TIP_TITLE"] = "Unscaled UI (100%)"
 L["WIZARD_PRESET_SCALE_100_TIP_DESC"] = "Standard 100% Blizzard UI size without scaling reductions."
 
-L["WIZARD_BTN_ADVANCED"] = "Advanced Settings (/akimbo)"
+L["WIZARD_BTN_ADVANCED"] = "Advanced Settings (/Offhand)"
 L["WIZARD_BTN_ADVANCED_TIP_TITLE"] = "Advanced Settings"
-L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab Akimbo options dashboard with complete customization controls."
+L["WIZARD_BTN_ADVANCED_TIP_DESC"] = "Closes the wizard and opens the full 3-tab Offhand options dashboard with complete customization controls."
 L["WIZARD_BTN_FINISH"] = "Save & Finish Setup"
 L["WIZARD_BTN_FINISH_TIP_TITLE"] = "Finish Calibration"
 L["WIZARD_BTN_FINISH_TIP_DESC"] = "Saves your configuration, marks initial setup complete, and applies your new multi-monitor layout."
@@ -279,7 +277,7 @@ L["WIZARD_BTN_FINISH_TIP_DESC"] = "Saves your configuration, marks initial setup
 -- ============================================================================
 -- Color Picker Helper
 -- ============================================================================
-function Akimbo:OpenColorPicker(initialR, initialG, initialB, initialA, hasOpacity, onColorChanged)
+function Offhand:OpenColorPicker(initialR, initialG, initialB, initialA, hasOpacity, onColorChanged)
     if not ColorPickerFrame then return end
 
     local function ColorCallback(restore)
@@ -339,7 +337,7 @@ end
 -- ============================================================================
 -- Universal Tooltip Helper
 -- ============================================================================
-function Akimbo:SetTooltip(frame, title, text, anchor)
+function Offhand:SetTooltip(frame, title, text, anchor)
     if not frame then return end
     if not (title or text) then return end
     if frame.EnableMouse then frame:EnableMouse(true) end
@@ -375,24 +373,24 @@ end
 -- ============================================================================
 local combatQueue = {}
 
-function Akimbo:RunOrQueueCombat(action, ...)
+function Offhand:RunOrQueueCombat(action, ...)
     if not InCombatLockdown() then
         action(...)
     else
         table.insert(combatQueue, { func = action, args = { ... } })
-        Akimbo:Debug("Action queued for post-combat execution.")
+        Offhand:Debug("Action queued for post-combat execution.")
     end
 end
 
 local function ProcessCombatQueue()
     if #combatQueue == 0 then return end
-    Akimbo:Debug("Processing %d combat-queued actions...", #combatQueue)
+    Offhand:Debug("Processing %d combat-queued actions...", #combatQueue)
     local queueCopy = combatQueue
     combatQueue = {}
     for _, item in ipairs(queueCopy) do
         local success, err = pcall(item.func, unpack(item.args))
         if not success then
-            Akimbo:Print("|cffff3333Queue Execution Error:|r %s", tostring(err))
+            Offhand:Print("|cffff3333Queue Execution Error:|r %s", tostring(err))
         end
     end
 end
@@ -400,7 +398,7 @@ end
 -- ============================================================================
 -- Core Event Dispatcher
 -- ============================================================================
-local eventFrame = CreateFrame("Frame", "AkimboEventFrame")
+local eventFrame = CreateFrame("Frame", "OffhandEventFrame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -411,15 +409,15 @@ eventFrame:RegisterEvent("DISPLAY_SIZE_CHANGED")
 
 eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
     if event == "ADDON_LOADED" and arg1 == addonName then
-        Akimbo:InitializeConfig()
-        if Akimbo.InitializeThemes then Akimbo:InitializeThemes() end
-        if Akimbo.InitializeCanvas then Akimbo:InitializeCanvas() end
-        if Akimbo.InitializeViewport then Akimbo:InitializeViewport() end
-        if Akimbo.InitializeSeamRedirect then Akimbo:InitializeSeamRedirect() end
-        if Akimbo.InitializeOptions then Akimbo:InitializeOptions() end
+        Offhand:InitializeConfig()
+        if Offhand.InitializeThemes then Offhand:InitializeThemes() end
+        if Offhand.InitializeCanvas then Offhand:InitializeCanvas() end
+        if Offhand.InitializeViewport then Offhand:InitializeViewport() end
+        if Offhand.InitializeSeamRedirect then Offhand:InitializeSeamRedirect() end
+        if Offhand.InitializeOptions then Offhand:InitializeOptions() end
 
         -- Initialize child modules
-        for name, module in pairs(Akimbo.modules) do
+        for name, module in pairs(Offhand.modules) do
             if module.Initialize then
                 module:Initialize()
             end
@@ -427,15 +425,15 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
 
     elseif event == "PLAYER_LOGIN" then
         pcall(function()
-            if ContainerFrame1 and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrame1"]) then
+            if ContainerFrame1 and not (Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["ContainerFrame1"]) then
                 ContainerFrame1:SetUserPlaced(false)
             end
-            if ContainerFrameCombinedBags and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["ContainerFrameCombinedBags"]) then
+            if ContainerFrameCombinedBags and not (Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["ContainerFrameCombinedBags"]) then
                 ContainerFrameCombinedBags:SetUserPlaced(false)
             end
             if PlayerFrame then PlayerFrame:SetUserPlaced(false) end
             if TargetFrame then TargetFrame:SetUserPlaced(false) end
-            if MinimapCluster and not (Akimbo.db and Akimbo.db.savedWorkspacePositions and Akimbo.db.savedWorkspacePositions["MinimapCluster"]) then
+            if MinimapCluster and not (Offhand.db and Offhand.db.savedWorkspacePositions and Offhand.db.savedWorkspacePositions["MinimapCluster"]) then
                 MinimapCluster:SetUserPlaced(false)
             end
             if SetCVar then
@@ -443,29 +441,29 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, ...)
                 SetCVar("rawMouseAccelerationEnable", "0")
             end
         end)
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_LOADED"], Akimbo.version)
-        if not Akimbo.db.firstRunComplete then
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_LOADED"], Offhand.version)
+        if not Offhand.db.firstRunComplete then
             C_Timer.After(1.5, function()
-                Akimbo:Print(L["MSG_FIRST_RUN"])
+                Offhand:Print(L["MSG_FIRST_RUN"])
             end)
         end
 
     elseif event == "PLAYER_ENTERING_WORLD" then
         -- Refresh viewport and layout after zone transition or loading screen
         C_Timer.After(0.5, function()
-            Akimbo:ApplyFullLayout()
+            Offhand:ApplyFullLayout()
         end)
 
     elseif event == "PLAYER_REGEN_ENABLED" then
         ProcessCombatQueue()
 
     elseif event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" then
-        if not Akimbo._displayDebounceTimer then
-            Akimbo._displayDebounceTimer = C_Timer.NewTimer(0.2, function()
-                Akimbo._displayDebounceTimer = nil
-                Akimbo:RunOrQueueCombat(function()
-                    Akimbo:ApplyFullLayout()
+        if not Offhand._displayDebounceTimer then
+            Offhand._displayDebounceTimer = C_Timer.NewTimer(0.2, function()
+                Offhand._displayDebounceTimer = nil
+                Offhand:RunOrQueueCombat(function()
+                    Offhand:ApplyFullLayout()
                 end)
             end)
         end
@@ -476,14 +474,14 @@ end)
 local isApplyingLayout = false
 local layoutPending = false
 
-function Akimbo:ApplyFullLayout()
-    if not Akimbo.db then return end
+function Offhand:ApplyFullLayout()
+    if not Offhand.db then return end
     if InCombatLockdown() then
         if not layoutPending then
             layoutPending = true
             self:RunOrQueueCombat(function()
                 layoutPending = false
-                Akimbo:ApplyFullLayout()
+                Offhand:ApplyFullLayout()
             end)
         end
         return
@@ -492,17 +490,17 @@ function Akimbo:ApplyFullLayout()
     isApplyingLayout = true
 
     local success, err = pcall(function()
-        if Akimbo.Viewport and Akimbo.Viewport.ApplyGlobalScale then Akimbo.Viewport:ApplyGlobalScale() end
-        if Akimbo.UpdateViewport then
-            Akimbo:UpdateViewport()
+        if Offhand.Viewport and Offhand.Viewport.ApplyGlobalScale then Offhand.Viewport:ApplyGlobalScale() end
+        if Offhand.UpdateViewport then
+            Offhand:UpdateViewport()
         end
-        if Akimbo.UpdateCanvas then
-            Akimbo:UpdateCanvas()
+        if Offhand.UpdateCanvas then
+            Offhand:UpdateCanvas()
         end
-        if Akimbo.UpdateSeamRedirect then
-            Akimbo:UpdateSeamRedirect()
+        if Offhand.UpdateSeamRedirect then
+            Offhand:UpdateSeamRedirect()
         end
-        for _, module in pairs(Akimbo.modules) do
+        for _, module in pairs(Offhand.modules) do
             if module.ApplyLayout then
                 module:ApplyLayout()
             end
@@ -511,7 +509,7 @@ function Akimbo:ApplyFullLayout()
 
     isApplyingLayout = false
     if not success then
-        Akimbo:Print(L["MSG_LAYOUT_ERROR"], tostring(err))
+        Offhand:Print(L["MSG_LAYOUT_ERROR"], tostring(err))
     end
 end
 
@@ -520,7 +518,7 @@ end
 -- ============================================================================
 SLASH_OFFHAND1 = "/offhand"
 SLASH_OFFHAND2 = "/oh"
-SLASH_OFFHAND3 = "/akimbo"
+SLASH_OFFHAND3 = "/Offhand"
 SLASH_OFFHAND4 = "/ak"
 
 SlashCmdList["OFFHAND"] = function(msg)
@@ -529,119 +527,119 @@ SlashCmdList["OFFHAND"] = function(msg)
     local cmd, arg = strsplit(" ", msg, 2)
 
     if cmd == "16:9" or cmd == "16/9" or cmd == "169" then
-        Akimbo.db.aspectRatioMode = "16_9"
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_AR_16_9"])
+        Offhand.db.aspectRatioMode = "16_9"
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_AR_16_9"])
     elseif cmd == "21:9" or cmd == "21/9" or cmd == "219" then
-        Akimbo.db.aspectRatioMode = "21_9"
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_AR_21_9"])
+        Offhand.db.aspectRatioMode = "21_9"
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_AR_21_9"])
     elseif cmd == "fill" then
-        Akimbo.db.aspectRatioMode = "FILL"
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_AR_FILL"])
+        Offhand.db.aspectRatioMode = "FILL"
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_AR_FILL"])
     elseif (cmd == "ar" or cmd == "fov") and tonumber(arg) then
         local ratio = tonumber(arg)
-        Akimbo.db.aspectRatioMode = "CUSTOM"
-        Akimbo.db.customAspectRatio = ratio
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_AR_CUSTOM"], ratio)
+        Offhand.db.aspectRatioMode = "CUSTOM"
+        Offhand.db.customAspectRatio = ratio
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_AR_CUSTOM"], ratio)
     elseif cmd == "hud" or cmd == "scale" then
         if tonumber(arg) then
             local scale = tonumber(arg)
             if scale > 1.25 then scale = scale / 100 end
             scale = math.max(0.25, math.min(1.25, scale))
-            Akimbo.db.hudScale = scale
-            Akimbo:ApplyFullLayout()
-            Akimbo:Print(L["MSG_HUD_SET"], scale * 100)
+            Offhand.db.hudScale = scale
+            Offhand:ApplyFullLayout()
+            Offhand:Print(L["MSG_HUD_SET"], scale * 100)
         else
-            Akimbo:Print(L["MSG_HUD_CURRENT"], Akimbo.db.hudScale or 0.70)
+            Offhand:Print(L["MSG_HUD_CURRENT"], Offhand.db.hudScale or 0.70)
         end
     elseif cmd == "chat" then
         arg = strtrim(arg or ""):lower()
         if arg == "deck" or arg == "secondary" or arg == "bay" then
-            Akimbo.db.chatPosition = "DECK"
-            Akimbo:ApplyFullLayout()
-            Akimbo:Print(L["MSG_CHAT_DECK"])
+            Offhand.db.chatPosition = "DECK"
+            Offhand:ApplyFullLayout()
+            Offhand:Print(L["MSG_CHAT_DECK"])
         elseif arg == "game" or arg == "hud" or arg == "primary" then
-            Akimbo.db.chatPosition = "GAME"
-            Akimbo:ApplyFullLayout()
-            Akimbo:Print(L["MSG_CHAT_GAME"])
+            Offhand.db.chatPosition = "GAME"
+            Offhand:ApplyFullLayout()
+            Offhand:Print(L["MSG_CHAT_GAME"])
         else
             -- Toggle
-            Akimbo.db.chatPosition = (Akimbo.db.chatPosition == "DECK") and "GAME" or "DECK"
-            Akimbo:ApplyFullLayout()
-            Akimbo:Print(L["MSG_CHAT_TOGGLED"], Akimbo.db.chatPosition)
+            Offhand.db.chatPosition = (Offhand.db.chatPosition == "DECK") and "GAME" or "DECK"
+            Offhand:ApplyFullLayout()
+            Offhand:Print(L["MSG_CHAT_TOGGLED"], Offhand.db.chatPosition)
         end
     elseif (cmd == "deck" or cmd == "seam") and tonumber(arg) then
         local pct = tonumber(arg)
         if pct > 1 then pct = pct / 100 end
         pct = math.max(0.15, math.min(0.80, pct))
-        Akimbo.db.deckWidthRatio = pct
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_SEAM_SET"], pct * 100)
+        Offhand.db.deckWidthRatio = pct
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_SEAM_SET"], pct * 100)
     elseif cmd == "bottom" and tonumber(arg) then
-        Akimbo.db.gameBottomPixels = math.max(0, tonumber(arg))
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_BOTTOM_SET"], Akimbo.db.gameBottomPixels)
+        Offhand.db.gameBottomPixels = math.max(0, tonumber(arg))
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_BOTTOM_SET"], Offhand.db.gameBottomPixels)
     elseif cmd == "height" and tonumber(arg) then
         local pct = tonumber(arg)
         if pct > 1 then pct = pct / 100 end
         pct = math.max(0.05, math.min(1, pct))
-        Akimbo.db.gameHeightRatio = pct
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["MSG_HEIGHT_SET"], pct * 100)
+        Offhand.db.gameHeightRatio = pct
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["MSG_HEIGHT_SET"], pct * 100)
     elseif cmd == "diag" or cmd == "metrics" or cmd == "info" then
-        local snapshot = Akimbo.Viewport:CaptureDiagnostics()
+        local snapshot = Offhand.Viewport:CaptureDiagnostics()
         local vpStatus = snapshot.viewportMatches and L["MSG_DIAG_PASS"] or L["MSG_DIAG_MISMATCH"]
-        Akimbo:Print(L["MSG_DIAG_VIEWPORT"], vpStatus)
+        Offhand:Print(L["MSG_DIAG_VIEWPORT"], vpStatus)
         local physW, physH = 0, 0
         if GetPhysicalScreenSize then pcall(function() physW, physH = GetPhysicalScreenSize() end) end
         local screenW = GetScreenWidth()
         local screenH = GetScreenHeight()
-        local m = Akimbo.Viewport and Akimbo.Viewport:GetMetrics() or {}
+        local m = Offhand.Viewport and Offhand.Viewport:GetMetrics() or {}
         local effScale = UIParent and UIParent:GetEffectiveScale() or 1.0
-        Akimbo:Print(L["MSG_DIAG_GAME_PIX"],
+        Offhand:Print(L["MSG_DIAG_GAME_PIX"],
             m.gamePixelWidth or 0, m.gamePixelHeight or 0, m.gamePixelLeft or 0,
             m.gamePixelBottom or 0, effScale)
-        Akimbo:Print(L["MSG_DIAG_FULL"],
-            physW, physH, screenW, screenH, effScale, m.deckWidth or 0, (Akimbo.db.deckWidthRatio or 0) * 100, m.gameWidth or 0, m.gameHeight or 0)
+        Offhand:Print(L["MSG_DIAG_FULL"],
+            physW, physH, screenW, screenH, effScale, m.deckWidth or 0, (Offhand.db.deckWidthRatio or 0) * 100, m.gameWidth or 0, m.gameHeight or 0)
     elseif msg == "apply" or msg == "reload" then
-        Akimbo:ApplyFullLayout()
-        Akimbo:Print(L["LAYOUT_REAPPLIED"])
+        Offhand:ApplyFullLayout()
+        Offhand:Print(L["LAYOUT_REAPPLIED"])
     elseif msg == "reset" then
-        Akimbo:ResetConfig()
+        Offhand:ResetConfig()
     elseif msg == "toggle" then
-        Akimbo.db.enabled = not Akimbo.db.enabled
-        Akimbo:Print(L["MSG_TOGGLED"], Akimbo.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
-        Akimbo:ApplyFullLayout()
+        Offhand.db.enabled = not Offhand.db.enabled
+        Offhand:Print(L["MSG_TOGGLED"], Offhand.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
+        Offhand:ApplyFullLayout()
     elseif msg == "debug" then
-        Akimbo.db.debugMode = not Akimbo.db.debugMode
-        Akimbo:Print(L["MSG_DEBUG_TOGGLED"], Akimbo.db.debugMode and L["MSG_DEBUG_ON"] or L["MSG_DEBUG_OFF"])
+        Offhand.db.debugMode = not Offhand.db.debugMode
+        Offhand:Print(L["MSG_DEBUG_TOGGLED"], Offhand.db.debugMode and L["MSG_DEBUG_ON"] or L["MSG_DEBUG_OFF"])
     elseif cmd == "wizard" or cmd == "setup" or cmd == "calibrate" then
-        if Akimbo.Wizard and Akimbo.Wizard.Open then
-            Akimbo.Wizard:Open()
-        elseif Akimbo.Options and Akimbo.Options.Open then
-            Akimbo.Options:Open(true)
+        if Offhand.Wizard and Offhand.Wizard.Open then
+            Offhand.Wizard:Open()
+        elseif Offhand.Options and Offhand.Options.Open then
+            Offhand.Options:Open(true)
         end
     elseif msg == "settings" or msg == "options" or msg == "config" then
-        if Akimbo.Options and Akimbo.Options.Open then
-            Akimbo.Options:Open()
+        if Offhand.Options and Offhand.Options.Open then
+            Offhand.Options:Open()
         end
     elseif msg == "span" or msg == "guide" then
-        if Akimbo.Options and Akimbo.Options.ShowSetupGuide then
-            Akimbo.Options:ShowSetupGuide()
+        if Offhand.Options and Offhand.Options.ShowSetupGuide then
+            Offhand.Options:ShowSetupGuide()
         else
-            Akimbo:Print(L["MSG_SPAN_GUIDE"])
+            Offhand:Print(L["MSG_SPAN_GUIDE"])
         end
     else
-        if Akimbo.Options and Akimbo.Options.Open then
-            Akimbo.Options:Open()
+        if Offhand.Options and Offhand.Options.Open then
+            Offhand.Options:Open()
         else
-            Akimbo:Print(L["MSG_STATUS"],
-                Akimbo.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
+            Offhand:Print(L["MSG_STATUS"],
+                Offhand.db.enabled and L["MSG_TOGGLE_ON"] or L["MSG_TOGGLE_OFF"])
         end
     end
 end
 
-SlashCmdList["AKIMBO"] = SlashCmdList["OFFHAND"]
+SlashCmdList["Offhand"] = SlashCmdList["OFFHAND"]

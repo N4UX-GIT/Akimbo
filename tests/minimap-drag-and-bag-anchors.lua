@@ -20,7 +20,7 @@ local addon = {
         savedMainPositions = {},
     }
 }
-_G.Akimbo = addon
+_G.Offhand = addon
 
 local metrics = {
     gameLeft = 1440, gameRight = 4000, gameBottom = 6, gameTop = 1446,
@@ -144,9 +144,9 @@ _G.UpdateContainerFrameAnchors = function()
     origBlizzardCalled = true
 end
 
-assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
+assert(loadfile("UI/Themes.lua"))("Offhand", addon)
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
 
 addon.Canvas:EnableFreeDragging()
 addon.SeamRedirect:HookFrames()
@@ -154,9 +154,9 @@ addon.SeamRedirect:HookFrames()
 assert(_G.UpdateContainerFrameAnchors ~= nil, "UpdateContainerFrameAnchors must be defined")
 assert(addon.HUD.bagHooksInstalled == true, "Bag hooks must be marked installed")
 
-assert(MinimapZoneTextButton._akimboHooked == true, "MinimapZoneTextButton must be hooked")
-assert(MinimapBorderTop._akimboHooked == true, "MinimapBorderTop must be hooked")
-assert(MinimapCluster._akimboHooked == true, "MinimapCluster itself must be hooked")
+assert(MinimapZoneTextButton._OffhandHooked == true, "MinimapZoneTextButton must be hooked")
+assert(MinimapBorderTop._OffhandHooked == true, "MinimapBorderTop must be hooked")
+assert(MinimapCluster._OffhandHooked == true, "MinimapCluster itself must be hooked")
 
 addon.HUD:AlignHUDFrames()
 local pt = MinimapCluster.points[#MinimapCluster.points]
@@ -164,7 +164,7 @@ assert(pt.point == "TOPRIGHT", "Initial MinimapCluster point must be TOPRIGHT")
 assert(pt.x == metrics.gameRight, "Initial MinimapCluster x must be gameRight")
 
 MinimapZoneTextButton.scripts["OnDragStart"](MinimapZoneTextButton)
-assert(MinimapCluster._akimboDragging == true, "MinimapCluster._akimboDragging must be true during drag")
+assert(MinimapCluster._OffhandDragging == true, "MinimapCluster._OffhandDragging must be true during drag")
 
 local pointCountBefore = #MinimapCluster.points
 addon.HUD:AlignHUDFrames()
@@ -173,7 +173,7 @@ assert(#MinimapCluster.points == pointCountBefore, "AlignHUDFrames must NOT touc
 MinimapCluster.points = { { point = "BOTTOMLEFT", relTo = UIParent, relPt = "BOTTOMLEFT", x = 200, y = 800 } }
 MinimapZoneTextButton.scripts["OnDragStop"](MinimapZoneTextButton)
 
-assert(MinimapCluster._akimboDragging == false, "MinimapCluster._akimboDragging must be reset after drag stop")
+assert(MinimapCluster._OffhandDragging == false, "MinimapCluster._OffhandDragging must be reset after drag stop")
 assert(addon.db.savedWorkspacePositions["MinimapCluster"] ~= nil, "MinimapCluster must be saved to workspace positions")
 assert(addon.db.savedWorkspacePositions["MinimapCluster"].x >= 12, "MinimapCluster x must be clamped within deck")
 
@@ -185,8 +185,8 @@ assert(postDragPt.x < metrics.deckWidth, "MinimapCluster must remain on workspac
 local cf1 = _G["ContainerFrame1"]
 cf1:Show()
 cf1.points = { { point = "BOTTOMLEFT", relTo = UIParent, relPt = "BOTTOMLEFT", x = 100, y = 400 } }
-if cf1._akimboHandle and cf1._akimboHandle.scripts["OnDragStop"] then
-    cf1._akimboHandle.scripts["OnDragStop"]()
+if cf1._OffhandHandle and cf1._OffhandHandle.scripts["OnDragStop"] then
+    cf1._OffhandHandle.scripts["OnDragStop"]()
 end
 assert(addon.db.savedWorkspacePositions["ContainerFrame1"] ~= nil, "ContainerFrame1 must be saved to workspace")
 
@@ -196,7 +196,7 @@ end
 
 origBlizzardCalled = false
 _G.UpdateContainerFrameAnchors()
-assert(origBlizzardCalled == false, "Blizzard's original UpdateContainerFrameAnchors must be intercepted by Akimbo")
+assert(origBlizzardCalled == false, "Blizzard's original UpdateContainerFrameAnchors must be intercepted by Offhand")
 
 for i = 1, 5 do
     local frame = _G["ContainerFrame" .. i]

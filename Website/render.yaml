@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: akimbo-wow
+    name: offhand-wow
     env: static
     buildCommand: ""
     staticPublishPath: .

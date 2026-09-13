@@ -8,7 +8,7 @@ local frames = {}
 local registeredEvents = {}
 local slashCmds = {}
 
-SLASH_AKIMBO1 = "/akimbo"
+SLASH_OFFHAND1 = "/offhand"
 SlashCmdList = {}
 UISpecialFrames = {}
 
@@ -122,17 +122,17 @@ GetScreenHeight = function() return 2560 end
 GetBuildInfo = function() return "1.15.5", "58238", "Jan 1 2025", 11505 end
 hooksecurefunc = function(t, name, fn) end
 
--- Load Akimbo modules
+-- Load Offhand modules
 local addon = { modules = {} }
-assert(loadfile("Core/Init.lua"))("Akimbo", addon)
-assert(loadfile("Core/Config.lua"))("Akimbo", addon)
-assert(loadfile("Core/Viewport.lua"))("Akimbo", addon)
-assert(loadfile("Core/SeamRedirect.lua"))("Akimbo", addon)
-assert(loadfile("Core/Canvas.lua"))("Akimbo", addon)
-assert(loadfile("Locales/enUS.lua"))("Akimbo", addon)
-assert(loadfile("UI/Themes.lua"))("Akimbo", addon)
-assert(loadfile("UI/Options.lua"))("Akimbo", addon)
-assert(loadfile("UI/Wizard.lua"))("Akimbo", addon)
+assert(loadfile("Core/Init.lua"))("Offhand", addon)
+assert(loadfile("Core/Config.lua"))("Offhand", addon)
+assert(loadfile("Core/Viewport.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Locales/enUS.lua"))("Offhand", addon)
+assert(loadfile("UI/Themes.lua"))("Offhand", addon)
+assert(loadfile("UI/Options.lua"))("Offhand", addon)
+assert(loadfile("UI/Wizard.lua"))("Offhand", addon)
 
 -- Initialize defaults
 addon.db = {
@@ -271,11 +271,11 @@ assert(layoutAppliedCount >= 1, "AutoConfigure must trigger ApplyFullLayout")
 -- ============================================================================
 -- 3. Test Wizard Dialog Frame & Interactive Controls
 -- ============================================================================
-assert(addon.Wizard ~= nil, "Akimbo.Wizard must exist")
+assert(addon.Wizard ~= nil, "Offhand.Wizard must exist")
 addon.Wizard:Open()
 
-local wizardFrame = _G["AkimboSetupWizardFrame"]
-assert(wizardFrame ~= nil, "AkimboSetupWizardFrame must be created")
+local wizardFrame = _G["OffhandSetupWizardFrame"]
+assert(wizardFrame ~= nil, "OffhandSetupWizardFrame must be created")
 assert(wizardFrame:IsShown() == true, "Wizard frame must be shown after Wizard:Open()")
 assert(wizardFrame.topoText:GetText():find("4000x2560"), "Wizard topoText must show detected resolution")
 assert(wizardFrame.recomText:GetText():find("36.0%%"), "Wizard recomText must show recommended 36% seam")
@@ -301,7 +301,7 @@ assert(wizardFrame.scaleValText:GetText():find("85%%"), "scaleValText must refle
 
 -- Test Laser Toggle in Wizard
 assert(addon.Options.IsSeamGuideShown ~= nil, "Options:IsSeamGuideShown must exist")
-local seamGuideLine = _G["AkimboSeamGuideLine"]
+local seamGuideLine = _G["OffhandSeamGuideLine"]
 assert(seamGuideLine ~= nil, "Seam guide line must exist")
 
 -- Close Wizard
@@ -316,16 +316,16 @@ local wizardOpened = false
 local originalWizardOpen = addon.Wizard.Open
 addon.Wizard.Open = function() wizardOpened = true end
 
-SlashCmdList["AKIMBO"]("wizard")
-assert(wizardOpened == true, "/akimbo wizard must call Akimbo.Wizard:Open()")
+SlashCmdList["Offhand"]("wizard")
+assert(wizardOpened == true, "/Offhand wizard must call Offhand.Wizard:Open()")
 
 wizardOpened = false
-SlashCmdList["AKIMBO"]("setup")
-assert(wizardOpened == true, "/akimbo setup must call Akimbo.Wizard:Open()")
+SlashCmdList["Offhand"]("setup")
+assert(wizardOpened == true, "/Offhand setup must call Offhand.Wizard:Open()")
 
 wizardOpened = false
-SlashCmdList["AKIMBO"]("calibrate")
-assert(wizardOpened == true, "/akimbo calibrate must call Akimbo.Wizard:Open()")
+SlashCmdList["Offhand"]("calibrate")
+assert(wizardOpened == true, "/Offhand calibrate must call Offhand.Wizard:Open()")
 
 addon.Wizard.Open = originalWizardOpen
 
@@ -371,6 +371,6 @@ assert(addon.L ~= nil, "Offhand.L must be defined")
 assert(addon.L["WIZARD_TITLE"] == "OFFHAND AUTO-CONFIGURATION WIZARD", "Localization must have WIZARD_TITLE")
 assert(addon.L["SLIDER_HUD_SCALE_TIP_TITLE"] ~= nil, "Localization must have SLIDER_HUD_SCALE_TIP_TITLE")
 assert(addon.L["CHECK_CANVAS_ENABLED_TIP_DESC"] ~= nil, "Localization must have CHECK_CANVAS_ENABLED_TIP_DESC")
-assert(addon.SetTooltip ~= nil, "Akimbo:SetTooltip must be defined")
+assert(addon.SetTooltip ~= nil, "Offhand:SetTooltip must be defined")
 
 print("PASS: 1-click auto-configuration, topology heuristics, wizard frame, UI scale slider, overlap prevention, and tooltips verified!")

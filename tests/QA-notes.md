@@ -1,4 +1,4 @@
-# Lifecycle validation — 2026-09-12
+# Lifecycle validation â€” 2026-09-12
 
 ## Global UI baseline and independent resizable map
 
@@ -6,7 +6,7 @@ Replaced per-frame scale corrections with one guarded UIParent:SetScale baseline
 calculated from physical game/canvas dimensions and the saved size preference.
 No uiScale CVar writes: avoids the earlier CVAR_UPDATE/layout feedback path.
 Repeated identical calculations do not write scale; recursion/combat are guarded,
-and disabling restores the pre-Akimbo root scale. Native addon relative scales remain.
+and disabling restores the pre-Offhand root scale. Native addon relative scales remain.
 Removed addon-specific placement names; generic top-level movable-window/tooltip
 discovery handles placement separately from scaling. Standard panel names remain
 for Blizzard docking and opening behavior, not for scale exceptions.
@@ -78,7 +78,7 @@ matches the project. This revision still needs live idle/form-change verificatio
 
 ## Companion unification and vertical alignment controls
 
-- GUI, one-shot spanner and watcher now use Companion/Akimbo-Window.ps1.
+- GUI, one-shot spanner and watcher now use Companion/Offhand-Window.ps1.
   Batch launchers use process-local execution-policy settings; no machine policy changes.
 - Shared path restores minimized/maximized windows, uses physical DPI coordinates,
   verifies window ownership and immediate final bounds, and rolls back borders/bounds
@@ -96,7 +96,7 @@ matches the project. This revision still needs live idle/form-change verificatio
 - tests/bottom-control.lua passed: opening, nudges, clamp, invalid text and refresh.
   Existing geometry/lifecycle suites and Lua/TOC validation passed. PowerShell files parse.
 - Nine updated runtime/documentation files copied to the installed addon with hash
-  verification and backups under the temporary Akimbo-before-companion-update folder.
+  verification and backups under the temporary Offhand-before-companion-update folder.
 - No live window mutation, GUI launch, or game reload was performed in this follow-up.
   Actual spanning and new control rendering still require live acceptance testing.
   Restart the companion and reload the addon to load the updated versions.
@@ -108,8 +108,8 @@ default comments and command help. Removed the unused uiScale initialization.
 The 55% button is explicitly a custom split; 36% names its 1440/4000 geometry.
 HUD presets are relative sizes, not resolution presets. Settings percentage
 formatting now multiplies stored fractions by 100. Settings seam range matches
-the wizard (15–80%, 0.5% steps); HUD range is 25–125%, with matching command clamps.
-Added /akimbo settings and /akimbo options; clarified Fill and height behavior.
+the wizard (15â€“80%, 0.5% steps); HUD range is 25â€“125%, with matching command clamps.
+Added /Offhand settings and /Offhand options; clarified Fill and height behavior.
 SavedVariables were not edited. Five updated files were backed up and copied to
 the installed addon, with matching hashes. Existing geometry/lifecycle tests and
 both TOC validations pass; revised graphical labels have not been checked live.
@@ -118,7 +118,7 @@ both TOC validations pass; revised graphical labels have not been checked live.
 
 User reported continuous resizing, which invalidates acceptance of the earlier
 transient recovery as sufficient. Classic's StatusTrackingManager UpdateBarVisuals
-calls SetScale(ClassicScale) on each update. Akimbo previously repaired that 50 ms
+calls SetScale(ClassicScale) on each update. Offhand previously repaired that 50 ms
 later and routed all HUD hooks through ApplyFullLayout.
 
 - XP scale now corrects synchronously through a guarded post-hook; combat defers.
@@ -134,7 +134,7 @@ later and routed all HUD hooks through ApplyFullLayout.
 
 Source: https://github.com/Gethe/wow-ui-source/blob/classic_era/Interface/AddOns/Blizzard_ActionBar/Classic/StatusTrackingManagerOverrides.lua
 
-## Geometry fix — final live result
+## Geometry fix â€” final live result
 
 The geometry work below supersedes the initial failing smoke test in this file.
 
@@ -144,9 +144,9 @@ The geometry work below supersedes the initial failing smoke test in this file.
   effective scales. HUD offsets had the same mismatch. Geometry now rounds in
   physical pixels and converts offsets for each target frame.
 - Installed updated Core files and Wizard into the existing Classic Era addon.
-  Backup: `C:\Users\NAUX\AppData\Local\Temp\Akimbo-geometry-20260912-001124`.
+  Backup: `C:\Users\NAUX\AppData\Local\Temp\Offhand-geometry-20260912-001124`.
 - Final saved settings: seam 0.36, HUD multiplier 0.70, bottom inset 6 pixels.
-- `/akimbo diag` passed after reload. Saved WorldFrame physical rectangle:
+- `/Offhand diag` passed after reload. Saved WorldFrame physical rectangle:
   x=1439.9999, y=6, width=2560, height=1439.9999. Deck width=1439.9999.
 - MainMenuBar, MainActionBar, ActionButton1, PlayerFrame, and MinimapCluster
   share effective scale 0.39375. ActionButton1 measures 47.25 x 47.25 pixels.
@@ -157,7 +157,7 @@ The geometry work below supersedes the initial failing smoke test in this file.
 - A transient Blizzard bar reposition was observed and recovered on the deferred
   layout pass. This is not a guarantee of zero visible movement during updates.
 - Closed WoW normally with `/quit`; saved settings and diagnostics verified.
-  Latest BugGrabber session 371 contained two errors, neither referencing Akimbo.
+  Latest BugGrabber session 371 contained two errors, neither referencing Offhand.
 - Lua 5.1 geometry and lifecycle suites pass; both TOCs pass syntax/file validation.
   Geometry tests cover multiple global scales, nested frames, left-primary layouts,
   manual seam changes, bottom inset, fill bounds, and invalid values.
@@ -182,10 +182,10 @@ setup deferral, and reporting of caught layout errors.
 - Client: existing Classic Era client under `C:\Games\World of Warcraft\_classic_era_`.
 - Character: Shapeshifted, idle in Stormwind. Realm not independently verified.
 - Backed up the four installed Core files to
-  `C:\Users\NAUX\AppData\Local\Temp\Akimbo-before-qa-20260912-000301`,
+  `C:\Users\NAUX\AppData\Local\Temp\Offhand-before-qa-20260912-000301`,
   then installed the four changed source files.
 - Entered `/reload` after visually verifying chat focus and the exact command.
-- Returned to the world; Akimbo startup and viewport messages appeared without a
+- Returned to the world; Offhand startup and viewport messages appeared without a
   visible Lua error dialog. This does not establish absence of taint or hidden errors.
 - Existing visible HUD misalignment persisted. Geometry is not accepted as passing.
 - Saved settings observed after reload: seam 0.36, HUD scale 0.56, game height 1.0,
@@ -208,7 +208,7 @@ setup deferral, and reporting of caught layout errors.
 ## 2026-09-12: inaccessible child and RIF reset errors
 - CharacterDock probes forbidden/inaccessible children and isolates discovery per frame. Failed hook installs stay inactive; discovery avoids combat. Added bad-self and forbidden-child regression; later valid frames and ticker initialization continue.
 - RedIsFriend UI_Settings reset now declares its function-local locale table. Isolated reset test verifies localized and fallback values without touching player data.
-- All five Akimbo Lua test files, RIF settings-reset test, and both project validators passed. Both changed runtime files backed up, deployed to Classic Era and hash verified. Live reload remains to be tested.
+- All five Offhand Lua test files, RIF settings-reset test, and both project validators passed. Both changed runtime files backed up, deployed to Classic Era and hash verified. Live reload remains to be tested.
 
 
 ## Deferred native layout corrections

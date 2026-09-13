@@ -1,14 +1,12 @@
 --[[
-    Akimbo: Dual Monitor Workstation Addon
+    Offhand: Multi-Monitor Workspace Addon
     UI/Themes.lua: Authentic Classic WoW UI styling, theme presets, and color palettes
 --]]
 
 local _, Offhand = ...
-local Akimbo = Offhand
 
 local Themes = {}
 Offhand.Themes = Themes
-Akimbo.Themes = Themes
 
 local THEME_DATA = {
     CLASSIC = {
@@ -114,29 +112,29 @@ end
 
 function Themes:ApplyCanvasTheme(canvasFrame)
     if not canvasFrame then
-        canvasFrame = _G["AkimboCanvasFrame"] or Akimbo.canvas
+        canvasFrame = _G["OffhandCanvasFrame"] or Offhand.canvas
     end
-    if not canvasFrame and Akimbo.Canvas and Akimbo.Canvas.CreateFrames then
-        Akimbo.Canvas:CreateFrames()
-        canvasFrame = _G["AkimboCanvasFrame"] or Akimbo.canvas
+    if not canvasFrame and Offhand.Canvas and Offhand.Canvas.CreateFrames then
+        Offhand.Canvas:CreateFrames()
+        canvasFrame = _G["OffhandCanvasFrame"] or Offhand.canvas
     end
     if not canvasFrame then return end
 
-    local currentThemeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local currentThemeKey = (Offhand.db and Offhand.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(currentThemeKey)
     local isClassic = (currentThemeKey == "CLASSIC")
     local isPureBlackTheme = (currentThemeKey == "PITCH_BLACK")
 
-    local colorKey = (Akimbo.db and Akimbo.db.canvasColor) or "CHARCOAL"
-    local alpha = (Akimbo.db and Akimbo.db.canvasAlpha)
+    local colorKey = (Offhand.db and Offhand.db.canvasColor) or "CHARCOAL"
+    local alpha = (Offhand.db and Offhand.db.canvasAlpha)
     if alpha == nil then alpha = 0.95 end
 
     local r, g, b
     local bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark"
     local isPureBlackBg = (colorKey == "PURE_BLACK") or isPureBlackTheme
 
-    if not isPureBlackTheme and colorKey == "CUSTOM" and Akimbo.db and Akimbo.db.customCanvasColor then
-        local c = Akimbo.db.customCanvasColor
+    if not isPureBlackTheme and colorKey == "CUSTOM" and Offhand.db and Offhand.db.customCanvasColor then
+        local c = Offhand.db.customCanvasColor
         r, g, b = c.r or 0.22, c.g or 0.42, c.b or 0.64
     elseif isPureBlackBg then
         r, g, b = 0.0, 0.0, 0.0
@@ -190,16 +188,16 @@ function Themes:ApplyCanvasTheme(canvasFrame)
     local br = theme.borderColor or { 1.0, 1.0, 1.0, 1.0 }
     if isPureBlackTheme then
         br = { 0.18, 0.18, 0.18, 1.0 }
-    elseif Akimbo.db and Akimbo.db.trimColor then
-        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
-            local c = Akimbo.db.customTrimColor
+    elseif Offhand.db and Offhand.db.trimColor then
+        if Offhand.db.trimColor == "CUSTOM" and Offhand.db.customTrimColor then
+            local c = Offhand.db.customTrimColor
             br = { c.r, c.g, c.b, c.a or 1.0 }
-        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
-            if isClassic and Akimbo.db.trimColor == "GOLD" then
+        elseif COLOR_PALETTES[Offhand.db.trimColor] then
+            if isClassic and Offhand.db.trimColor == "GOLD" then
                 -- Classic Blizzard gold on UI-DialogBox-Border is pre-rendered; keep untainted
                 br = { 1.0, 1.0, 1.0, 1.0 }
             else
-                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                local c = COLOR_PALETTES[Offhand.db.trimColor]
                 br = { c.r, c.g, c.b, c.a or 1.0 }
             end
         end
@@ -212,15 +210,15 @@ end
 
 function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
     if not frame then return end
-    if frame == _G["AkimboCanvasFrame"] or frame == Akimbo.canvas then
+    if frame == _G["OffhandCanvasFrame"] or frame == Offhand.canvas then
         self:ApplyCanvasTheme(frame)
         return
     end
 
-    local currentThemeKey = themeKey or (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local currentThemeKey = themeKey or (Offhand.db and Offhand.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(currentThemeKey)
     local isClassic = (currentThemeKey == "CLASSIC")
-    local alpha = customAlpha or (Akimbo.db and Akimbo.db.canvasAlpha) or 0.95
+    local alpha = customAlpha or (Offhand.db and Offhand.db.canvasAlpha) or 0.95
 
     if not frame.SetBackdrop then
         Mixin(frame, BackdropTemplateMixin)
@@ -245,16 +243,16 @@ function Themes:ApplyBackdrop(frame, themeKey, customAlpha)
 
     -- Window border color
     local br = theme.borderColor
-    if Akimbo.db and Akimbo.db.trimColor then
-        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
-            local c = Akimbo.db.customTrimColor
+    if Offhand.db and Offhand.db.trimColor then
+        if Offhand.db.trimColor == "CUSTOM" and Offhand.db.customTrimColor then
+            local c = Offhand.db.customTrimColor
             br = { c.r, c.g, c.b, c.a or 1.0 }
-        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
-            if isClassic and Akimbo.db.trimColor == "GOLD" then
+        elseif COLOR_PALETTES[Offhand.db.trimColor] then
+            if isClassic and Offhand.db.trimColor == "GOLD" then
                 -- Default Blizzard Gold on UI-DialogBox-Border is pre-rendered; keep untainted
                 br = { 1.0, 1.0, 1.0, 1.0 }
             else
-                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                local c = COLOR_PALETTES[Offhand.db.trimColor]
                 br = { c.r, c.g, c.b, c.a }
             end
         end
@@ -283,14 +281,14 @@ function Themes:CreateBayHeader(parent, titleText, customHeight)
     if icon and icon.SetTexture and icon.SetSize and icon.SetPoint then
         icon:SetSize(24, 24)
         icon:SetPoint("LEFT", header, "LEFT", 10, 0)
-        icon:SetTexture("Interface\\AddOns\\Akimbo\\Media\\akimbo-logo")
+        icon:SetTexture("Interface\\AddOns\\Offhand\\Media\\Offhand-logo")
         header.icon = icon
         iconOffset = 40
     end
 
     local title = header:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     title:SetPoint("LEFT", header, "LEFT", iconOffset, 0)
-    title:SetText(titleText or "AKIMBO")
+    title:SetText(titleText or "Offhand")
     header.title = title
 
     self:UpdateHeader(header, titleText)
@@ -300,22 +298,22 @@ end
 function Themes:UpdateHeader(header, titleText)
     if not header then return end
 
-    local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+    local themeKey = (Offhand.db and Offhand.db.theme) or "CLASSIC"
     local theme = self:GetThemeInfo(themeKey)
     local isClassic = (themeKey == "CLASSIC")
 
     header:SetBackdropColor(theme.headerColor[1], theme.headerColor[2], theme.headerColor[3], 0.90)
 
     local br = theme.borderColor
-    if Akimbo.db and Akimbo.db.trimColor then
-        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
-            local c = Akimbo.db.customTrimColor
+    if Offhand.db and Offhand.db.trimColor then
+        if Offhand.db.trimColor == "CUSTOM" and Offhand.db.customTrimColor then
+            local c = Offhand.db.customTrimColor
             br = { c.r, c.g, c.b, c.a or 1.0 }
-        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
-            if isClassic and Akimbo.db.trimColor == "GOLD" then
+        elseif COLOR_PALETTES[Offhand.db.trimColor] then
+            if isClassic and Offhand.db.trimColor == "GOLD" then
                 br = { 0.85, 0.70, 0.20, 1.0 }
             else
-                local c = COLOR_PALETTES[Akimbo.db.trimColor]
+                local c = COLOR_PALETTES[Offhand.db.trimColor]
                 br = { c.r, c.g, c.b, c.a or 1.0 }
             end
         end
@@ -323,12 +321,12 @@ function Themes:UpdateHeader(header, titleText)
     header:SetBackdropBorderColor(br[1], br[2], br[3], br[4] or 1.0)
 
     local textCol = theme.headerTextColor
-    if Akimbo.db and Akimbo.db.trimColor then
-        if Akimbo.db.trimColor == "CUSTOM" and Akimbo.db.customTrimColor then
-            local c = Akimbo.db.customTrimColor
+    if Offhand.db and Offhand.db.trimColor then
+        if Offhand.db.trimColor == "CUSTOM" and Offhand.db.customTrimColor then
+            local c = Offhand.db.customTrimColor
             textCol = { c.r, c.g, c.b, 1.0 }
-        elseif COLOR_PALETTES[Akimbo.db.trimColor] then
-            local c = COLOR_PALETTES[Akimbo.db.trimColor]
+        elseif COLOR_PALETTES[Offhand.db.trimColor] then
+            local c = COLOR_PALETTES[Offhand.db.trimColor]
             textCol = { c.r, c.g, c.b, 1.0 }
         end
     end
@@ -339,25 +337,25 @@ function Themes:UpdateHeader(header, titleText)
     end
 end
 
-function Akimbo:UpdateTheme()
-    local themeKey = (Akimbo.db and Akimbo.db.theme) or "CLASSIC"
+function Offhand:UpdateTheme()
+    local themeKey = (Offhand.db and Offhand.db.theme) or "CLASSIC"
 
     -- Update background workspace canvas
     Themes:ApplyCanvasTheme()
 
     -- Update config dialog if created
-    local config = Akimbo.Options and Akimbo.Options.GetConfigFrame and Akimbo.Options:GetConfigFrame()
+    local config = Offhand.Options and Offhand.Options.GetConfigFrame and Offhand.Options:GetConfigFrame()
     if config then
         Themes:ApplyBackdrop(config, themeKey, 0.98)
         if config.header then
             Themes:UpdateHeader(config.header)
         end
-        if Akimbo.Options.UpdateCardThemes then
-            Akimbo.Options:UpdateCardThemes()
+        if Offhand.Options.UpdateCardThemes then
+            Offhand.Options:UpdateCardThemes()
         end
     end
 end
 
-function Akimbo:InitializeThemes()
+function Offhand:InitializeThemes()
     -- Theme registry ready
 end

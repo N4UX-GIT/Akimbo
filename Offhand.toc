@@ -7,8 +7,8 @@
 ## Notes: Transforms multi-monitor setups into a dedicated primary 3D viewport and secondary command deck.
 ## Author: N4UX (Noggaholic)
 ## Version: 1.0.1
-## SavedVariables: OffhandDB, AkimboDB
-## SavedVariablesPerCharacter: OffhandCharDB, AkimboCharDB
+## SavedVariables: OffhandDB
+## SavedVariablesPerCharacter: OffhandCharDB
 
 # Core Subsystems
 Core\Init.lua
