@@ -603,53 +603,56 @@ function Wizard:CreateFrame()
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(btnScaleReset, L["WIZARD_BTN_SCALE_RESET_TIP_TITLE"], L["WIZARD_BTN_SCALE_RESET_TIP_DESC"]) end
 
+    -- Physical-pixel-delta drag controller (scale-independent)
+    local DRAG_PIXELS = 300
+    local function StartScaleDrag(self)
+        self._dragStartX = GetCursorPosition and select(1, GetCursorPosition()) or 0
+        self._dragStartVal = self:GetValue()
+        self._isCustomDrag = true
+        self:SetScript("OnUpdate", function(s)
+            if not s._isCustomDrag then s:SetScript("OnUpdate", nil) return end
+            local curX = GetCursorPosition and select(1, GetCursorPosition()) or s._dragStartX
+            local pixelDelta = curX - s._dragStartX
+            local newVal = math.max(0.25, math.min(1.25, s._dragStartVal + pixelDelta * (1.00 / DRAG_PIXELS)))
+            newVal = math.floor((newVal / 0.01) + 0.5) * 0.01
+            Akimbo.db.hudScale = newVal
+            scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], newVal * 100))
+            if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
+                scaleEditBox:SetText(string.format("%.0f%%", newVal * 100))
+            end
+            s:SetValue(newVal)
+        end)
+    end
+
     scaleSlider:SetScript("OnMouseDown", function(self, button)
-        if button == "LeftButton" then self.isDragging = true end
+        if button == "LeftButton" then StartScaleDrag(self) end
     end)
 
     scaleSlider:SetScript("OnMouseUp", function(self, button)
-        self.isDragging = false
-        if self._pendingApply then
-            self._pendingApply = false
+        if button == "LeftButton" then
+            self._isCustomDrag = false
+            self._dragStartX = nil
+            self._dragStartVal = nil
             self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
         end
     end)
 
     scaleSlider:SetScript("OnValueChanged", function(self, val, userInput)
+        if self._isCustomDrag then return end
         val = math.floor((val / 0.01) + 0.5) * 0.01
         Akimbo.db.hudScale = val
         scaleValText:SetText(string.format(L["WIZARD_SCALE_VAL_FMT"], val * 100))
         if scaleEditBox and not (scaleEditBox.HasFocus and scaleEditBox:HasFocus()) then
             scaleEditBox:SetText(string.format("%.0f%%", val * 100))
         end
-
         if self._isDirect then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
             Akimbo:ApplyFullLayout()
             return
         end
-
-        local isMouseDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) or (self.isDragging == true) or (userInput == true)
-        if isMouseDown then
-            self._pendingApply = true
-            self:SetScript("OnUpdate", function(s)
-                local stillDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton"))
-                if not stillDown then
-                    s.isDragging = false
-                    if s._pendingApply then
-                        s._pendingApply = false
-                        s:SetScript("OnUpdate", nil)
-                        Akimbo:ApplyFullLayout()
-                    end
-                end
-            end)
-        else
-            self._pendingApply = false
-            self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
-        end
+        Akimbo:ApplyFullLayout()
     end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(scaleSlider, L["WIZARD_UI_SCALE_TIP_TITLE"], L["WIZARD_UI_SCALE_TIP_DESC"]) end
 

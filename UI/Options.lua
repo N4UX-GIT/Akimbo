@@ -280,7 +280,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
 
     -- Value Stepper [+] Button (Top-Right)
     local btnPlus = CreateFrame("Button", nil, slider, "UIPanelButtonTemplate")
-    btnPlus:SetSize(20, 20)
+    btnPlus:SetSize(24, 24)
     btnPlus:SetPoint("BOTTOMRIGHT", slider, "TOPRIGHT", 0, 3)
     btnPlus:SetText("+")
     slider.btnPlus = btnPlus
@@ -290,7 +290,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
 
     -- Direct Value Entry EditBox
     local editBox = CreateFrame("EditBox", nil, slider, "BackdropTemplate")
-    editBox:SetSize(52, 20)
+    editBox:SetSize(56, 24)
     editBox:SetPoint("RIGHT", btnPlus, "LEFT", -2, 0)
     editBox:SetAutoFocus(false)
     if editBox.SetFontObject then editBox:SetFontObject("GameFontHighlightSmall") end
@@ -313,7 +313,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
 
     -- Value Stepper [-] Button
     local btnMinus = CreateFrame("Button", nil, slider, "UIPanelButtonTemplate")
-    btnMinus:SetSize(20, 20)
+    btnMinus:SetSize(24, 24)
     btnMinus:SetPoint("RIGHT", editBox, "LEFT", -2, 0)
     btnMinus:SetText("-")
     slider.btnMinus = btnMinus
@@ -410,20 +410,58 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         slider:SetValueDirect(newVal)
     end)
 
+    -- Physical-pixel-delta drag controller.
+    -- GetCursorPosition() returns raw screen pixels — scale-independent.
+    -- The same physical mouse movement always produces the same value change
+    -- regardless of UIParent:SetScale(), fixing the runaway sensitivity on the
+    -- Global UI Scale slider (which modifies the parent frame's own scale).
+    local DRAG_PIXELS = 300  -- physical pixels of travel for full value range
+
+    local function StartCustomDrag(self)
+        self._dragStartX = GetCursorPosition and select(1, GetCursorPosition()) or 0
+        self._dragStartVal = self:GetValue()
+        self._isCustomDrag = true
+        self:SetScript("OnUpdate", function(s)
+            if not s._isCustomDrag then
+                s:SetScript("OnUpdate", nil)
+                return
+            end
+            local curX = GetCursorPosition and select(1, GetCursorPosition()) or s._dragStartX
+            local pixelDelta = curX - s._dragStartX
+            local valDelta = pixelDelta * ((maxVal - minVal) / DRAG_PIXELS)
+            local newVal = math.max(minVal, math.min(maxVal, s._dragStartVal + valDelta))
+            newVal = math.floor(((newVal - minVal) / step) + 0.5) * step + minVal
+            newVal = math.floor(newVal * 10000 + 0.5) / 10000
+            -- Update display directly (OnValueChanged returns early during drag)
+            if editBox and not (editBox.HasFocus and editBox:HasFocus()) then
+                editBox:SetText(FormatValue(newVal))
+            end
+            setVal(newVal)
+            -- Move thumb to computed position (OnValueChanged early-returns for _isCustomDrag)
+            s:SetValue(newVal)
+        end)
+    end
+
     slider:SetScript("OnMouseDown", function(self, button)
         if button == "LeftButton" then
-            self.isDragging = true
+            StartCustomDrag(self)
         end
     end)
 
     slider:SetScript("OnMouseUp", function(self, button)
-        self.isDragging = false
-        if self._pendingApply then
-            ApplyLayoutCleanly(self)
+        if button == "LeftButton" then
+            self._isCustomDrag = false
+            self._dragStartX = nil
+            self._dragStartVal = nil
+            self:SetScript("OnUpdate", nil)
+            Akimbo:ApplyFullLayout()
         end
     end)
 
     slider:SetScript("OnValueChanged", function(self, val, userInput)
+        -- During custom drag, OnUpdate drives value + display; skip here
+        if self._isCustomDrag then return end
+
         val = math.max(minVal, math.min(maxVal, val))
         val = math.floor(((val - minVal) / step) + 0.5) * step + minVal
         val = math.floor(val * 10000 + 0.5) / 10000
@@ -433,7 +471,7 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
         end
         setVal(val)
 
-        -- Direct programmatic adjustment ([-], [+], editBox, or preset buttons)
+        -- Direct programmatic set ([-]/[+] buttons, editBox, preset buttons)
         if self._isDirect then
             self._pendingApply = false
             self:SetScript("OnUpdate", nil)
@@ -441,22 +479,8 @@ local function CreateNativeSlider(parent, text, minVal, maxVal, step, getVal, se
             return
         end
 
-        -- Check if user is actively holding down the mouse button (dragging the slider)
-        local isMouseDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton")) or (self.isDragging == true) or (userInput == true)
-        if isMouseDown then
-            self._pendingApply = true
-            self:SetScript("OnUpdate", function(s)
-                local stillDown = (IsMouseButtonDown and IsMouseButtonDown("LeftButton"))
-                if not stillDown then
-                    s.isDragging = false
-                    ApplyLayoutCleanly(s)
-                end
-            end)
-        else
-            self._pendingApply = false
-            self:SetScript("OnUpdate", nil)
-            Akimbo:ApplyFullLayout()
-        end
+        -- Fallback for any external SetValue not covered above
+        Akimbo:ApplyFullLayout()
     end)
 
     slider.UpdateText = function(self)
@@ -545,7 +569,7 @@ function Options:CreateFloatingPanel()
     if configFrame then return configFrame end
 
     configFrame = CreateFrame("Frame", "AkimboFloatingConfigFrame", UIParent, "BackdropTemplate")
-    configFrame:SetSize(720, 650)
+    configFrame:SetSize(720, 680)
     configFrame:SetFrameStrata("DIALOG")
     configFrame:EnableMouse(true)
     configFrame:SetMovable(true)
@@ -843,7 +867,7 @@ function Options:CreateFloatingPanel()
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p55Btn, L["WIZARD_PRESET_SEAM_55_TIP_TITLE"], L["WIZARD_PRESET_SEAM_55_TIP_DESC"]) end
 
 
-    local card1_3 = CreateCard(tab1, "Screen Bottom Offset & Global UI Scale", -252, 180)
+    local card1_3 = CreateCard(tab1, "Screen Bottom Offset & Global UI Scale", -252, 210)
 
     local bottomControl = Options:CreateBottomControl(card1_3)
     bottomControl:SetPoint("TOPLEFT", 12, -26)
@@ -855,11 +879,11 @@ function Options:CreateFloatingPanel()
         L["SLIDER_HUD_SCALE_TIP_TITLE"], L["SLIDER_HUD_SCALE_TIP_DESC"]
     )
     hudSlider:SetPoint("TOPLEFT", 360, -46)
-    hudSlider:SetWidth(300)
+    hudSlider:SetWidth(360)
 
     local p56Btn = CreateFrame("Button", nil, card1_3, "UIPanelButtonTemplate")
     p56Btn:SetSize(56, 22)
-    p56Btn:SetPoint("TOPLEFT", 360, -74)
+    p56Btn:SetPoint("TOPLEFT", 360, -82)
     p56Btn:SetText("56%")
     p56Btn:SetScript("OnClick", function() hudSlider:SetValueDirect(0.56) end)
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p56Btn, L["WIZARD_PRESET_SCALE_56_TIP_TITLE"], L["WIZARD_PRESET_SCALE_56_TIP_DESC"]) end
@@ -893,8 +917,8 @@ function Options:CreateFloatingPanel()
     if Akimbo.SetTooltip then Akimbo:SetTooltip(p100Btn, L["WIZARD_PRESET_SCALE_100_TIP_TITLE"], L["WIZARD_PRESET_SCALE_100_TIP_DESC"]) end
 
     local hudNote = card1_3:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-    hudNote:SetPoint("TOPLEFT", 360, -104)
-    hudNote:SetPoint("TOPRIGHT", -12, -104)
+    hudNote:SetPoint("TOPLEFT", 360, -112)
+    hudNote:SetPoint("TOPRIGHT", -12, -112)
     hudNote:SetJustifyH("LEFT")
     hudNote:SetText("|cff888888Scales Blizzard action bars, unit frames, and dialogs relative to primary display resolution.|r")
 
