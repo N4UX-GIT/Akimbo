@@ -1891,7 +1891,7 @@ and placement in Windows first; the addon cannot measure individual monitors.
 In WoW, open Graphics settings and select Windowed display mode.
 
 |cffffcc00Step 2: Span the Window|r
-While WoW is open, run Offhand-Span.bat (or Offhand-Span.ps1) from your Offhand folder.
+While WoW is open, run the Offhand Companion (Offhand.exe) or borderless window tool.
 The resulting canvas size depends on your Windows display arrangement.
 
 |cffffcc00Step 3: Calibrate the Game View|r

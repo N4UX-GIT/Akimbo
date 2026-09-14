@@ -1,5 +1,5 @@
-param([switch]$Watch)
-. (Join-Path $PSScriptRoot 'Companion\Offhand-Window.ps1')
+﻿param([switch]$Watch)
+. (Join-Path $PSScriptRoot 'Offhand-Window.ps1')
 
 Write-Host 'Offhand: borderless window spanning'
 Write-Host 'Enable Offhand in WoW and select Windowed mode. Run only one WoW client.'

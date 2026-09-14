@@ -19,3 +19,6 @@ ehthumbs_vista.db
 *.bak
 *.swp
 *~
+
+# Build & distribution output
+dist/

@@ -1,10 +1,10 @@
-## Interface: 11509
+﻿## Interface: 11509
 ## Interface-Vanilla: 11509
 ## Interface-Classic: 11509
 ## Interface-Cata: 40402
 ## Interface-Retail: 110100
-## Title: |cff00e5ffOffhand|r |cffffffff[Multi-Monitor Workspace]|r
-## Notes: Transforms multi-monitor setups into a dedicated primary 3D viewport and secondary command deck.
+## Title: |cffffbd0aOffhand|r |cffffffff[Multi-Monitor Workspace]|r
+## Notes: Equip your Offhand. Dual wield your monitors. Multi-monitor workspace for World of Warcraft.
 ## Author: N4UX (Noggaholic)
 ## Version: 1.0.1
 ## SavedVariables: OffhandDB
