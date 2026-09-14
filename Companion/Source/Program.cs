@@ -112,23 +112,24 @@ namespace Offhand.Companion
 
     public class CompanionForm : Form
     {
-        // Colors
-        private readonly Color cBg = Color.FromArgb(8, 10, 18);
-        private readonly Color cCard = Color.FromArgb(17, 24, 38);
-        private readonly Color cBorder = Color.FromArgb(58, 74, 94);
-        private readonly Color cBorderDim = Color.FromArgb(26, 48, 80);
-        private readonly Color cText = Color.FromArgb(216, 232, 245);
-        private readonly Color cMuted = Color.FromArgb(122, 150, 176);
-        private readonly Color cBlue = Color.FromArgb(42, 144, 232);
-        private readonly Color cBlueBright = Color.FromArgb(90, 184, 255);
-        private readonly Color cBrass = Color.FromArgb(180, 138, 52);
-        private readonly Color cGreen = Color.FromArgb(68, 204, 136);
-        private readonly Color cRed = Color.FromArgb(204, 68, 68);
-        private readonly Color cYellow = Color.FromArgb(220, 180, 60);
-        private readonly Color cBtnBg = Color.FromArgb(26, 36, 56);
-        private readonly Color cBtnDanger = Color.FromArgb(40, 16, 16);
-        private readonly Color cLogBg = Color.FromArgb(6, 8, 14);
-        private readonly Color cLogText = Color.FromArgb(140, 180, 218);
+        // Warcraft Dark Interface Palette (Black / Dark Grey / Burnished Gold)
+        private readonly Color cBg = Color.FromArgb(12, 12, 14);                // Obsidian black canvas (#0c0c0e)
+        private readonly Color cCard = Color.FromArgb(20, 20, 24);              // Dark forged iron card (#141418)
+        private readonly Color cBorder = Color.FromArgb(145, 115, 55);          // Burnished gold outer border (#917337)
+        private readonly Color cBorderDim = Color.FromArgb(65, 52, 28);         // Antique bronze divider (#41341c)
+        private readonly Color cText = Color.FromArgb(235, 230, 215);           // Warm parchment white (#ebe6d7)
+        private readonly Color cMuted = Color.FromArgb(155, 145, 130);          // Weathered silver-grey (#9b9182)
+        private readonly Color cGold = Color.FromArgb(240, 184, 54);            // Iconic Warcraft Gold (#f0b836)
+        private readonly Color cGoldBright = Color.FromArgb(255, 215, 80);      // Luminous gold highlight (#ffd750)
+        private readonly Color cBrass = Color.FromArgb(185, 145, 60);           // Warm brass trim (#b9913c)
+        private readonly Color cGreen = Color.FromArgb(72, 204, 120);           // Active emerald green (#48cc78)
+        private readonly Color cRed = Color.FromArgb(220, 75, 75);              // Crimson warning / danger (#dc4b4b)
+        private readonly Color cYellow = Color.FromArgb(240, 185, 55);          // Warning amber (#f0b937)
+        private readonly Color cBtnBg = Color.FromArgb(28, 28, 34);             // Dark iron button (#1c1c22)
+        private readonly Color cBtnPrimaryBg = Color.FromArgb(36, 30, 20);      // Dark bronze primary button (#241e14)
+        private readonly Color cBtnDanger = Color.FromArgb(44, 16, 16);          // Dark ruby danger button (#2c1010)
+        private readonly Color cLogBg = Color.FromArgb(8, 8, 10);               // Deepest obsidian log (#08080a)
+        private readonly Color cLogText = Color.FromArgb(195, 190, 175);        // Parchment log text (#c3beaf)
 
         // UI Controls
         private Label lblWowStatus;
@@ -183,7 +184,7 @@ namespace Offhand.Companion
             Panel headerPanel = new Panel();
             headerPanel.Location = new Point(0, 0);
             headerPanel.Size = new Size(524, 90);
-            headerPanel.BackColor = Color.FromArgb(10, 14, 24);
+            headerPanel.BackColor = Color.FromArgb(15, 15, 18);
             headerPanel.Paint += (s, e) =>
             {
                 using (Pen pen = new Pen(cBorder, 2))
@@ -195,8 +196,8 @@ namespace Offhand.Companion
 
             // Header Logo
             PictureBox logoBox = new PictureBox();
-            logoBox.Location = new Point(8, 5);
-            logoBox.Size = new Size(80, 80);
+            logoBox.Location = new Point(10, 8);
+            logoBox.Size = new Size(74, 74);
             logoBox.SizeMode = PictureBoxSizeMode.Zoom;
             logoBox.BackColor = Color.Transparent;
 
@@ -216,8 +217,11 @@ namespace Offhand.Companion
             {
                 // Fallback to disk asset if running unpackaged
                 string[] diskFallbacks = new string[] {
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\offhand-icon.png"),
                     Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Media\offhand-logo.png"),
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-logo.png")
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-icon.png"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Media\offhand-logo.png"),
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\Website\assets\offhand-icon.png")
                 };
                 foreach (string path in diskFallbacks)
                 {
@@ -232,27 +236,27 @@ namespace Offhand.Companion
             // Title
             Label titleLabel = new Label();
             titleLabel.Text = "OFFHAND";
-            titleLabel.Location = new Point(96, 10);
-            titleLabel.Size = new Size(400, 36);
+            titleLabel.Location = new Point(96, 12);
+            titleLabel.Size = new Size(400, 34);
             titleLabel.Font = new Font("Georgia", 22, FontStyle.Bold);
-            titleLabel.ForeColor = cBlue;
+            titleLabel.ForeColor = cGold;
             titleLabel.BackColor = Color.Transparent;
             headerPanel.Controls.Add(titleLabel);
 
             // Subtitle
             Label subLabel = new Label();
             subLabel.Text = "Multi-Monitor Companion for World of Warcraft";
-            subLabel.Location = new Point(98, 50);
+            subLabel.Location = new Point(98, 48);
             subLabel.Size = new Size(400, 18);
             subLabel.Font = new Font("Segoe UI", 8.5f);
-            subLabel.ForeColor = cMuted;
+            subLabel.ForeColor = cBrass;
             subLabel.BackColor = Color.Transparent;
             headerPanel.Controls.Add(subLabel);
 
             // Version
             Label verLabel = new Label();
             verLabel.Text = "v1.2";
-            verLabel.Location = new Point(98, 68);
+            verLabel.Location = new Point(98, 66);
             verLabel.Size = new Size(100, 14);
             verLabel.Font = new Font("Segoe UI", 7.5f, FontStyle.Italic);
             verLabel.ForeColor = cMuted;
@@ -325,11 +329,11 @@ namespace Offhand.Companion
             configPanel.Controls.Add(chkAutoSpan);
 
             // Action Buttons
-            btnSpanNow = CreateButton("Span WoW Window Now", 16, 296, 238, 36, cBtnBg, cBlueBright, cBorder);
+            btnSpanNow = CreateButton("Span WoW Window Now", 16, 296, 238, 36, cBtnPrimaryBg, cGoldBright, cGold);
             btnSpanNow.Click += (s, e) => { InvokeSpanWindow(true); };
             this.Controls.Add(btnSpanNow);
 
-            btnToggleWatch = CreateButton("Pause Monitoring", 262, 296, 244, 36, cBtnBg, cText, cBorderDim);
+            btnToggleWatch = CreateButton("Pause Monitoring", 262, 296, 244, 36, cBtnBg, cText, cBorder);
             btnToggleWatch.Click += (s, e) =>
             {
                 isMonitoring = !isMonitoring;
@@ -372,7 +376,7 @@ namespace Offhand.Companion
             };
             this.Controls.Add(btnMinimize);
 
-            Button btnExit = CreateButton("Exit Companion", 356, 556, 152, 30, cBtnDanger, cRed, Color.FromArgb(120, 50, 40));
+            Button btnExit = CreateButton("Exit Companion", 356, 556, 152, 30, cBtnDanger, Color.FromArgb(235, 130, 130), Color.FromArgb(140, 45, 45));
             btnExit.Click += (s, e) => { ExitApplication(); };
             this.Controls.Add(btnExit);
 
@@ -398,11 +402,11 @@ namespace Offhand.Companion
 
             Label lblTitle = new Label
             {
-                Text = "  " + title,
+                Text = "  " + title.ToUpper(),
                 Location = new Point(0, 4),
                 Size = new Size(w, 20),
-                Font = new Font("Segoe UI", 8, FontStyle.Bold),
-                ForeColor = cBlue
+                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
+                ForeColor = cGold
             };
             panel.Controls.Add(lblTitle);
 

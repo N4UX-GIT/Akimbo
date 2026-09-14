@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Offhand Companion: Multi-Monitor Desktop Controller & Background Watcher
 # Native Windows GUI with System Tray, Auto-Spanning, and Addon Validation
 # Classic Warcraft Theme
@@ -37,24 +37,25 @@ foreach ($p in $psProcs) {
 }
 
 # ==============================================================================
-# Dark Metal & Blue Color Palette
+# Warcraft Dark Interface Palette (Black / Dark Grey / Burnished Gold)
 # ==============================================================================
-$cBg           = [System.Drawing.Color]::FromArgb(8, 10, 18)          # Near-black deep metal
-$cCard         = [System.Drawing.Color]::FromArgb(17, 24, 38)         # Dark steel card
-$cBorder       = [System.Drawing.Color]::FromArgb(58, 74, 94)         # Forged steel rim
-$cBorderDim    = [System.Drawing.Color]::FromArgb(26, 48, 80)         # Dim blue border
-$cText         = [System.Drawing.Color]::FromArgb(216, 232, 245)      # Cool arctic white
-$cMuted        = [System.Drawing.Color]::FromArgb(122, 150, 176)      # Steel grey muted
-$cGold         = [System.Drawing.Color]::FromArgb(42, 144, 232)       # Blue glow primary
-$cGoldBright   = [System.Drawing.Color]::FromArgb(90, 184, 255)       # Blue highlight
-$cBrass        = [System.Drawing.Color]::FromArgb(180, 138, 52)       # Antique brass (secondary trim)
-$cGreen        = [System.Drawing.Color]::FromArgb(68, 204, 136)       # Status green
-$cRed          = [System.Drawing.Color]::FromArgb(204, 68, 68)        # Status red
-$cYellow       = [System.Drawing.Color]::FromArgb(220, 180, 60)       # Warning amber
-$cBtnBg        = [System.Drawing.Color]::FromArgb(26, 36, 56)         # Button dark metal
-$cBtnDanger    = [System.Drawing.Color]::FromArgb(40, 16, 16)         # Danger button
-$cLogBg        = [System.Drawing.Color]::FromArgb(6, 8, 14)           # Log deep black
-$cLogText      = [System.Drawing.Color]::FromArgb(140, 180, 218)      # Log cool steel text
+$cBg           = [System.Drawing.Color]::FromArgb(12, 12, 14)          # Obsidian black canvas (#0c0c0e)
+$cCard         = [System.Drawing.Color]::FromArgb(20, 20, 24)          # Dark forged iron card (#141418)
+$cBorder       = [System.Drawing.Color]::FromArgb(145, 115, 55)        # Burnished gold outer border (#917337)
+$cBorderDim    = [System.Drawing.Color]::FromArgb(65, 52, 28)         # Antique bronze divider (#41341c)
+$cText         = [System.Drawing.Color]::FromArgb(235, 230, 215)       # Warm parchment white (#ebe6d7)
+$cMuted        = [System.Drawing.Color]::FromArgb(155, 145, 130)       # Weathered silver-grey (#9b9182)
+$cGold         = [System.Drawing.Color]::FromArgb(240, 184, 54)        # Iconic Warcraft Gold (#f0b836)
+$cGoldBright   = [System.Drawing.Color]::FromArgb(255, 215, 80)        # Luminous gold highlight (#ffd750)
+$cBrass        = [System.Drawing.Color]::FromArgb(185, 145, 60)        # Warm brass trim (#b9913c)
+$cGreen        = [System.Drawing.Color]::FromArgb(72, 204, 120)        # Active emerald green (#48cc78)
+$cRed          = [System.Drawing.Color]::FromArgb(220, 75, 75)         # Crimson warning / danger (#dc4b4b)
+$cYellow       = [System.Drawing.Color]::FromArgb(240, 185, 55)        # Warning amber (#f0b937)
+$cBtnBg        = [System.Drawing.Color]::FromArgb(28, 28, 34)          # Dark iron button (#1c1c22)
+$cBtnPrimaryBg = [System.Drawing.Color]::FromArgb(36, 30, 20)          # Dark bronze primary button (#241e14)
+$cBtnDanger    = [System.Drawing.Color]::FromArgb(44, 16, 16)          # Danger button (#2c1010)
+$cLogBg        = [System.Drawing.Color]::FromArgb(8, 8, 10)            # Deepest obsidian log (#08080a)
+$cLogText      = [System.Drawing.Color]::FromArgb(195, 190, 175)       # Parchment log text (#c3beaf)
 
 # ==============================================================================
 # Helper: Styled Button with gold border
@@ -84,10 +85,10 @@ function New-CardPanel {
     $panel.BackColor = $cCard
 
     $lbl = New-Object System.Windows.Forms.Label
-    $lbl.Text = "  $title"
+    $lbl.Text = "  " + $title.ToUpper()
     $lbl.Location = New-Object System.Drawing.Point(0, 4)
     $lbl.Size = New-Object System.Drawing.Size($w, 20)
-    $lbl.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Bold)
+    $lbl.Font = New-Object System.Drawing.Font("Segoe UI", 8.5, [System.Drawing.FontStyle]::Bold)
     $lbl.ForeColor = $cGold
     $panel.Controls.Add($lbl)
 
@@ -122,7 +123,7 @@ $form.ForeColor = $cText
 $headerPanel = New-Object System.Windows.Forms.Panel
 $headerPanel.Location = New-Object System.Drawing.Point(0, 0)
 $headerPanel.Size = New-Object System.Drawing.Size(524, 90)
-$headerPanel.BackColor = [System.Drawing.Color]::FromArgb(10, 14, 24)
+$headerPanel.BackColor = [System.Drawing.Color]::FromArgb(15, 15, 18)
 $form.Controls.Add($headerPanel)
 
 $headerPanel.add_Paint({
@@ -134,15 +135,16 @@ $headerPanel.add_Paint({
 
 # Logo image
 $logoPicBox = New-Object System.Windows.Forms.PictureBox
-$logoPicBox.Location = New-Object System.Drawing.Point(8, 5)
-$logoPicBox.Size = New-Object System.Drawing.Size(80, 80)
+$logoPicBox.Location = New-Object System.Drawing.Point(10, 8)
+$logoPicBox.Size = New-Object System.Drawing.Size(74, 74)
 $logoPicBox.SizeMode = "Zoom"
 $logoPicBox.BackColor = [System.Drawing.Color]::Transparent
 
 $logoCandidates = @(
-    (Join-Path $PSScriptRoot "..\Media\OFFHAND-logo.png"),
-    "C:\Users\NAUX\.gemini\antigravity\brain\937603db-0268-4223-88ae-effc8cc5441c\.user_uploaded\media_1789282129946.png",
-    (Join-Path $PSScriptRoot "..\Media\OFFHAND-logo.jpg")
+    (Join-Path $PSScriptRoot "..\Media\offhand-icon.png"),
+    (Join-Path $PSScriptRoot "..\Media\offhand-logo.png"),
+    (Join-Path $PSScriptRoot "..\Website\assets\offhand-icon.png"),
+    (Join-Path $PSScriptRoot "..\Media\offhand-banner.png")
 )
 foreach ($path in $logoCandidates) {
     if (Test-Path $path -ErrorAction SilentlyContinue) {
@@ -153,25 +155,25 @@ $headerPanel.Controls.Add($logoPicBox)
 
 $titleLabel = New-Object System.Windows.Forms.Label
 $titleLabel.Text = "OFFHAND"
-$titleLabel.Location = New-Object System.Drawing.Point(96, 10)
-$titleLabel.Size = New-Object System.Drawing.Size(400, 36)
+$titleLabel.Location = New-Object System.Drawing.Point(96, 12)
+$titleLabel.Size = New-Object System.Drawing.Size(400, 34)
 $titleLabel.Font = New-Object System.Drawing.Font("Georgia", 22, [System.Drawing.FontStyle]::Bold)
 $titleLabel.ForeColor = $cGold
 $titleLabel.BackColor = [System.Drawing.Color]::Transparent
 $headerPanel.Controls.Add($titleLabel)
 
 $subLabel = New-Object System.Windows.Forms.Label
-$subLabel.Text = "Dual-Monitor Companion for World of Warcraft"
-$subLabel.Location = New-Object System.Drawing.Point(98, 50)
+$subLabel.Text = "Multi-Monitor Companion for World of Warcraft"
+$subLabel.Location = New-Object System.Drawing.Point(98, 48)
 $subLabel.Size = New-Object System.Drawing.Size(400, 18)
 $subLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8.5)
-$subLabel.ForeColor = $cMuted
+$subLabel.ForeColor = $cBrass
 $subLabel.BackColor = [System.Drawing.Color]::Transparent
 $headerPanel.Controls.Add($subLabel)
 
 $versionLabel = New-Object System.Windows.Forms.Label
 $versionLabel.Text = "v1.2"
-$versionLabel.Location = New-Object System.Drawing.Point(98, 68)
+$versionLabel.Location = New-Object System.Drawing.Point(98, 66)
 $versionLabel.Size = New-Object System.Drawing.Size(100, 14)
 $versionLabel.Font = New-Object System.Drawing.Font("Segoe UI", 7.5, [System.Drawing.FontStyle]::Italic)
 $versionLabel.ForeColor = $cMuted
@@ -236,11 +238,11 @@ $configPanel.Controls.Add($chkAutoSpan)
 # ACTION BUTTONS
 # ==============================================================================
 $btnSpanNow = New-StyledButton -text "Span WoW Window Now" -x 16 -y 296 -w 238 -h 36 `
-    -bgColor $cBtnBg -textColor $cGold -borderColor $cBorder
+    -bgColor $cBtnPrimaryBg -textColor $cGoldBright -borderColor $cGold
 $form.Controls.Add($btnSpanNow)
 
 $btnToggleWatch = New-StyledButton -text "Pause Monitoring" -x 262 -y 296 -w 244 -h 36 `
-    -bgColor $cBtnBg -textColor $cText -borderColor $cBorderDim
+    -bgColor $cBtnBg -textColor $cText -borderColor $cBorder
 $form.Controls.Add($btnToggleWatch)
 
 # ==============================================================================
@@ -266,8 +268,8 @@ $btnMinimize = New-StyledButton -text "Minimize to Tray" -x 16 -y 556 -w 152 -h 
 $form.Controls.Add($btnMinimize)
 
 $btnExit = New-StyledButton -text "Exit Companion" -x 356 -y 556 -w 152 -h 30 `
-    -bgColor $cBtnDanger -textColor $cRed `
-    -borderColor ([System.Drawing.Color]::FromArgb(120, 50, 40))
+    -bgColor $cBtnDanger -textColor ([System.Drawing.Color]::FromArgb(235, 130, 130)) `
+    -borderColor ([System.Drawing.Color]::FromArgb(140, 45, 45))
 $form.Controls.Add($btnExit)
 
 # ==============================================================================
