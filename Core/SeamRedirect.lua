@@ -650,9 +650,3 @@ function Offhand:UpdateSeamRedirect()
     HUD:HookFrames()
     HUD:AlignHUDFrames()
 end
-function Offhand:InitializeSeamRedirect()
-    Offhand:InitializeSeamRedirect()
-end
-function Offhand:UpdateSeamRedirect()
-    Offhand:UpdateSeamRedirect()
-end

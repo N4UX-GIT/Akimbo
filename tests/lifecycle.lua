@@ -41,4 +41,51 @@ assert(messages[#messages] == "MSG_LAYOUT_ERROR", "failure was hidden")
 addon.UpdateCanvas = function() addon:ApplyFullLayout() end
 addon:ApplyFullLayout()
 assert(calls == 3, "layout guard did not recover or prevent recursion")
-print("PASS: config preservation, defaults, combat coalescing, error recovery, reentrancy")
+
+-- Verify ADDON_LOADED initializes Canvas and SeamRedirect without recursion / stack overflow
+UIParent = {
+    GetEffectiveScale = function() return 1 end,
+    GetWidth = function() return 4000 end,
+    GetHeight = function() return 2560 end,
+    GetLeft = function() return 0 end,
+    GetRight = function() return 4000 end,
+    GetTop = function() return 2560 end,
+    GetBottom = function() return 0 end,
+    GetScale = function() return 1 end,
+    SetScale = function() end,
+}
+WorldFrame = { ClearAllPoints = function() end, SetAllPoints = function() end, SetPoint = function() end }
+hooksecurefunc = function() end
+UISpecialFrames = {}
+addon.Viewport = {
+    GetMetrics = function()
+        return { isSpanned = true, gameWidth = 2560, gameHeight = 1440, deckWidth = 1440, bezel = 0, gameLeft = 1440, gameRight = 4000, gameBottom = 0, gameTop = 1440 }
+    end,
+    Apply = function() end,
+}
+local function makeMockFrame()
+    local f = {}
+    f.RegisterEvent = function() end
+    f.SetScript = function(_, name, fn) events[name] = fn end
+    f.SetFrameStrata = function() end
+    f.SetFrameLevel = function() end
+    f.CreateTexture = function() return { SetAllPoints = function() end } end
+    f.SetAllPoints = function() end
+    f.ClearAllPoints = function() end
+    f.SetPoint = function() end
+    f.Hide = function() end
+    f.Show = function() end
+    f.HookScript = function() end
+    return f
+end
+CreateFrame = function() return makeMockFrame() end
+assert(loadfile("Core/Canvas.lua"))("Offhand", addon)
+assert(loadfile("Core/SeamRedirect.lua"))("Offhand", addon)
+local initOk, initErr = pcall(function()
+    events.OnEvent(nil, "ADDON_LOADED", "Offhand")
+end)
+assert(initOk, "ADDON_LOADED failed with error: " .. tostring(initErr))
+assert(type(addon.InitializeCanvas) == "function", "InitializeCanvas missing")
+assert(type(addon.InitializeSeamRedirect) == "function", "InitializeSeamRedirect missing")
+
+print("PASS: config preservation, defaults, combat coalescing, error recovery, reentrancy, ADDON_LOADED stack safety")

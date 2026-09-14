@@ -767,11 +767,3 @@ end
 function Offhand:UpdateCanvas()
     Canvas:UpdateLayout()
 end
-
-function Offhand:InitializeCanvas()
-    Offhand:InitializeCanvas()
-end
-
-function Offhand:UpdateCanvas()
-    Offhand:UpdateCanvas()
-end
