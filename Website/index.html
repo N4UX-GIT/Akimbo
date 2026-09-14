@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -245,40 +245,91 @@
                 </div>
 
                 <div class="faq-grid">
-                    <div class="faq-card">
-                        <h4>Does spanning World of Warcraft stretch or distort the 3D camera?</h4>
-                        <p>
-                            No. Offhand uses native Blizzard viewport coordinate APIs to constrain 3D camera rendering strictly to your primary monitor's pixel bounds. Your camera aspect ratio and field of view remain native 1:1, completely eliminating horizontal fisheye distortion.
-                        </p>
-                    </div>
+                    <details class="faq-card" open>
+                        <summary class="faq-summary">
+                            <h4>How do I set World of Warcraft into Windowed mode?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                Offhand requires World of Warcraft to run in standard <strong>Windowed</strong> mode so the window can span freely across your dual displays. You can set this in three ways:
+                            </p>
+                            <ol class="faq-steps-list">
+                                <li>
+                                    <strong>In-Game Menu:</strong> Press <kbd>Esc</kbd> &rarr; click <strong>Options</strong> (or <strong>System</strong> in Classic) &rarr; under <strong>Graphics</strong>, set <strong>Display Mode</strong> to <strong>Windowed</strong> &rarr; click <strong>Apply</strong>.
+                                </li>
+                                <li>
+                                    <strong>Keyboard Shortcut:</strong> While World of Warcraft is active and focused, press <kbd>Alt</kbd> + <kbd>Enter</kbd> to immediately toggle between fullscreen and windowed mode.
+                                </li>
+                                <li>
+                                    <strong>Config.wtf File:</strong> If you cannot open the game, open your <code>WTF\Config.wtf</code> file in Notepad and add or edit the line: <code>SET gxWindow "1"</code>.
+                                </li>
+                            </ol>
+                            <div class="faq-tip">
+                                <strong>Important:</strong> Do not select <em>Windowed (Fullscreen)</em>. Windows restricts borderless fullscreen to a single monitor. Selecting standard <em>Windowed</em> mode allows the Offhand Companion or your window manager to span the canvas across both screens.
+                            </div>
+                        </div>
+                    </details>
 
-                    <div class="faq-card">
-                        <h4>Is the desktop companion app required?</h4>
-                        <p>
-                            No. The companion app (<code>Offhand.exe</code>) is an optional convenience tool to borderless-span your game window in one click. You can also use GPU driver spanning (NVIDIA Surround, AMD Eyefinity) or utilities like Borderless Gaming and DisplayFusion.
-                        </p>
-                    </div>
+                    <details class="faq-card">
+                        <summary class="faq-summary">
+                            <h4>Does spanning World of Warcraft stretch or distort the 3D camera?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                No. Offhand uses native Blizzard viewport coordinate APIs to constrain 3D camera rendering strictly to your primary monitor's pixel bounds. Your camera aspect ratio and field of view remain native 1:1, completely eliminating horizontal fisheye distortion.
+                            </p>
+                        </div>
+                    </details>
 
-                    <div class="faq-card">
-                        <h4>Does it work with different monitor sizes and vertical screens?</h4>
-                        <p>
-                            Yes. Offhand is specifically engineered for asymmetrical multi-monitor setups, including vertical portrait monitors alongside ultrawide or standard landscape gaming monitors, with independent refresh rate handling.
-                        </p>
-                    </div>
+                    <details class="faq-card">
+                        <summary class="faq-summary">
+                            <h4>Is the desktop companion app required?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                No. The companion app (<code>Offhand.exe</code>) is an optional convenience tool to borderless-span your game window in one click. You can also use GPU driver spanning (NVIDIA Surround, AMD Eyefinity) or utilities like Borderless Gaming and DisplayFusion.
+                            </p>
+                        </div>
+                    </details>
 
-                    <div class="faq-card">
-                        <h4>Is Offhand safe and compliant with Blizzard's Terms of Service?</h4>
-                        <p>
-                            Yes, 100%. The in-game addon is pure Lua using Blizzard's official UI frame and viewport APIs. The companion app is fully open source and merely positions the Windows desktop window—it does not inject code, read game memory, or automate player actions.
-                        </p>
-                    </div>
+                    <details class="faq-card">
+                        <summary class="faq-summary">
+                            <h4>Does it work with different monitor sizes and vertical screens?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                Yes. Offhand is specifically engineered for asymmetrical multi-monitor setups, including vertical portrait monitors alongside ultrawide or standard landscape gaming monitors, with independent refresh rate handling.
+                            </p>
+                        </div>
+                    </details>
 
-                    <div class="faq-card">
-                        <h4>Which versions of World of Warcraft are supported?</h4>
-                        <p>
-                            Offhand is built and tested for World of Warcraft Classic Era (1.15.x), Hardcore, and 20th Anniversary Classic realms, with underlying architecture compatible with modern Retail.
-                        </p>
-                    </div>
+                    <details class="faq-card">
+                        <summary class="faq-summary">
+                            <h4>Is Offhand safe and compliant with Blizzard's Terms of Service?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                Yes, 100%. The in-game addon is pure Lua using Blizzard's official UI frame and viewport APIs. The companion app is fully open source and merely positions the Windows desktop window—it does not inject code, read game memory, or automate player actions.
+                            </p>
+                        </div>
+                    </details>
+
+                    <details class="faq-card">
+                        <summary class="faq-summary">
+                            <h4>Which versions of World of Warcraft are supported?</h4>
+                            <svg class="faq-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </summary>
+                        <div class="faq-body">
+                            <p>
+                                Offhand is built and tested for World of Warcraft Classic Era (1.15.x), Hardcore, and 20th Anniversary Classic realms, with underlying architecture compatible with modern Retail.
+                            </p>
+                        </div>
+                    </details>
                 </div>
             </div>
         </section>
